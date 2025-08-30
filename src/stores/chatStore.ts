@@ -43,6 +43,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       
       // Also save to database
       await chatApi.createMessage(messageData);
+      
+      // Refetch messages to update the UI
+      await get().fetchMessages();
     } catch (error) {
       set({ error: 'Failed to send message' });
     }

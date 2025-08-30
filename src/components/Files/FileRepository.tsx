@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useFileStore } from '../../stores/fileStore';
+import { useAuthStore } from '../../stores/authStore';
 
 const FileRepository: React.FC = () => {
   const { files, loading, error, fetchFiles, uploadFile } = useFileStore();
+  const { user } = useAuthStore();
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadForm, setUploadForm] = useState({
-    uploadedBy: '',
+    uploadedBy: user?.username || '',
     description: '',
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -24,15 +26,15 @@ const FileRepository: React.FC = () => {
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedFile || !uploadForm.uploadedBy.trim()) {
+    if (!selectedFile || !user?.username) {
       return;
     }
 
-    await uploadFile(selectedFile, uploadForm.uploadedBy, uploadForm.description);
+    await uploadFile(selectedFile, user.username, uploadForm.description);
     
     if (!error) {
       setSelectedFile(null);
-      setUploadForm({ uploadedBy: '', description: '' });
+      setUploadForm({ uploadedBy: user.username, description: '' });
       setShowUploadForm(false);
       // Reset file input
       const fileInput = document.getElementById('fileInput') as HTMLInputElement;
@@ -46,6 +48,40 @@ const FileRepository: React.FC = () => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const handleDownload = async (file: any) => {
+    try {
+      // For files that were uploaded as 'image' type but are actually PDFs,
+      // we need to use the original URL without changing the path
+      let downloadUrl = file.cloudinary_url;
+      
+      // Add attachment parameter to force download
+      if (downloadUrl.includes('?')) {
+        downloadUrl += '&fl_attachment';
+      } else {
+        downloadUrl += '?fl_attachment';
+      }
+      
+      // Create temporary link and click it
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = file.original_name;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Download error:', error);
+      // Fallback to opening in new tab with attachment parameter
+      let fallbackUrl = file.cloudinary_url;
+      if (fallbackUrl.includes('?')) {
+        fallbackUrl += '&fl_attachment';
+      } else {
+        fallbackUrl += '?fl_attachment';
+      }
+      window.open(fallbackUrl, '_blank');
+    }
   };
 
   return (
@@ -65,14 +101,13 @@ const FileRepository: React.FC = () => {
           {error && <div className="error">Error: {error}</div>}
           
           <div className="form-group">
-            <label htmlFor="uploadedBy">Your Name</label>
+            <label htmlFor="uploadedBy">Uploader</label>
             <input
               type="text"
               id="uploadedBy"
-              value={uploadForm.uploadedBy}
-              onChange={(e) => setUploadForm({ ...uploadForm, uploadedBy: e.target.value })}
-              placeholder="Enter your name"
-              required
+              value={user?.username || ''}
+              placeholder="Uploader name"
+              disabled
             />
           </div>
 
@@ -151,14 +186,33 @@ const FileRepository: React.FC = () => {
                   </div>
                 </div>
                 <div className="file-actions">
-                  <a 
-                    href={file.cloudinary_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
+                  <button 
+                    onClick={() => handleDownload(file)}
                     className="btn btn-primary btn-sm"
+                    style={{ marginRight: '0.5rem' }}
                   >
                     Download
-                  </a>
+                  </button>
+                  {file.file_type === 'application/pdf' && (
+                    <a 
+                      href={file.cloudinary_url}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="btn btn-secondary btn-sm"
+                    >
+                      View PDF
+                    </a>
+                  )}
+                  {file.file_type.startsWith('image/') && (
+                    <a 
+                      href={file.cloudinary_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="btn btn-secondary btn-sm"
+                    >
+                      View Image
+                    </a>
+                  )}
                 </div>
               </div>
             ))}

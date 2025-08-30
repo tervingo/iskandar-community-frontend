@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useChatStore } from '../../stores/chatStore';
+import { useAuthStore } from '../../stores/authStore';
 
 const ChatRoom: React.FC = () => {
   const { messages, loading, error, fetchMessages, sendMessage, connectSocket, disconnectSocket, connected } = useChatStore();
+  const { user, isAuthenticated } = useAuthStore();
   const [messageInput, setMessageInput] = useState('');
-  const [username, setUsername] = useState('');
 
   useEffect(() => {
     fetchMessages();
@@ -18,12 +19,12 @@ const ChatRoom: React.FC = () => {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!messageInput.trim() || !username.trim()) {
+    if (!messageInput.trim() || !user?.username) {
       return;
     }
 
     await sendMessage({
-      username,
+      username: user.username,
       message: messageInput,
       message_type: 'text',
     });
@@ -44,39 +45,20 @@ const ChatRoom: React.FC = () => {
         </div>
       </div>
 
-      {!username && (
-        <div className="username-form">
-          <h3>Enter your name to join the chat</h3>
-          <form onSubmit={(e) => { e.preventDefault(); }}>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Your name"
-              required
-            />
-            <button 
-              type="button" 
-              onClick={() => {}}
-              disabled={!username.trim()}
-              className="btn btn-primary"
-            >
-              Join Chat
-            </button>
-          </form>
-        </div>
-      )}
-
-      {username && (
+      {isAuthenticated && user && (
         <>
           <div className="messages">
             {loading && <div className="loading">Loading messages...</div>}
             {error && <div className="error">Error: {error}</div>}
             
-            {messages.map((message) => (
+            <div style={{padding: '10px', background: '#f0f0f0', marginBottom: '10px', fontSize: '12px'}}>
+              Chatting as: "{user.username}" {user.role === 'admin' && '(Admin)'}
+            </div>
+            
+            {messages.map((message, index) => (
               <div 
-                key={message.id} 
-                className={`message ${message.username === username ? 'own' : 'other'}`}
+                key={message.id || `message-${index}`}
+                className={`message ${message.username === user.username ? 'own' : 'other'}`}
               >
                 <div className="message-header">
                   <strong>{message.username}</strong>

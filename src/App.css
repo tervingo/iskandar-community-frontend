@@ -63,10 +63,72 @@ body {
 
 /* Common Components */
 .header {
+  background: #2c3e50;
+  color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 0;
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo a {
+  color: #ecf0f1;
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.header .nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.header .nav a {
+  color: #bdc3c7;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.header .nav a:hover {
+  color: white;
+  background-color: rgba(255,255,255,0.1);
+}
+
+.auth-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info {
+  color: #ecf0f1;
+  font-size: 0.9rem;
+}
+
+.admin-badge {
+  color: #f39c12;
+  font-weight: bold;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .header h1 {

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Post, PostCreate, PostUpdate, Comment, CommentCreate, ChatMessage, ChatMessageCreate, FileItem } from '../types';
+import { Post, PostCreate, PostUpdate, Comment, CommentCreate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -8,6 +8,15 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+// Add token to requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // Posts API
@@ -99,5 +108,42 @@ export const filesApi = {
 
   delete: async (id: string): Promise<void> => {
     await api.delete(`/files/${id}`);
+  },
+};
+
+// Authentication API
+export const authApi = {
+  login: async (credentials: LoginRequest): Promise<LoginResponse> => {
+    const response = await api.post('/auth/login', credentials);
+    return response.data;
+  },
+
+
+  getCurrentUser: async (): Promise<User> => {
+    const response = await api.get('/auth/me');
+    return response.data;
+  },
+
+  getUsers: async (): Promise<User[]> => {
+    const response = await api.get('/auth/users');
+    return response.data;
+  },
+
+  createUser: async (userData: RegisterRequest): Promise<User> => {
+    const response = await api.post('/auth/users', userData);
+    return response.data;
+  },
+
+  updateUser: async (userId: string, userData: Partial<RegisterRequest>): Promise<User> => {
+    const response = await api.put(`/auth/users/${userId}`, userData);
+    return response.data;
+  },
+
+  deleteUser: async (userId: string): Promise<void> => {
+    await api.delete(`/auth/users/${userId}`);
+  },
+
+  toggleUserStatus: async (userId: string): Promise<void> => {
+    await api.post(`/auth/users/${userId}/toggle-status`);
   },
 };

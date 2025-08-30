@@ -56,3 +56,42 @@ export interface FileItem {
   uploaded_at: string;
   description?: string;
 }
+
+// Authentication types
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: 'admin' | 'normal';
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
+  avatar?: string;
+  phone?: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+  role?: 'admin' | 'normal';
+  avatar?: string;
+  phone?: string;
+}
+
+export interface TokenData {
+  sub: string;
+  role: string;
+  exp: number;
+}

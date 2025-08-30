@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBlogStore } from '../../stores/blogStore';
+import { useAuthStore } from '../../stores/authStore';
 
 const CreatePost: React.FC = () => {
   const navigate = useNavigate();
   const { createPost, loading, error } = useBlogStore();
+  const { user } = useAuthStore();
 
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    author_name: '',
+    author_name: user?.username || '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -22,11 +24,14 @@ const CreatePost: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title.trim() || !formData.content.trim() || !formData.author_name.trim()) {
+    if (!formData.title.trim() || !formData.content.trim() || !user?.username) {
       return;
     }
 
-    await createPost(formData);
+    await createPost({
+      ...formData,
+      author_name: user.username
+    });
     
     if (!error) {
       navigate('/blog');
@@ -50,15 +55,14 @@ const CreatePost: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="post-form">
         <div className="form-group">
-          <label htmlFor="author_name">Your Name</label>
+          <label htmlFor="author_name">Author</label>
           <input
             type="text"
             id="author_name"
             name="author_name"
-            value={formData.author_name}
-            onChange={handleChange}
-            placeholder="Enter your name"
-            required
+            value={user?.username || ''}
+            placeholder="Author name"
+            disabled
           />
         </div>
 
@@ -100,7 +104,7 @@ const CreatePost: React.FC = () => {
           <button 
             type="submit" 
             className="btn btn-primary"
-            disabled={loading || !formData.title.trim() || !formData.content.trim() || !formData.author_name.trim()}
+            disabled={loading || !formData.title.trim() || !formData.content.trim()}
           >
             {loading ? 'Creating...' : 'Create Post'}
           </button>
