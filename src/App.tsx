@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
+import Home from './components/Home/Home';
 import PostList from './components/Blog/PostList';
 import CreatePost from './components/Blog/CreatePost';
 import PostDetail from './components/Blog/PostDetail';
@@ -22,7 +23,8 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Navigate to="/blog" replace />} />
+          <Route index element={<Navigate to="/home" replace />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/blog" element={<PostList />} />
           <Route 
             path="/blog/create" 

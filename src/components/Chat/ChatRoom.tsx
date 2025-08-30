@@ -19,12 +19,12 @@ const ChatRoom: React.FC = () => {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!messageInput.trim() || !user?.username) {
+    if (!messageInput.trim() || !user?.name) {
       return;
     }
 
     await sendMessage({
-      username: user.username,
+      username: user.name,
       message: messageInput,
       message_type: 'text',
     });
@@ -58,7 +58,7 @@ const ChatRoom: React.FC = () => {
             {messages.map((message, index) => (
               <div 
                 key={message.id || `message-${index}`}
-                className={`message ${message.username === user.username ? 'own' : 'other'}`}
+                className={`message ${message.username === user.name ? 'own' : 'other'}`}
               >
                 <div className="message-header">
                   <strong>{message.username}</strong>

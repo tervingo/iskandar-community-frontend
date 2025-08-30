@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import AuthModal from '../Auth/AuthModal';
+import bibliotecaImage from '../../assets/images/biblioteca.jpg';
+
 
 const Header: React.FC = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuthStore();
@@ -29,8 +31,17 @@ const Header: React.FC = () => {
           <div className="logo">
             <Link to="/">Iskandar Community</Link>
           </div>
+
+          <div className="header-nav-image">
+            <img 
+              src={bibliotecaImage} 
+              alt="Biblioteca" 
+              className="nav-image"
+            />
+          </div>
           
           <nav className="nav">
+            <Link to="/home">Home</Link>
             <Link to="/blog">Blog</Link>
             <Link to="/chat">Chat</Link>
             <Link to="/files">Files</Link>
