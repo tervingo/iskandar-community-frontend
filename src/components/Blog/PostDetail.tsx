@@ -5,16 +5,12 @@ import CommentSection from './CommentSection';
 
 const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { currentPost, loading, error, fetchPost, clearCurrentPost } = useBlogStore();
+  const { currentPost, loading, error, fetchPost } = useBlogStore();
 
   useEffect(() => {
     if (id) {
       fetchPost(id);
     }
-    
-    return () => {
-      clearCurrentPost();
-    };
   }, [id]);
 
   if (loading) return <div className="loading">Loading post...</div>;

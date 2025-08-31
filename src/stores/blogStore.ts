@@ -44,12 +44,13 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
   },
 
   fetchPost: async (id: string) => {
-    set({ loading: true, error: null });
+    set({ loading: true, error: null, currentPost: null });
     try {
       const post = await postsApi.getById(id);
       set({ currentPost: post, loading: false });
-    } catch (error) {
-      set({ error: 'Failed to fetch post', loading: false });
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to fetch post';
+      set({ error: errorMessage, loading: false, currentPost: null });
     }
   },
 
