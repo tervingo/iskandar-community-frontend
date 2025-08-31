@@ -7,6 +7,7 @@ interface BlogStore {
   currentPost: Post | null;
   comments: Comment[];
   loading: boolean;
+  commentsLoading: boolean;
   error: string | null;
 
   // Posts actions
@@ -31,6 +32,7 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
   currentPost: null,
   comments: [],
   loading: false,
+  commentsLoading: false,
   error: null,
 
   fetchPosts: async () => {
@@ -92,35 +94,35 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
   },
 
   fetchComments: async (postId: string) => {
-    set({ loading: true, error: null });
+    set({ commentsLoading: true, error: null });
     try {
       const comments = await commentsApi.getByPostId(postId);
-      set({ comments, loading: false });
+      set({ comments, commentsLoading: false });
     } catch (error) {
-      set({ error: 'Failed to fetch comments', loading: false });
+      set({ error: 'Failed to fetch comments', commentsLoading: false });
     }
   },
 
   createComment: async (postId: string, commentData: CommentCreate) => {
-    set({ loading: true, error: null });
+    set({ commentsLoading: true, error: null });
     try {
       const newComment = await commentsApi.create(postId, commentData);
       const { comments } = get();
-      set({ comments: [...comments, newComment], loading: false });
+      set({ comments: [...comments, newComment], commentsLoading: false });
     } catch (error) {
-      set({ error: 'Failed to create comment', loading: false });
+      set({ error: 'Failed to create comment', commentsLoading: false });
     }
   },
 
   deleteComment: async (id: string) => {
-    set({ loading: true, error: null });
+    set({ commentsLoading: true, error: null });
     try {
       await commentsApi.delete(id);
       const { comments } = get();
       const updatedComments = comments.filter(comment => comment.id !== id);
-      set({ comments: updatedComments, loading: false });
+      set({ comments: updatedComments, commentsLoading: false });
     } catch (error) {
-      set({ error: 'Failed to delete comment', loading: false });
+      set({ error: 'Failed to delete comment', commentsLoading: false });
     }
   },
 

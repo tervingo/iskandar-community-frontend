@@ -6,7 +6,7 @@ interface CommentSectionProps {
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
-  const { comments, loading, error, fetchComments, createComment } = useBlogStore();
+  const { comments, commentsLoading, error, fetchComments, createComment } = useBlogStore();
   
   const [commentForm, setCommentForm] = useState({
     author_name: '',
@@ -84,23 +84,23 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
               type="button" 
               onClick={() => setShowCommentForm(false)}
               className="btn btn-secondary"
-              disabled={loading}
+              disabled={commentsLoading}
             >
               Cancel
             </button>
             <button 
               type="submit" 
               className="btn btn-primary"
-              disabled={loading || !commentForm.author_name.trim() || !commentForm.content.trim()}
+              disabled={commentsLoading || !commentForm.author_name.trim() || !commentForm.content.trim()}
             >
-              {loading ? 'Posting...' : 'Post Comment'}
+              {commentsLoading ? 'Posting...' : 'Post Comment'}
             </button>
           </div>
         </form>
       )}
 
       <div className="comments">
-        {loading && <div className="loading">Loading comments...</div>}
+        {commentsLoading && <div className="loading">Loading comments...</div>}
         
         {comments.length === 0 ? (
           <div className="no-comments">
