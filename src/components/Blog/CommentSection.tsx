@@ -17,7 +17,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
 
   useEffect(() => {
     fetchComments(postId);
-  }, [postId, fetchComments]);
+  }, [postId]);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setCommentForm({

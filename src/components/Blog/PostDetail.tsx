@@ -15,7 +15,7 @@ const PostDetail: React.FC = () => {
     return () => {
       clearCurrentPost();
     };
-  }, [id, fetchPost, clearCurrentPost]);
+  }, [id]);
 
   if (loading) return <div className="loading">Loading post...</div>;
   if (error) return <div className="error">Error: {error}</div>;

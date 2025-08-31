@@ -7,7 +7,7 @@ const PostList: React.FC = () => {
 
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts]);
+  }, []);
 
   if (loading) return <div className="loading">Loading posts...</div>;
   if (error) return <div className="error">Error: {error}</div>;
