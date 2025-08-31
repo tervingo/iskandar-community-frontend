@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useBlogStore } from '../../stores/blogStore';
+import { useAuthStore } from '../../stores/authStore';
 
 interface CommentSectionProps {
   postId: string;
@@ -7,9 +8,10 @@ interface CommentSectionProps {
 
 const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
   const { comments, commentsLoading, error, fetchComments, createComment } = useBlogStore();
+  const { user } = useAuthStore();
   
   const [commentForm, setCommentForm] = useState({
-    author_name: '',
+    author_name: user?.name || '',
     content: '',
   });
   
@@ -18,6 +20,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
   useEffect(() => {
     fetchComments(postId);
   }, [postId]);
+
+  useEffect(() => {
+    if (user?.name && commentForm.author_name === '') {
+      setCommentForm(prev => ({
+        ...prev,
+        author_name: user.name
+      }));
+    }
+  }, [user?.name]);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setCommentForm({
@@ -36,7 +47,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
     await createComment(postId, commentForm);
     
     if (!error) {
-      setCommentForm({ author_name: '', content: '' });
+      setCommentForm({ author_name: user?.name || '', content: '' });
       setShowCommentForm(false);
     }
   };
