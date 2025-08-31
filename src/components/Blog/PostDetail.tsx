@@ -48,7 +48,7 @@ const PostDetail: React.FC = () => {
         </div>
       </article>
 
-      <CommentSection postId={currentPost.id} />
+      <CommentSection postId={id!} />
     </div>
   );
 };
