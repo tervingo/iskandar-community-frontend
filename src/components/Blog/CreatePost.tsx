@@ -11,7 +11,7 @@ const CreatePost: React.FC = () => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    author_name: user?.username || '',
+    author_name: user?.name || '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -24,13 +24,13 @@ const CreatePost: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title.trim() || !formData.content.trim() || !user?.username) {
+    if (!formData.title.trim() || !formData.content.trim() || !user?.name) {
       return;
     }
 
     await createPost({
       ...formData,
-      author_name: user.username
+      author_name: user.name
     });
     
     if (!error) {
@@ -60,7 +60,7 @@ const CreatePost: React.FC = () => {
             type="text"
             id="author_name"
             name="author_name"
-            value={user?.username || ''}
+            value={user?.name || ''}
             placeholder="Author name"
             disabled
           />

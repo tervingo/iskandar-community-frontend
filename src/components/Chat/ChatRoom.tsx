@@ -52,7 +52,7 @@ const ChatRoom: React.FC = () => {
             {error && <div className="error">Error: {error}</div>}
             
             <div style={{padding: '10px', background: '#f0f0f0', marginBottom: '10px', fontSize: '12px'}}>
-              Chatting as: "{user.username}" {user.role === 'admin' && '(Admin)'}
+              Chatting as: "{user.name}" {user.role === 'admin' && '(Admin)'}
             </div>
             
             {messages.map((message, index) => (

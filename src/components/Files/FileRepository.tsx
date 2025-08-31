@@ -7,7 +7,7 @@ const FileRepository: React.FC = () => {
   const { user } = useAuthStore();
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadForm, setUploadForm] = useState({
-    uploadedBy: user?.username || '',
+    uploadedBy: user?.name || '',
     description: '',
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -26,15 +26,15 @@ const FileRepository: React.FC = () => {
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedFile || !user?.username) {
+    if (!selectedFile || !user?.name) {
       return;
     }
 
-    await uploadFile(selectedFile, user.username, uploadForm.description);
+    await uploadFile(selectedFile, user.name, uploadForm.description);
     
     if (!error) {
       setSelectedFile(null);
-      setUploadForm({ uploadedBy: user.username, description: '' });
+      setUploadForm({ uploadedBy: user.name, description: '' });
       setShowUploadForm(false);
       // Reset file input
       const fileInput = document.getElementById('fileInput') as HTMLInputElement;
@@ -105,7 +105,7 @@ const FileRepository: React.FC = () => {
             <input
               type="text"
               id="uploadedBy"
-              value={user?.username || ''}
+              value={user?.name || ''}
               placeholder="Uploader name"
               disabled
             />
