@@ -138,136 +138,100 @@ const FileRepository: React.FC = () => {
     }
   };
 
-  const handleViewPDF = async (file: FileItem) => {
-    try {
-      // Try to fetch and create a blob URL for better filename handling
-      const response = await fetch(file.cloudinary_url, {
-        method: 'GET',
-        mode: 'cors',
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        
-        // Open in new window with custom title and blob URL
-        const newWindow = window.open('', '_blank');
-        if (newWindow) {
-          newWindow.document.title = file.original_name;
-          newWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>${file.original_name}</title>
-                <meta charset="UTF-8">
-                <style>
-                  body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
-                  .header { 
-                    background: #f5f5f5; 
-                    padding: 10px 20px; 
-                    border-bottom: 1px solid #ddd;
-                    font-size: 16px;
-                    font-weight: bold;
-                  }
-                  .pdf-container { 
-                    height: calc(100vh - 60px); 
-                    width: 100%; 
-                  }
-                  iframe { 
-                    width: 100%; 
-                    height: 100%; 
-                    border: none; 
-                  }
-                  .fallback {
-                    padding: 20px;
-                    text-align: center;
-                  }
-                </style>
-              </head>
-              <body>
-                <div class="header">${file.original_name}</div>
-                <div class="pdf-container">
-                  <iframe src="${blobUrl}" type="application/pdf">
-                    <div class="fallback">
-                      <p>Your browser doesn't support PDF viewing.</p>
-                      <a href="${blobUrl}" download="${file.original_name}" style="
-                        display: inline-block;
-                        padding: 10px 20px;
-                        background: #007bff;
-                        color: white;
-                        text-decoration: none;
-                        border-radius: 4px;
-                      ">Download ${file.original_name}</a>
-                    </div>
-                  </iframe>
-                </div>
-              </body>
-            </html>
-          `);
-          newWindow.document.close();
-          
-          // Clean up blob URL when window is closed (if possible)
-          newWindow.addEventListener('beforeunload', () => {
-            window.URL.revokeObjectURL(blobUrl);
-          });
-        } else {
-          // Fallback if popup is blocked
-          window.URL.revokeObjectURL(blobUrl);
-          throw new Error('Popup blocked');
-        }
-      } else {
-        throw new Error('Fetch failed');
-      }
-    } catch (error) {
-      console.warn('PDF blob creation failed, using direct URL:', error);
-      
-      // Fallback to direct URL method
-      const newWindow = window.open('', '_blank');
-      if (newWindow) {
-        newWindow.document.title = file.original_name;
-        newWindow.document.write(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>${file.original_name}</title>
-              <meta charset="UTF-8">
-              <style>
-                body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
-                .header { 
-                  background: #f5f5f5; 
-                  padding: 10px 20px; 
-                  border-bottom: 1px solid #ddd;
-                  font-size: 16px;
-                  font-weight: bold;
-                }
-                .pdf-container { 
-                  height: calc(100vh - 60px); 
-                  width: 100%; 
-                }
-                iframe { 
-                  width: 100%; 
-                  height: 100%; 
-                  border: none; 
-                }
-              </style>
-            </head>
-            <body>
-              <div class="header">${file.original_name}</div>
-              <div class="pdf-container">
-                <iframe src="${file.cloudinary_url}" type="application/pdf">
-                  <p>Your browser doesn't support PDF viewing. 
-                    <a href="${file.cloudinary_url}" target="_blank">Open in new tab</a>
-                  </p>
-                </iframe>
+  const handleViewPDF = (file: FileItem) => {
+    // Use Google's PDF viewer for better compatibility and to avoid download issues
+    const pdfUrl = encodeURIComponent(file.cloudinary_url);
+    const googlePdfViewer = `https://docs.google.com/gview?url=${pdfUrl}&embedded=true`;
+    
+    // Open in new window with custom title and header
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.title = file.original_name;
+      newWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${file.original_name}</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              body { 
+                margin: 0; 
+                padding: 0; 
+                font-family: Arial, sans-serif; 
+                background: #f5f5f5;
+              }
+              .header { 
+                background: #2c3e50; 
+                color: white;
+                padding: 15px 20px; 
+                border-bottom: 2px solid #34495e;
+                font-size: 16px;
+                font-weight: 600;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              }
+              .header .actions {
+                display: flex;
+                gap: 10px;
+              }
+              .header a {
+                color: #3498db;
+                text-decoration: none;
+                font-size: 14px;
+                padding: 5px 10px;
+                border: 1px solid #3498db;
+                border-radius: 4px;
+                transition: all 0.3s;
+              }
+              .header a:hover {
+                background: #3498db;
+                color: white;
+              }
+              .pdf-container { 
+                height: calc(100vh - 70px); 
+                width: 100%; 
+                background: white;
+              }
+              iframe { 
+                width: 100%; 
+                height: 100%; 
+                border: none; 
+              }
+              .loading {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 200px;
+                font-size: 16px;
+                color: #666;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <span>📄 ${file.original_name}</span>
+              <div class="actions">
+                <a href="${file.cloudinary_url}" target="_blank">Direct View</a>
+                <a href="${file.cloudinary_url}" download="${file.original_name}">Download</a>
               </div>
-            </body>
-          </html>
-        `);
-        newWindow.document.close();
-      } else {
-        // Final fallback - direct URL in new tab
-        window.open(file.cloudinary_url, '_blank');
-      }
+            </div>
+            <div class="pdf-container">
+              <div class="loading">Loading PDF viewer...</div>
+              <iframe src="${googlePdfViewer}" onload="this.previousElementSibling.style.display='none'">
+                <p>Unable to load PDF viewer. <a href="${file.cloudinary_url}" target="_blank">Click here to view directly</a></p>
+              </iframe>
+            </div>
+          </body>
+        </html>
+      `);
+      newWindow.document.close();
+    } else {
+      // Fallback if popup is blocked - try direct PDF URL first
+      const directUrl = file.cloudinary_url + '#view=FitH';
+      window.open(directUrl, '_blank');
     }
   };
 
