@@ -52,35 +52,73 @@ const FileRepository: React.FC = () => {
 
   const handleDownload = async (file: any) => {
     try {
-      // For files that were uploaded as 'image' type but are actually PDFs,
-      // we need to use the original URL without changing the path
-      let downloadUrl = file.cloudinary_url;
+      console.log('Downloading file:', file.original_name, 'from:', file.cloudinary_url);
       
-      // Add attachment parameter to force download
-      if (downloadUrl.includes('?')) {
-        downloadUrl += '&fl_attachment';
+      // Try fetching the file first to handle CORS issues
+      const response = await fetch(file.cloudinary_url + '?fl_attachment', {
+        method: 'GET',
+        mode: 'cors',
+      });
+      
+      if (response.ok) {
+        // Create blob from response
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        
+        // Create download link with original filename
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = file.original_name;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up blob URL
+        window.URL.revokeObjectURL(blobUrl);
       } else {
-        downloadUrl += '?fl_attachment';
+        throw new Error('Fetch failed');
       }
-      
-      // Create temporary link and click it
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = file.original_name;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
     } catch (error) {
-      console.error('Download error:', error);
-      // Fallback to opening in new tab with attachment parameter
-      let fallbackUrl = file.cloudinary_url;
-      if (fallbackUrl.includes('?')) {
-        fallbackUrl += '&fl_attachment';
-      } else {
-        fallbackUrl += '?fl_attachment';
+      console.warn('Fetch download failed, trying direct link method:', error);
+      
+      try {
+        // Fallback to direct link method
+        let downloadUrl = file.cloudinary_url;
+        
+        // Add attachment parameter to force download
+        if (downloadUrl.includes('?')) {
+          downloadUrl += '&fl_attachment';
+        } else {
+          downloadUrl += '?fl_attachment';
+        }
+        
+        // Create temporary link and click it
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = file.original_name;
+        link.target = '_blank';
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+      } catch (fallbackError) {
+        console.error('All download methods failed:', fallbackError);
+        
+        // Final fallback - open in new tab with attachment parameter
+        let fallbackUrl = file.cloudinary_url;
+        if (fallbackUrl.includes('?')) {
+          fallbackUrl += '&fl_attachment';
+        } else {
+          fallbackUrl += '?fl_attachment';
+        }
+        window.open(fallbackUrl, '_blank');
+        
+        alert(`Download started in new tab. Please check your downloads folder for: ${file.original_name}`);
       }
-      window.open(fallbackUrl, '_blank');
     }
   };
 
