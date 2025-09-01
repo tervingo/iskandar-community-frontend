@@ -4,10 +4,9 @@ import { LoginRequest } from '../../types';
 
 interface LoginProps {
   onLoginSuccess?: () => void;
-  onSwitchToRegister?: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onLoginSuccess, onSwitchToRegister }) => {
+const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const { login, loading, error, clearError } = useAuthStore();
   const [credentials, setCredentials] = useState<LoginRequest>({
     name: '',
