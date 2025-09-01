@@ -79,18 +79,6 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onSwitchToRegister }) => 
         </button>
       </form>
 
-      {onSwitchToRegister && (
-        <p className="switch-auth">
-          Don't have an account?{' '}
-          <button 
-            type="button" 
-            className="link-button"
-            onClick={onSwitchToRegister}
-          >
-            Register here
-          </button>
-        </p>
-      )}
     </div>
   );
 };
