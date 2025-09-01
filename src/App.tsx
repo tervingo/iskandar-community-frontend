@@ -9,6 +9,7 @@ import ChatRoom from './components/Chat/ChatRoom';
 import FileRepository from './components/Files/FileRepository';
 import AdminPanel from './components/Admin/AdminPanel';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
+import RedirectRoute from './components/Auth/RedirectRoute';
 import { useAuthStore } from './stores/authStore';
 import './App.css';
 
@@ -25,30 +26,44 @@ const App: React.FC = () => {
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/blog" element={<PostList />} />
+          <Route 
+            path="/blog" 
+            element={
+              <RedirectRoute>
+                <PostList />
+              </RedirectRoute>
+            } 
+          />
           <Route 
             path="/blog/create" 
             element={
-              <ProtectedRoute>
+              <RedirectRoute>
                 <CreatePost />
-              </ProtectedRoute>
+              </RedirectRoute>
             } 
           />
-          <Route path="/blog/:id" element={<PostDetail />} />
+          <Route 
+            path="/blog/:id" 
+            element={
+              <RedirectRoute>
+                <PostDetail />
+              </RedirectRoute>
+            } 
+          />
           <Route 
             path="/chat" 
             element={
-              <ProtectedRoute>
+              <RedirectRoute>
                 <ChatRoom />
-              </ProtectedRoute>
+              </RedirectRoute>
             } 
           />
           <Route 
             path="/files" 
             element={
-              <ProtectedRoute>
+              <RedirectRoute>
                 <FileRepository />
-              </ProtectedRoute>
+              </RedirectRoute>
             } 
           />
           <Route 

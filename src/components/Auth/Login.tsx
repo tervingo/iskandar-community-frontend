@@ -10,7 +10,7 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onLoginSuccess, onSwitchToRegister }) => {
   const { login, loading, error, clearError } = useAuthStore();
   const [credentials, setCredentials] = useState<LoginRequest>({
-    email: '',
+    name: '',
     password: '',
   });
 
@@ -44,15 +44,16 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onSwitchToRegister }) => 
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="email">Email:</label>
+          <label htmlFor="name">Name:</label>
           <input
-            type="email"
-            id="email"
-            name="email"
-            value={credentials.email}
+            type="text"
+            id="name"
+            name="name"
+            value={credentials.name}
             onChange={handleChange}
             required
             disabled={loading}
+            placeholder="Enter your name"
           />
         </div>
 

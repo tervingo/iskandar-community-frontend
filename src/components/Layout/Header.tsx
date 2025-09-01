@@ -42,10 +42,20 @@ const Header: React.FC = () => {
           
           <nav className="nav">
             <Link to="/home">Home</Link>
-            <Link to="/blog">Blog</Link>
-            <Link to="/chat">Chat</Link>
-            <Link to="/files">Files</Link>
-            {isAdmin && <Link to="/admin">Admin</Link>}
+            {isAuthenticated ? (
+              <>
+                <Link to="/blog">Blog</Link>
+                <Link to="/chat">Chat</Link>
+                <Link to="/files">Files</Link>
+                {isAdmin && <Link to="/admin">Admin</Link>}
+              </>
+            ) : (
+              <>
+                <span className="nav-link-disabled" title="Login required">Blog</span>
+                <span className="nav-link-disabled" title="Login required">Chat</span>
+                <span className="nav-link-disabled" title="Login required">Files</span>
+              </>
+            )}
           </nav>
           
           <div className="auth-section">
