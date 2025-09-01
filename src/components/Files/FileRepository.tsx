@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useFileStore } from '../../stores/fileStore';
 import { useAuthStore } from '../../stores/authStore';
+import { FileItem } from '../../types';
 
 const FileRepository: React.FC = () => {
-  const { files, loading, error, fetchFiles, uploadFile } = useFileStore();
+  const { files, loading, error, fetchFiles, uploadFile, deleteFile } = useFileStore();
   const { user } = useAuthStore();
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadForm, setUploadForm] = useState({
@@ -122,6 +123,27 @@ const FileRepository: React.FC = () => {
     }
   };
 
+  const handleDelete = async (file: FileItem) => {
+    if (!user) return;
+    
+    const confirmMessage = `Are you sure you want to delete "${file.original_name}"? This action cannot be undone.`;
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      await deleteFile(file.id);
+    } catch (error) {
+      console.error('Delete error:', error);
+    }
+  };
+
+  const canDeleteFile = (file: FileItem): boolean => {
+    if (!user) return false;
+    // Admin users can delete any file, or user can delete their own files
+    return user.role === 'admin' || file.uploaded_by === user.name;
+  };
+
   return (
     <div className="file-repository">
       <div className="header">
@@ -237,6 +259,7 @@ const FileRepository: React.FC = () => {
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="btn btn-secondary btn-sm"
+                      style={{ marginRight: '0.5rem' }}
                     >
                       View PDF
                     </a>
@@ -247,9 +270,20 @@ const FileRepository: React.FC = () => {
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="btn btn-secondary btn-sm"
+                      style={{ marginRight: '0.5rem' }}
                     >
                       View Image
                     </a>
+                  )}
+                  {canDeleteFile(file) && (
+                    <button 
+                      onClick={() => handleDelete(file)}
+                      className="btn btn-danger btn-sm"
+                      disabled={loading}
+                      style={{ marginLeft: '0.5rem' }}
+                    >
+                      Delete
+                    </button>
                   )}
                 </div>
               </div>
