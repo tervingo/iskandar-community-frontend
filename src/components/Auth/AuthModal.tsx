@@ -32,7 +32,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         {mode === 'login' ? (
           <Login
             onLoginSuccess={handleLoginSuccess}
-            onSwitchToRegister={() => setMode('register')}
+ //           onSwitchToRegister={() => setMode('register')}
           />
         ) : (
           <Register
