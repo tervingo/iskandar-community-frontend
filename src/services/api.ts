@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Post, PostCreate, PostUpdate, Comment, CommentCreate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User } from '../types';
+import { Post, PostCreate, PostUpdate, Comment, CommentCreate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -145,5 +145,9 @@ export const authApi = {
 
   toggleUserStatus: async (userId: string): Promise<void> => {
     await api.post(`/auth/users/${userId}/toggle-status`);
+  },
+
+  changePassword: async (passwordData: PasswordChangeRequest): Promise<void> => {
+    await api.post('/auth/change-password', passwordData);
   },
 };

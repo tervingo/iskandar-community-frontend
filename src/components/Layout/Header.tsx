@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import AuthModal from '../Auth/AuthModal';
+import ChangePassword from '../Auth/ChangePassword';
 import bibliotecaImage from '../../assets/images/biblioteca.jpg';
 
 
 const Header: React.FC = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuthStore();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   const handleLogin = () => {
@@ -66,6 +68,13 @@ const Header: React.FC = () => {
                   {isAdmin && <span className="admin-badge"> (Admin)</span>}
                 </span>
                 <button 
+                  onClick={() => setShowPasswordChange(true)}
+                  className="btn btn-sm btn-secondary"
+                  style={{ marginRight: '0.5rem' }}
+                >
+                  Change Password
+                </button>
+                <button 
                   onClick={handleLogout}
                   className="btn btn-secondary"
                 >
@@ -97,6 +106,20 @@ const Header: React.FC = () => {
         onClose={() => setShowAuthModal(false)}
         initialMode={authMode}
       />
+      
+      {showPasswordChange && (
+        <div className="modal-overlay" onClick={() => setShowPasswordChange(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <ChangePassword
+              onClose={() => setShowPasswordChange(false)}
+              onSuccess={() => {
+                // Password changed successfully
+                console.log('Password changed successfully');
+              }}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };

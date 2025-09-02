@@ -95,3 +95,8 @@ export interface TokenData {
   role: string;
   exp: number;
 }
+
+export interface PasswordChangeRequest {
+  current_password: string;
+  new_password: string;
+}

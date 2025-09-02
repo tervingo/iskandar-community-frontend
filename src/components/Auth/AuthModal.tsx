@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Login from './Login';
 import Register from './Register';
 
@@ -10,6 +10,15 @@ interface AuthModalProps {
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'login' }) => {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
+  const [resetTrigger, setResetTrigger] = useState(0);
+
+  // Trigger form reset when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const timestamp = Date.now();
+      setResetTrigger(timestamp);
+    }
+  }, [isOpen]);
 
   const handleLoginSuccess = () => {
     onClose();
@@ -32,7 +41,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         {mode === 'login' ? (
           <Login
             onLoginSuccess={handleLoginSuccess}
- //           onSwitchToRegister={() => setMode('register')}
+            shouldReset={resetTrigger > 0}
           />
         ) : (
           <Register
