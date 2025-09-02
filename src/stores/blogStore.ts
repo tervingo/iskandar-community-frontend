@@ -85,11 +85,15 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       await postsApi.delete(id);
-      const { posts } = get();
+      const { posts, currentPost } = get();
       const updatedPosts = posts.filter(post => post.id !== id);
-      set({ posts: updatedPosts, loading: false });
-    } catch (error) {
-      set({ error: 'Failed to delete post', loading: false });
+      // Clear current post if it's the one being deleted
+      const newCurrentPost = currentPost?.id === id ? null : currentPost;
+      set({ posts: updatedPosts, currentPost: newCurrentPost, loading: false });
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to delete post';
+      set({ error: errorMessage, loading: false });
+      throw error; // Re-throw to allow component to handle the error
     }
   },
 
