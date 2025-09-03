@@ -9,11 +9,21 @@ const AdminPanel: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCreateUser, setShowCreateUser] = useState(false);
+  const [showEditUser, setShowEditUser] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState<RegisterRequest>({
     email: '',
     password: '',
     name: '',
     role: 'normal',
+    avatar: '',
+    phone: '',
+  });
+  const [editUserData, setEditUserData] = useState({
+    name: '',
+    role: 'normal' as 'admin' | 'normal',
+    avatar: '',
+    phone: '',
   });
 
   useEffect(() => {
@@ -38,7 +48,7 @@ const AdminPanel: React.FC = () => {
     e.preventDefault();
     try {
       await authApi.createUser(newUser);
-      setNewUser({ email: '', password: '', name: '', role: 'normal' });
+      setNewUser({ email: '', password: '', name: '', role: 'normal', avatar: '', phone: '' });
       setShowCreateUser(false);
       fetchUsers();
     } catch (error: any) {
@@ -46,8 +56,48 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  const handleToggleUserStatus = async (userId: string) => {
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setEditUserData({
+      name: user.name,
+      role: user.role,
+      avatar: user.avatar || '',
+      phone: user.phone || '',
+    });
+    setShowEditUser(true);
+  };
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    
     try {
+      // Handle both id and _id fields for compatibility
+      const userId = editingUser.id || (editingUser as any)._id;
+      console.log('Updating user with ID:', userId, 'User object:', editingUser);
+      
+      if (!userId) {
+        setError('User ID is missing');
+        return;
+      }
+      
+      await authApi.updateUser(userId, editUserData);
+      setShowEditUser(false);
+      setEditingUser(null);
+      fetchUsers();
+    } catch (error: any) {
+      console.error('Update user error:', error);
+      setError('Failed to update user');
+    }
+  };
+
+  const handleToggleUserStatus = async (user: User) => {
+    try {
+      const userId = user.id || (user as any)._id;
+      if (!userId) {
+        setError('User ID is missing');
+        return;
+      }
       await authApi.toggleUserStatus(userId);
       fetchUsers();
     } catch (error: any) {
@@ -55,9 +105,14 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
+  const handleDeleteUser = async (user: User) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
+        const userId = user.id || (user as any)._id;
+        if (!userId) {
+          setError('User ID is missing');
+          return;
+        }
         await authApi.deleteUser(userId);
         fetchUsers();
       } catch (error: any) {
@@ -123,6 +178,24 @@ const AdminPanel: React.FC = () => {
                 </select>
               </div>
               <div className="form-group">
+                <label>Avatar URL (optional):</label>
+                <input
+                  type="url"
+                  value={newUser.avatar || ''}
+                  onChange={(e) => setNewUser({...newUser, avatar: e.target.value})}
+                  placeholder="https://example.com/avatar.jpg"
+                />
+              </div>
+              <div className="form-group">
+                <label>Phone (optional):</label>
+                <input
+                  type="tel"
+                  value={newUser.phone || ''}
+                  onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
+                  placeholder="+1234567890"
+                />
+              </div>
+              <div className="form-group">
                 <label>Password:</label>
                 <input
                   type="password"
@@ -146,6 +219,63 @@ const AdminPanel: React.FC = () => {
         </div>
       )}
 
+      {showEditUser && editingUser && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Edit User: {editingUser.name}</h3>
+            <form onSubmit={handleUpdateUser}>
+              <div className="form-group">
+                <label>Name:</label>
+                <input
+                  type="text"
+                  value={editUserData.name}
+                  onChange={(e) => setEditUserData({...editUserData, name: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Role:</label>
+                <select
+                  value={editUserData.role}
+                  onChange={(e) => setEditUserData({...editUserData, role: e.target.value as 'admin' | 'normal'})}
+                >
+                  <option value="normal">Normal</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Avatar URL (optional):</label>
+                <input
+                  type="url"
+                  value={editUserData.avatar}
+                  onChange={(e) => setEditUserData({...editUserData, avatar: e.target.value})}
+                  placeholder="https://example.com/avatar.jpg"
+                />
+              </div>
+              <div className="form-group">
+                <label>Phone (optional):</label>
+                <input
+                  type="tel"
+                  value={editUserData.phone}
+                  onChange={(e) => setEditUserData({...editUserData, phone: e.target.value})}
+                  placeholder="+1234567890"
+                />
+              </div>
+              <div className="form-actions">
+                <button type="submit" className="btn btn-primary">Update</button>
+                <button 
+                  type="button" 
+                  onClick={() => setShowEditUser(false)}
+                  className="btn btn-secondary"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="users-table">
         <h2>Users</h2>
         {loading ? (
@@ -154,8 +284,10 @@ const AdminPanel: React.FC = () => {
           <table>
             <thead>
               <tr>
+                <th>Avatar</th>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Phone</th>
                 <th>Role</th>
                 <th>Status</th>
                 <th>Created</th>
@@ -164,9 +296,17 @@ const AdminPanel: React.FC = () => {
             </thead>
             <tbody>
               {users.map(user => (
-                <tr key={user.id}>
+                <tr key={user.id || (user as any)._id}>
+                  <td>
+                    {user.avatar ? (
+                      <img src={user.avatar} alt={`${user.name}'s avatar`} className="user-avatar-small" />
+                    ) : (
+                      <div className="user-avatar-placeholder">👤</div>
+                    )}
+                  </td>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
+                  <td>{user.phone || '-'}</td>
                   <td>
                     <span className={`role-badge ${user.role}`}>
                       {user.role}
@@ -180,13 +320,19 @@ const AdminPanel: React.FC = () => {
                   <td>{new Date(user.created_at).toLocaleDateString()}</td>
                   <td className="actions">
                     <button 
-                      onClick={() => handleToggleUserStatus(user.id)}
+                      onClick={() => handleEditUser(user)}
+                      className="btn btn-small"
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => handleToggleUserStatus(user)}
                       className="btn btn-small"
                     >
                       {user.is_active ? 'Deactivate' : 'Activate'}
                     </button>
                     <button 
-                      onClick={() => handleDeleteUser(user.id)}
+                      onClick={() => handleDeleteUser(user)}
                       className="btn btn-small btn-danger"
                     >
                       Delete
