@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Post, PostCreate, PostUpdate, Comment, CommentCreate } from '../types';
+import { Post, PostCreate, PostUpdate, Comment, CommentCreate, CommentUpdate } from '../types';
 import { postsApi, commentsApi } from '../services/api';
 
 interface BlogStore {
@@ -20,6 +20,7 @@ interface BlogStore {
   // Comments actions
   fetchComments: (postId: string) => Promise<void>;
   createComment: (postId: string, comment: CommentCreate) => Promise<void>;
+  updateComment: (id: string, comment: CommentUpdate) => Promise<void>;
   deleteComment: (id: string) => Promise<void>;
 
   // Utility actions
@@ -118,6 +119,22 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
     }
   },
 
+  updateComment: async (id: string, commentData: CommentUpdate) => {
+    set({ commentsLoading: true, error: null });
+    try {
+      const updatedComment = await commentsApi.update(id, commentData);
+      const { comments } = get();
+      const updatedComments = comments.map(comment => 
+        comment.id === id ? updatedComment : comment
+      );
+      set({ comments: updatedComments, commentsLoading: false });
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to update comment';
+      set({ error: errorMessage, commentsLoading: false });
+      throw error; // Re-throw to allow component to handle the error
+    }
+  },
+
   deleteComment: async (id: string) => {
     set({ commentsLoading: true, error: null });
     try {
@@ -125,8 +142,10 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       const { comments } = get();
       const updatedComments = comments.filter(comment => comment.id !== id);
       set({ comments: updatedComments, commentsLoading: false });
-    } catch (error) {
-      set({ error: 'Failed to delete comment', commentsLoading: false });
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to delete comment';
+      set({ error: errorMessage, commentsLoading: false });
+      throw error; // Re-throw to allow component to handle the error
     }
   },
 

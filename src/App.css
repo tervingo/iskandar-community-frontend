@@ -417,6 +417,47 @@ body {
   line-height: 1.6;
 }
 
+.comment-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.comment-edit-form {
+  margin-top: 1rem;
+}
+
+.comment-edit-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.comment-edit-textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.comment-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.btn-danger {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #c0392b;
+}
+
 /* Chat */
 .chat-room {
   background: white;

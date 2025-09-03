@@ -31,6 +31,10 @@ export interface CommentCreate {
   content: string;
 }
 
+export interface CommentUpdate {
+  content: string;
+}
+
 export interface ChatMessage {
   id: string;
   username: string;

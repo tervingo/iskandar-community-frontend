@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Post, PostCreate, PostUpdate, Comment, CommentCreate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest } from '../types';
+import { Post, PostCreate, PostUpdate, Comment, CommentCreate, CommentUpdate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -55,6 +55,11 @@ export const commentsApi = {
 
   create: async (postId: string, comment: CommentCreate): Promise<Comment> => {
     const response = await api.post(`/comments/post/${postId}`, comment);
+    return response.data;
+  },
+
+  update: async (id: string, comment: CommentUpdate): Promise<Comment> => {
+    const response = await api.put(`/comments/${id}`, comment);
     return response.data;
   },
 

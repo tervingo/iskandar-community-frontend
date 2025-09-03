@@ -21,8 +21,9 @@ const Home: React.FC = () => {
             You can add multiple paragraphs by using multiple <p> tags.
           */}
           <p>
-            [Your explanation text about the biblioteca will go here. You can replace this entire 
-            paragraph with your own content about the library and community.]
+            Iskandar es el nombre en árabe para Alejandro, e Iskandariya es el nombre en árabe para la ciudad de Alejandría, donde estaba 
+            la biblioteca más famosa del mundo, la biblioteca de Alejandría. 
+            Este sitio pretende ser una pequeña comunidad virtual donde se pueda compartir información, opinión y conocimiento.
           </p>
           
           {/* 
