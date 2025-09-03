@@ -10,6 +10,7 @@ interface FileStore {
   // Actions
   fetchFiles: () => Promise<void>;
   uploadFile: (file: File, uploadedBy: string, description?: string) => Promise<void>;
+  addUrl: (url: string, uploadedBy: string, description?: string) => Promise<void>;
   deleteFile: (id: string) => Promise<void>;
   setError: (error: string | null) => void;
 }
@@ -37,6 +38,17 @@ export const useFileStore = create<FileStore>((set, get) => ({
       set({ files: [newFile, ...files], loading: false });
     } catch (error) {
       set({ error: 'Failed to upload file', loading: false });
+    }
+  },
+
+  addUrl: async (url: string, uploadedBy: string, description?: string) => {
+    set({ loading: true, error: null });
+    try {
+      const newFile = await filesApi.addUrl(url, uploadedBy, description);
+      const { files } = get();
+      set({ files: [newFile, ...files], loading: false });
+    } catch (error) {
+      set({ error: 'Failed to add URL', loading: false });
     }
   },
 

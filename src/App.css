@@ -567,6 +567,21 @@ body {
 }
 
 /* Files */
+.file-repository .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .file-repository .upload-form {
   background: #f8f9fa;
   padding: 1.5rem;

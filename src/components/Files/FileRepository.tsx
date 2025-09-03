@@ -6,11 +6,16 @@ import ImageViewer from './ImageViewer';
 import AudioPlayer from './AudioPlayer';
 
 const FileRepository: React.FC = () => {
-  const { files, loading, error, fetchFiles, uploadFile, deleteFile } = useFileStore();
+  const { files, loading, error, fetchFiles, uploadFile, addUrl, deleteFile } = useFileStore();
   const { user } = useAuthStore();
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [showUrlForm, setShowUrlForm] = useState(false);
   const [uploadForm, setUploadForm] = useState({
     uploadedBy: user?.name || '',
+    description: '',
+  });
+  const [urlForm, setUrlForm] = useState({
+    url: '',
     description: '',
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -46,6 +51,21 @@ const FileRepository: React.FC = () => {
       // Reset file input
       const fileInput = document.getElementById('fileInput') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
+    }
+  };
+
+  const handleAddUrl = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!urlForm.url.trim() || !user?.name) {
+      return;
+    }
+
+    await addUrl(urlForm.url, user.name, urlForm.description);
+    
+    if (!error) {
+      setUrlForm({ url: '', description: '' });
+      setShowUrlForm(false);
     }
   };
 
@@ -295,12 +315,27 @@ const FileRepository: React.FC = () => {
     <div className="file-repository">
       <div className="header">
         <h1>File Repository</h1>
-        <button 
-          onClick={() => setShowUploadForm(!showUploadForm)}
-          className="btn btn-primary"
-        >
-          {showUploadForm ? 'Cancel' : 'Upload File'}
-        </button>
+        <div className="header-actions">
+          <button 
+            onClick={() => {
+              setShowUploadForm(!showUploadForm);
+              setShowUrlForm(false);
+            }}
+            className="btn btn-primary"
+          >
+            {showUploadForm ? 'Cancel' : 'Upload File'}
+          </button>
+          <button 
+            onClick={() => {
+              setShowUrlForm(!showUrlForm);
+              setShowUploadForm(false);
+            }}
+            className="btn btn-secondary"
+            style={{ marginLeft: '0.5rem' }}
+          >
+            {showUrlForm ? 'Cancel' : 'Add URL'}
+          </button>
+        </div>
       </div>
 
       {showUploadForm && (
@@ -364,6 +399,64 @@ const FileRepository: React.FC = () => {
         </form>
       )}
 
+      {showUrlForm && (
+        <form onSubmit={handleAddUrl} className="upload-form">
+          {error && <div className="error">Error: {error}</div>}
+          
+          <div className="form-group">
+            <label htmlFor="uploaderUrl">Uploader</label>
+            <input
+              type="text"
+              id="uploaderUrl"
+              value={user?.name || ''}
+              placeholder="Uploader name"
+              disabled
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="urlInput">URL</label>
+            <input
+              type="url"
+              id="urlInput"
+              value={urlForm.url}
+              onChange={(e) => setUrlForm({ ...urlForm, url: e.target.value })}
+              placeholder="https://example.com/resource"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="urlDescription">Description (optional)</label>
+            <input
+              type="text"
+              id="urlDescription"
+              value={urlForm.description}
+              onChange={(e) => setUrlForm({ ...urlForm, description: e.target.value })}
+              placeholder="Brief description of the URL"
+            />
+          </div>
+
+          <div className="form-actions">
+            <button 
+              type="button" 
+              onClick={() => setShowUrlForm(false)}
+              className="btn btn-secondary"
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              className="btn btn-primary"
+              disabled={loading || !urlForm.url.trim()}
+            >
+              {loading ? 'Adding URL...' : 'Add URL'}
+            </button>
+          </div>
+        </form>
+      )}
+
       <div className="files">
         {loading && <div className="loading">Loading files...</div>}
         
@@ -376,7 +469,8 @@ const FileRepository: React.FC = () => {
             {files.map((file) => (
               <div key={file.id} className="file-card">
                 <div className="file-icon">
-                  {file.file_type.startsWith('image/') ? '🖼️' : 
+                  {file.source_type === 'url' ? '🔗' :
+                   file.file_type.startsWith('image/') ? '🖼️' : 
                    file.file_type.startsWith('video/') ? '🎥' : 
                    file.file_type.startsWith('audio/') ? '🎵' : 
                    file.file_type.includes('pdf') ? '📄' : 
@@ -394,14 +488,24 @@ const FileRepository: React.FC = () => {
                   </div>
                 </div>
                 <div className="file-actions">
-                  <button 
-                    onClick={() => handleDownload(file)}
-                    className="btn btn-primary btn-sm"
-                    style={{ marginRight: '0.5rem' }}
-                  >
-                    Download
-                  </button>
-                  {file.file_type === 'application/pdf' && (
+                  {file.source_type === 'url' ? (
+                    <button 
+                      onClick={() => window.open(file.original_url || file.cloudinary_url, '_blank')}
+                      className="btn btn-primary btn-sm"
+                      style={{ marginRight: '0.5rem' }}
+                    >
+                      Open URL
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => handleDownload(file)}
+                      className="btn btn-primary btn-sm"
+                      style={{ marginRight: '0.5rem' }}
+                    >
+                      Download
+                    </button>
+                  )}
+                  {file.file_type === 'application/pdf' && file.source_type !== 'url' && (
                     <button 
                       onClick={() => handleViewPDF(file)}
                       className="btn btn-secondary btn-sm"
@@ -411,7 +515,7 @@ const FileRepository: React.FC = () => {
                       View PDF
                     </button>
                   )}
-                  {isImageFile(file) && (
+                  {isImageFile(file) && file.source_type !== 'url' && (
                     <button 
                       onClick={() => handleViewImage(file)}
                       className="btn btn-secondary btn-sm"
@@ -421,7 +525,7 @@ const FileRepository: React.FC = () => {
                       View Image
                     </button>
                   )}
-                  {isAudioFile(file) && (
+                  {isAudioFile(file) && file.source_type !== 'url' && (
                     <button 
                       onClick={() => handlePlayAudio(file)}
                       className="btn btn-secondary btn-sm"

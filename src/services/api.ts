@@ -111,6 +111,17 @@ export const filesApi = {
     return response.data;
   },
 
+  addUrl: async (url: string, uploadedBy: string, description?: string): Promise<FileItem> => {
+    const urlData = {
+      url,
+      uploaded_by: uploadedBy,
+      description: description || ''
+    };
+
+    const response = await api.post('/files/url', urlData);
+    return response.data;
+  },
+
   delete: async (id: string): Promise<void> => {
     await api.delete(`/files/${id}`);
   },
