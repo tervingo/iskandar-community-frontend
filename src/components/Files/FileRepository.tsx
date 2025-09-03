@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useFileStore } from '../../stores/fileStore';
 import { useAuthStore } from '../../stores/authStore';
 import { FileItem } from '../../types';
+import ImageViewer from './ImageViewer';
+import AudioPlayer from './AudioPlayer';
 
 const FileRepository: React.FC = () => {
   const { files, loading, error, fetchFiles, uploadFile, deleteFile } = useFileStore();
@@ -12,6 +14,10 @@ const FileRepository: React.FC = () => {
     description: '',
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [audioPlayerOpen, setAudioPlayerOpen] = useState(false);
+  const [currentAudioIndex, setCurrentAudioIndex] = useState(0);
 
   useEffect(() => {
     fetchFiles();
@@ -241,6 +247,50 @@ const FileRepository: React.FC = () => {
     return user.role === 'admin' || file.uploaded_by === user.name;
   };
 
+  // Filter image files for the image viewer
+  const imageFiles = useMemo(() => 
+    files.filter(file => file.file_type.startsWith('image/')),
+    [files]
+  );
+
+  // Filter audio files for the audio player
+  const audioFiles = useMemo(() => 
+    files.filter(file => file.file_type.startsWith('audio/')),
+    [files]
+  );
+
+  const isImageFile = (file: FileItem): boolean => {
+    return file.file_type.startsWith('image/');
+  };
+
+  const isAudioFile = (file: FileItem): boolean => {
+    return file.file_type.startsWith('audio/');
+  };
+
+  const handleViewImage = (file: FileItem) => {
+    const imageIndex = imageFiles.findIndex(img => img.id === file.id);
+    if (imageIndex !== -1) {
+      setCurrentImageIndex(imageIndex);
+      setImageViewerOpen(true);
+    }
+  };
+
+  const handleImageNavigation = (index: number) => {
+    setCurrentImageIndex(index);
+  };
+
+  const handlePlayAudio = (file: FileItem) => {
+    const audioIndex = audioFiles.findIndex(audio => audio.id === file.id);
+    if (audioIndex !== -1) {
+      setCurrentAudioIndex(audioIndex);
+      setAudioPlayerOpen(true);
+    }
+  };
+
+  const handleAudioNavigation = (index: number) => {
+    setCurrentAudioIndex(index);
+  };
+
   return (
     <div className="file-repository">
       <div className="header">
@@ -328,6 +378,7 @@ const FileRepository: React.FC = () => {
                 <div className="file-icon">
                   {file.file_type.startsWith('image/') ? '🖼️' : 
                    file.file_type.startsWith('video/') ? '🎥' : 
+                   file.file_type.startsWith('audio/') ? '🎵' : 
                    file.file_type.includes('pdf') ? '📄' : 
                    '📎'}
                 </div>
@@ -360,16 +411,25 @@ const FileRepository: React.FC = () => {
                       View PDF
                     </button>
                   )}
-                  {file.file_type.startsWith('image/') && (
-                    <a 
-                      href={file.cloudinary_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
+                  {isImageFile(file) && (
+                    <button 
+                      onClick={() => handleViewImage(file)}
                       className="btn btn-secondary btn-sm"
                       style={{ marginRight: '0.5rem' }}
+                      disabled={loading}
                     >
                       View Image
-                    </a>
+                    </button>
+                  )}
+                  {isAudioFile(file) && (
+                    <button 
+                      onClick={() => handlePlayAudio(file)}
+                      className="btn btn-secondary btn-sm"
+                      style={{ marginRight: '0.5rem' }}
+                      disabled={loading}
+                    >
+                      Play Audio
+                    </button>
                   )}
                   {canDeleteFile(file) && (
                     <button 
@@ -387,6 +447,24 @@ const FileRepository: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Image Viewer Modal */}
+      <ImageViewer
+        isOpen={imageViewerOpen}
+        onClose={() => setImageViewerOpen(false)}
+        images={imageFiles}
+        currentIndex={currentImageIndex}
+        onNavigate={handleImageNavigation}
+      />
+
+      {/* Audio Player Modal */}
+      <AudioPlayer
+        isOpen={audioPlayerOpen}
+        onClose={() => setAudioPlayerOpen(false)}
+        audioFiles={audioFiles}
+        currentIndex={currentAudioIndex}
+        onNavigate={handleAudioNavigation}
+      />
     </div>
   );
 };
