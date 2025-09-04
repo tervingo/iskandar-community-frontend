@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useCategoryStore } from '../../stores/categoryStore';
 import { useBlogStore } from '../../stores/blogStore';
-import { Category } from '../../types';
 
 interface CategorySidebarProps {
   selectedCategoryId?: string;
