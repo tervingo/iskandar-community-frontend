@@ -4,7 +4,7 @@ import { FileItem } from '../../types';
 
 interface FileCategorySidebarProps {
   files: FileItem[];
-  selectedCategoryId?: string;
+  selectedCategoryId?: string | null;
   onCategorySelect: (categoryId: string | null) => void;
 }
 
