@@ -1,8 +1,30 @@
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
+}
+
+export interface CategoryCreate {
+  name: string;
+  description?: string;
+}
+
+export interface CategoryUpdate {
+  name?: string;
+  description?: string;
+  is_active?: boolean;
+}
+
 export interface Post {
   id: string;
   title: string;
   content: string;
   author_name: string;
+  category_id?: string;
+  category_name?: string;
   created_at: string;
   updated_at: string;
 }
@@ -11,11 +33,13 @@ export interface PostCreate {
   title: string;
   content: string;
   author_name: string;
+  category_id?: string;
 }
 
 export interface PostUpdate {
   title?: string;
   content?: string;
+  category_id?: string;
 }
 
 export interface Comment {

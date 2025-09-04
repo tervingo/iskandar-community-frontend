@@ -8,6 +8,7 @@ import PostDetail from './components/Blog/PostDetail';
 import ChatRoom from './components/Chat/ChatRoom';
 import FileRepository from './components/Files/FileRepository';
 import AdminPanel from './components/Admin/AdminPanel';
+import CategoryManagement from './components/Admin/CategoryManagement';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import RedirectRoute from './components/Auth/RedirectRoute';
 import { useAuthStore } from './stores/authStore';
@@ -71,6 +72,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute requireAdmin={true}>
                 <AdminPanel />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/categories" 
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <CategoryManagement />
               </ProtectedRoute>
             } 
           />

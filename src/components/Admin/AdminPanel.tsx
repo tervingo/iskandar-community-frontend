@@ -129,12 +129,17 @@ const AdminPanel: React.FC = () => {
     <div className="admin-panel">
       <div className="admin-header">
         <h1>Admin Panel</h1>
-        <button 
-          onClick={() => setShowCreateUser(true)}
-          className="btn btn-primary"
-        >
-          Create User
-        </button>
+        <div className="header-actions">
+          <a href="/admin/categories" className="btn btn-secondary">
+            Manage Categories
+          </a>
+          <button 
+            onClick={() => setShowCreateUser(true)}
+            className="btn btn-primary"
+          >
+            Create User
+          </button>
+        </div>
       </div>
 
       {error && (

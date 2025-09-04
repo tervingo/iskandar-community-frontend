@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Post, PostCreate, PostUpdate, Comment, CommentCreate, CommentUpdate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest } from '../types';
+import { Post, PostCreate, PostUpdate, Comment, CommentCreate, CommentUpdate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest, Category, CategoryCreate, CategoryUpdate } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -19,10 +19,47 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Categories API
+export const categoriesApi = {
+  getAll: async (): Promise<Category[]> => {
+    const response = await api.get('/categories');
+    return response.data;
+  },
+
+  getAllAdmin: async (): Promise<Category[]> => {
+    const response = await api.get('/categories/all');
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<Category> => {
+    const response = await api.get(`/categories/${id}`);
+    return response.data;
+  },
+
+  create: async (category: CategoryCreate): Promise<Category> => {
+    const response = await api.post('/categories', category);
+    return response.data;
+  },
+
+  update: async (id: string, category: CategoryUpdate): Promise<Category> => {
+    const response = await api.put(`/categories/${id}`, category);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/categories/${id}`);
+  },
+
+  initializeDefaults: async (): Promise<void> => {
+    await api.post('/categories/initialize');
+  },
+};
+
 // Posts API
 export const postsApi = {
-  getAll: async (): Promise<Post[]> => {
-    const response = await api.get('/posts');
+  getAll: async (categoryId?: string): Promise<Post[]> => {
+    const params = categoryId ? { category_id: categoryId } : {};
+    const response = await api.get('/posts', { params });
     return response.data;
   },
 

@@ -1,20 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBlogStore } from '../../stores/blogStore';
 import { useAuthStore } from '../../stores/authStore';
+import { useCategoryStore } from '../../stores/categoryStore';
 
 const CreatePost: React.FC = () => {
   const navigate = useNavigate();
   const { createPost, loading, error } = useBlogStore();
   const { user } = useAuthStore();
+  const { categories, fetchCategories } = useCategoryStore();
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const [formData, setFormData] = useState({
     title: '',
     content: '',
     author_name: user?.name || '',
+    category_id: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -28,10 +35,14 @@ const CreatePost: React.FC = () => {
       return;
     }
 
-    await createPost({
-      ...formData,
-      author_name: user.name
-    });
+    const postData = {
+      title: formData.title,
+      content: formData.content,
+      author_name: user.name,
+      category_id: formData.category_id || undefined
+    };
+    
+    await createPost(postData);
     
     if (!error) {
       navigate('/blog');
@@ -64,6 +75,23 @@ const CreatePost: React.FC = () => {
             placeholder="Author name"
             disabled
           />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="category_id">Category (Optional)</label>
+          <select
+            id="category_id"
+            name="category_id"
+            value={formData.category_id}
+            onChange={handleChange}
+          >
+            <option value="">-- No Category --</option>
+            {categories.map(category => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="form-group">

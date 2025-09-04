@@ -1,19 +1,30 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useBlogStore } from '../../stores/blogStore';
+import CategorySidebar from './CategorySidebar';
 
 const PostList: React.FC = () => {
   const { posts, loading, error, fetchPosts } = useBlogStore();
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchPosts();
-  }, []);
+    fetchPosts(selectedCategoryId || undefined);
+  }, [selectedCategoryId]);
+
+  const handleCategorySelect = (categoryId: string | null) => {
+    setSelectedCategoryId(categoryId);
+  };
 
   if (loading) return <div className="loading">Loading posts...</div>;
   if (error) return <div className="error">Error: {error}</div>;
 
   return (
-    <div className="post-list">
+    <div className="blog-layout">
+      <CategorySidebar 
+        selectedCategoryId={selectedCategoryId || undefined}
+        onCategorySelect={handleCategorySelect}
+      />
+      <div className="post-list">
       <div className="header">
         <h1>Community Blog</h1>
         <Link to="/blog/create" className="btn btn-primary">
@@ -36,6 +47,12 @@ const PostList: React.FC = () => {
                 <Link to={`/blog/${post.id}`}>{post.title}</Link>
               </h2>
               <div className="post-meta">
+                {post.category_name && (
+                  <>
+                    <span className="post-category">{post.category_name}</span>
+                    <span>•</span>
+                  </>
+                )}
                 <span>By {post.author_name}</span>
                 <span>•</span>
                 <span>{new Date(post.created_at).toLocaleDateString()}</span>
@@ -53,6 +70,7 @@ const PostList: React.FC = () => {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 };
