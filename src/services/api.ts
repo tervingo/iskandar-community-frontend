@@ -122,8 +122,9 @@ export const chatApi = {
 
 // Files API
 export const filesApi = {
-  getAll: async (): Promise<FileItem[]> => {
-    const response = await api.get('/files');
+  getAll: async (categoryId?: string): Promise<FileItem[]> => {
+    const params = categoryId ? { category_id: categoryId } : {};
+    const response = await api.get('/files', { params });
     return response.data;
   },
 
@@ -132,12 +133,15 @@ export const filesApi = {
     return response.data;
   },
 
-  upload: async (file: File, uploadedBy: string, description?: string): Promise<FileItem> => {
+  upload: async (file: File, uploadedBy: string, description?: string, categoryId?: string): Promise<FileItem> => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('uploaded_by', uploadedBy);
     if (description) {
       formData.append('description', description);
+    }
+    if (categoryId) {
+      formData.append('category_id', categoryId);
     }
 
     const response = await api.post('/files/upload', formData, {
@@ -148,11 +152,12 @@ export const filesApi = {
     return response.data;
   },
 
-  addUrl: async (url: string, uploadedBy: string, description?: string): Promise<FileItem> => {
+  addUrl: async (url: string, uploadedBy: string, description?: string, categoryId?: string): Promise<FileItem> => {
     const urlData = {
       url,
       uploaded_by: uploadedBy,
-      description: description || ''
+      description: description || '',
+      category_id: categoryId
     };
 
     const response = await api.post('/files/url', urlData);

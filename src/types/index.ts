@@ -83,6 +83,8 @@ export interface FileItem {
   uploaded_by: string;
   uploaded_at: string;
   description?: string;
+  category_id?: string;
+  category_name?: string;
   source_type?: string;
   original_url?: string;
 }

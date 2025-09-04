@@ -1,22 +1,28 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useFileStore } from '../../stores/fileStore';
 import { useAuthStore } from '../../stores/authStore';
+import { useCategoryStore } from '../../stores/categoryStore';
 import { FileItem } from '../../types';
 import ImageViewer from './ImageViewer';
 import AudioPlayer from './AudioPlayer';
+import FileCategorySidebar from './FileCategorySidebar';
 
 const FileRepository: React.FC = () => {
   const { files, loading, error, fetchFiles, uploadFile, addUrl, deleteFile } = useFileStore();
   const { user } = useAuthStore();
+  const { categories, fetchCategories } = useCategoryStore();
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [showUrlForm, setShowUrlForm] = useState(false);
   const [uploadForm, setUploadForm] = useState({
     uploadedBy: user?.name || '',
     description: '',
+    categoryId: '',
   });
   const [urlForm, setUrlForm] = useState({
     url: '',
     description: '',
+    categoryId: '',
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
@@ -25,8 +31,13 @@ const FileRepository: React.FC = () => {
   const [currentAudioIndex, setCurrentAudioIndex] = useState(0);
 
   useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
+    fetchFiles(selectedCategoryId || undefined);
+    fetchCategories();
+  }, [selectedCategoryId, fetchFiles]);
+
+  const handleCategorySelect = (categoryId: string | null) => {
+    setSelectedCategoryId(categoryId);
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -42,11 +53,11 @@ const FileRepository: React.FC = () => {
       return;
     }
 
-    await uploadFile(selectedFile, user.name, uploadForm.description);
+    await uploadFile(selectedFile, user.name, uploadForm.description, uploadForm.categoryId || undefined);
     
     if (!error) {
       setSelectedFile(null);
-      setUploadForm({ uploadedBy: user.name, description: '' });
+      setUploadForm({ uploadedBy: user.name, description: '', categoryId: '' });
       setShowUploadForm(false);
       // Reset file input
       const fileInput = document.getElementById('fileInput') as HTMLInputElement;
@@ -61,10 +72,10 @@ const FileRepository: React.FC = () => {
       return;
     }
 
-    await addUrl(urlForm.url, user.name, urlForm.description);
+    await addUrl(urlForm.url, user.name, urlForm.description, urlForm.categoryId || undefined);
     
     if (!error) {
-      setUrlForm({ url: '', description: '' });
+      setUrlForm({ url: '', description: '', categoryId: '' });
       setShowUrlForm(false);
     }
   };
@@ -313,30 +324,38 @@ const FileRepository: React.FC = () => {
 
   return (
     <div className="file-repository">
-      <div className="header">
-        <h1>File Repository</h1>
-        <div className="header-actions">
-          <button 
-            onClick={() => {
-              setShowUploadForm(!showUploadForm);
-              setShowUrlForm(false);
-            }}
-            className="btn btn-primary"
-          >
-            {showUploadForm ? 'Cancel' : 'Upload File'}
-          </button>
-          <button 
-            onClick={() => {
-              setShowUrlForm(!showUrlForm);
-              setShowUploadForm(false);
-            }}
-            className="btn btn-secondary"
-            style={{ marginLeft: '0.5rem' }}
-          >
-            {showUrlForm ? 'Cancel' : 'Add URL'}
-          </button>
-        </div>
-      </div>
+      <div className="file-repository-layout">
+        <FileCategorySidebar
+          files={files}
+          selectedCategoryId={selectedCategoryId}
+          onCategorySelect={handleCategorySelect}
+        />
+        
+        <div className="file-repository-main">
+          <div className="header">
+            <h1>File Repository</h1>
+            <div className="header-actions">
+              <button 
+                onClick={() => {
+                  setShowUploadForm(!showUploadForm);
+                  setShowUrlForm(false);
+                }}
+                className="btn btn-primary"
+              >
+                {showUploadForm ? 'Cancel' : 'Upload File'}
+              </button>
+              <button 
+                onClick={() => {
+                  setShowUrlForm(!showUrlForm);
+                  setShowUploadForm(false);
+                }}
+                className="btn btn-secondary"
+                style={{ marginLeft: '0.5rem' }}
+              >
+                {showUrlForm ? 'Cancel' : 'Add URL'}
+              </button>
+            </div>
+          </div>
 
       {showUploadForm && (
         <form onSubmit={handleUpload} className="upload-form">
@@ -366,6 +385,22 @@ const FileRepository: React.FC = () => {
                 Selected: {selectedFile.name} ({formatFileSize(selectedFile.size)})
               </div>
             )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="categoryId">Category (Optional)</label>
+            <select
+              id="categoryId"
+              value={uploadForm.categoryId}
+              onChange={(e) => setUploadForm({ ...uploadForm, categoryId: e.target.value })}
+            >
+              <option value="">-- No Category --</option>
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">
@@ -424,6 +459,22 @@ const FileRepository: React.FC = () => {
               placeholder="https://example.com/resource"
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="urlCategoryId">Category (Optional)</label>
+            <select
+              id="urlCategoryId"
+              value={urlForm.categoryId}
+              onChange={(e) => setUrlForm({ ...urlForm, categoryId: e.target.value })}
+            >
+              <option value="">-- No Category --</option>
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">
@@ -561,14 +612,16 @@ const FileRepository: React.FC = () => {
         onNavigate={handleImageNavigation}
       />
 
-      {/* Audio Player Modal */}
-      <AudioPlayer
-        isOpen={audioPlayerOpen}
-        onClose={() => setAudioPlayerOpen(false)}
-        audioFiles={audioFiles}
-        currentIndex={currentAudioIndex}
-        onNavigate={handleAudioNavigation}
-      />
+          {/* Audio Player Modal */}
+          <AudioPlayer
+            isOpen={audioPlayerOpen}
+            onClose={() => setAudioPlayerOpen(false)}
+            audioFiles={audioFiles}
+            currentIndex={currentAudioIndex}
+            onNavigate={handleAudioNavigation}
+          />
+        </div>
+      </div>
     </div>
   );
 };

@@ -8,9 +8,9 @@ interface FileStore {
   error: string | null;
 
   // Actions
-  fetchFiles: () => Promise<void>;
-  uploadFile: (file: File, uploadedBy: string, description?: string) => Promise<void>;
-  addUrl: (url: string, uploadedBy: string, description?: string) => Promise<void>;
+  fetchFiles: (categoryId?: string) => Promise<void>;
+  uploadFile: (file: File, uploadedBy: string, description?: string, categoryId?: string) => Promise<void>;
+  addUrl: (url: string, uploadedBy: string, description?: string, categoryId?: string) => Promise<void>;
   deleteFile: (id: string) => Promise<void>;
   setError: (error: string | null) => void;
 }
@@ -20,20 +20,20 @@ export const useFileStore = create<FileStore>((set, get) => ({
   loading: false,
   error: null,
 
-  fetchFiles: async () => {
+  fetchFiles: async (categoryId?: string) => {
     set({ loading: true, error: null });
     try {
-      const files = await filesApi.getAll();
+      const files = await filesApi.getAll(categoryId);
       set({ files, loading: false });
     } catch (error) {
       set({ error: 'Failed to fetch files', loading: false });
     }
   },
 
-  uploadFile: async (file: File, uploadedBy: string, description?: string) => {
+  uploadFile: async (file: File, uploadedBy: string, description?: string, categoryId?: string) => {
     set({ loading: true, error: null });
     try {
-      const newFile = await filesApi.upload(file, uploadedBy, description);
+      const newFile = await filesApi.upload(file, uploadedBy, description, categoryId);
       const { files } = get();
       set({ files: [newFile, ...files], loading: false });
     } catch (error) {
@@ -41,10 +41,10 @@ export const useFileStore = create<FileStore>((set, get) => ({
     }
   },
 
-  addUrl: async (url: string, uploadedBy: string, description?: string) => {
+  addUrl: async (url: string, uploadedBy: string, description?: string, categoryId?: string) => {
     set({ loading: true, error: null });
     try {
-      const newFile = await filesApi.addUrl(url, uploadedBy, description);
+      const newFile = await filesApi.addUrl(url, uploadedBy, description, categoryId);
       const { files } = get();
       set({ files: [newFile, ...files], loading: false });
     } catch (error) {

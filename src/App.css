@@ -701,6 +701,17 @@ body {
 }
 
 /* Files */
+.file-repository-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.file-repository-main {
+  flex: 1;
+  min-width: 0; /* Allow content to shrink */
+}
+
 .file-repository .header {
   display: flex;
   justify-content: space-between;

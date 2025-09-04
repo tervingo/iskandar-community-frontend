@@ -23,7 +23,7 @@ const Home: React.FC = () => {
           <p>
             Iskandar es el nombre en árabe para Alejandro, e Iskandariya es el nombre en árabe para la ciudad de Alejandría, donde estaba 
             la biblioteca más famosa del mundo, la biblioteca de Alejandría. 
-            Este sitio pretende ser una pequeña comunidad virtual donde se pueda compartir información, opinión y conocimiento.
+            Este sitio quiere ser una pequeña comunidad virtual donde se pueda compartir información, opinión y conocimiento.
           </p>
           
           {/* 
