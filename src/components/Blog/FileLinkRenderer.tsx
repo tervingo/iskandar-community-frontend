@@ -35,6 +35,7 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     
     if (!file) return;
 
@@ -180,14 +181,12 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
   };
 
   return (
-    <a
-      href="#"
+    <span
       onClick={handleClick}
       className="file-link"
       title={`${file.original_name} (${file.file_type})`}
       style={{
         color: '#3498db',
-        textDecoration: 'none',
         borderBottom: '1px dotted #3498db',
         cursor: 'pointer',
         display: 'inline-flex',
@@ -197,7 +196,7 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
     >
       <span style={{ fontSize: '0.9em' }}>{getFileIcon(file)}</span>
       {children}
-    </a>
+    </span>
   );
 };
 

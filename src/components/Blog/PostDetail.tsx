@@ -99,15 +99,60 @@ const PostDetail: React.FC = () => {
           <ReactMarkdown 
             remarkPlugins={[remarkGfm]}
             components={{
-              a: ({ href, children, ...props }) => {
-                // Check if this is a file link
-                if (href && href.startsWith('file:')) {
-                  const fileId = href.replace('file:', '');
-                  return <FileLink fileId={fileId}>{children}</FileLink>;
-                }
-                // Regular link
-                return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{children}</a>;
-              }
+              // Handle paragraphs and other text-containing elements
+              p: ({ children, ...props }) => {
+                const processChildren = (children: React.ReactNode): React.ReactNode => {
+                  if (typeof children === 'string') {
+                    // Split by file links but keep the text flow
+                    const parts = children.split(/({{file:[^}]+}})/g);
+                    return parts.map((part, index) => {
+                      const fileMatch = part.match(/^{{file:([^|]+)\|([^}]+)}}$/);
+                      if (fileMatch) {
+                        const [, fileId, linkText] = fileMatch;
+                        return <FileLink key={index} fileId={fileId}>{linkText}</FileLink>;
+                      }
+                      return part;
+                    });
+                  }
+                  
+                  if (Array.isArray(children)) {
+                    return children.map((child, index) => (
+                      <React.Fragment key={index}>
+                        {processChildren(child)}
+                      </React.Fragment>
+                    ));
+                  }
+                  
+                  return children;
+                };
+                
+                return <p {...props}>{processChildren(children)}</p>;
+              },
+              // Handle other elements that might contain text
+              span: ({ children, ...props }) => {
+                const processChildren = (children: React.ReactNode): React.ReactNode => {
+                  if (typeof children === 'string') {
+                    const parts = children.split(/({{file:[^}]+}})/g);
+                    return parts.map((part, index) => {
+                      const fileMatch = part.match(/^{{file:([^|]+)\|([^}]+)}}$/);
+                      if (fileMatch) {
+                        const [, fileId, linkText] = fileMatch;
+                        return <FileLink key={index} fileId={fileId}>{linkText}</FileLink>;
+                      }
+                      return part;
+                    });
+                  }
+                  return children;
+                };
+                
+                return <span {...props}>{processChildren(children)}</span>;
+              },
+              // Handle regular links
+              a: ({ href, children, ...props }) => (
+                <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+                  {children}
+                </a>
+              )
             }}
           >
             {currentPost.content}
