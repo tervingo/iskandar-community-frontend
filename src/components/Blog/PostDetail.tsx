@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useBlogStore } from '../../stores/blogStore';
 import { useAuthStore } from '../../stores/authStore';
 import CommentSection from './CommentSection';
+import FileLink from './FileLinkRenderer';
 
 const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -36,6 +39,11 @@ const PostDetail: React.FC = () => {
     isAdmin || currentPost.author_name === user.name
   );
 
+  // Check if current user can edit this post
+  const canEdit = user && currentPost && (
+    isAdmin || currentPost.author_name === user.name
+  );
+
   if (loading) return <div className="loading">Loading post...</div>;
   if (error) return <div className="error">Error: {error}</div>;
   if (!currentPost) return <div className="error">Post not found</div>;
@@ -47,16 +55,28 @@ const PostDetail: React.FC = () => {
           ← Back to Blog
         </Link>
         
-        {canDelete && (
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="btn btn-danger"
-            style={{ marginLeft: '10px' }}
-          >
-            {deleting ? 'Deleting...' : 'Delete Post'}
-          </button>
-        )}
+        <div className="post-actions">
+          {canEdit && (
+            <Link
+              to={`/blog/${id}/edit`}
+              className="btn btn-primary"
+              style={{ marginLeft: '10px' }}
+            >
+              Edit Post
+            </Link>
+          )}
+          
+          {canDelete && (
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="btn btn-danger"
+              style={{ marginLeft: '10px' }}
+            >
+              {deleting ? 'Deleting...' : 'Delete Post'}
+            </button>
+          )}
+        </div>
       </div>
 
       <article className="post">
@@ -76,9 +96,22 @@ const PostDetail: React.FC = () => {
         </header>
 
         <div className="post-content">
-          {currentPost.content.split('\n').map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))}
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm]}
+            components={{
+              a: ({ href, children, ...props }) => {
+                // Check if this is a file link
+                if (href && href.startsWith('file:')) {
+                  const fileId = href.replace('file:', '');
+                  return <FileLink fileId={fileId}>{children}</FileLink>;
+                }
+                // Regular link
+                return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{children}</a>;
+              }
+            }}
+          >
+            {currentPost.content}
+          </ReactMarkdown>
         </div>
       </article>
 

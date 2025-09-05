@@ -11,6 +11,122 @@ body {
   background-color: gainsboro;
 }
 
+/* Markdown content styling */
+.post-content h1, .preview-content h1 {
+  font-size: 2em;
+  margin: 0.5em 0;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.3em;
+}
+
+.post-content h2, .preview-content h2 {
+  font-size: 1.5em;
+  margin: 0.5em 0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.2em;
+}
+
+.post-content h3, .preview-content h3 {
+  font-size: 1.2em;
+  margin: 0.4em 0;
+}
+
+.post-content p, .preview-content p {
+  margin: 1em 0;
+}
+
+.post-content code, .preview-content code {
+  background: #f4f4f4;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.post-content pre, .preview-content pre {
+  background: #f8f8f8;
+  padding: 1em;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.post-content blockquote, .preview-content blockquote {
+  border-left: 4px solid #ddd;
+  padding-left: 1em;
+  margin: 1em 0;
+  color: #666;
+  font-style: italic;
+}
+
+.post-content ul, .post-content ol, .preview-content ul, .preview-content ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+.post-content table, .preview-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.post-content th, .post-content td, .preview-content th, .preview-content td {
+  border: 1px solid #ddd;
+  padding: 0.5em;
+  text-align: left;
+}
+
+.post-content th, .preview-content th {
+  background: #f5f5f5;
+  font-weight: bold;
+}
+
+/* Content editor tabs */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.content-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tab-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  background: #fff;
+  border-bottom-color: #fff;
+  font-weight: bold;
+}
+
+.tab-btn:hover {
+  background: #f0f0f0;
+}
+
+.preview-content {
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 0 0 4px 4px;
+}
+
+.markdown-help {
+  margin-top: 0.5rem;
+  color: #666;
+}
+
 .app {
   min-height: 100vh;
   display: flex;

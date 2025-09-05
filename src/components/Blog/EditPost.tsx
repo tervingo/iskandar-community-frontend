@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useBlogStore } from '../../stores/blogStore';
@@ -9,26 +9,46 @@ import FileLink from './FileLinkRenderer';
 import FileLinkSelector from './FileLinkSelector';
 import { FileItem } from '../../types';
 
-const CreatePost: React.FC = () => {
+const EditPost: React.FC = () => {
   const navigate = useNavigate();
-  const { createPost, loading, error } = useBlogStore();
-  const { user } = useAuthStore();
+  const { id } = useParams<{ id: string }>();
+  const { currentPost, loading, error, fetchPost, updatePost } = useBlogStore();
+  const { user, isAdmin } = useAuthStore();
   const { categories, fetchCategories } = useCategoryStore();
 
   useEffect(() => {
+    if (id) {
+      fetchPost(id);
+    }
     fetchCategories();
-  }, []);
+  }, [id]);
 
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    author_name: user?.name || '',
     category_id: '',
   });
 
+  const [updating, setUpdating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showFileLinkSelector, setShowFileLinkSelector] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Update form data when currentPost is loaded
+  useEffect(() => {
+    if (currentPost) {
+      setFormData({
+        title: currentPost.title,
+        content: currentPost.content,
+        category_id: currentPost.category_id || '',
+      });
+    }
+  }, [currentPost]);
+
+  // Check if current user can edit this post
+  const canEdit = user && currentPost && (
+    isAdmin || currentPost.author_name === user.name
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -40,21 +60,28 @@ const CreatePost: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title.trim() || !formData.content.trim() || !user?.name) {
+    if (!formData.title.trim() || !formData.content.trim() || !id || !canEdit) {
       return;
     }
 
-    const postData = {
-      title: formData.title,
-      content: formData.content,
-      author_name: user.name,
-      category_id: formData.category_id || undefined
-    };
+    setUpdating(true);
     
-    await createPost(postData);
-    
-    if (!error) {
-      navigate('/blog');
+    try {
+      const updateData = {
+        title: formData.title,
+        content: formData.content,
+        category_id: formData.category_id || undefined
+      };
+      
+      await updatePost(id, updateData);
+      
+      if (!error) {
+        navigate(`/blog/${id}`);
+      }
+    } catch (err) {
+      console.error('Failed to update post:', err);
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -86,17 +113,21 @@ const CreatePost: React.FC = () => {
     }
   };
 
+  if (loading) return <div className="loading">Loading post...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
+  if (!currentPost) return <div className="error">Post not found</div>;
+  if (!canEdit) return <div className="error">You don't have permission to edit this post</div>;
+
   return (
-    <div className="create-post">
+    <div className="edit-post">
       <div className="header">
-        <h1>Create New Post</h1>
-        <button 
-          type="button" 
-          onClick={() => navigate('/blog')}
+        <h1>Edit Post</h1>
+        <Link 
+          to={`/blog/${id}`}
           className="btn btn-secondary"
         >
-          ← Back to Blog
-        </button>
+          ← Back to Post
+        </Link>
       </div>
 
       {error && <div className="error">Error: {error}</div>}
@@ -107,8 +138,7 @@ const CreatePost: React.FC = () => {
           <input
             type="text"
             id="author_name"
-            name="author_name"
-            value={user?.name || ''}
+            value={currentPost.author_name}
             placeholder="Author name"
             disabled
           />
@@ -220,20 +250,18 @@ const CreatePost: React.FC = () => {
         </div>
 
         <div className="form-actions">
-          <button 
-            type="button" 
-            onClick={() => navigate('/blog')}
+          <Link
+            to={`/blog/${id}`}
             className="btn btn-secondary"
-            disabled={loading}
           >
             Cancel
-          </button>
+          </Link>
           <button 
             type="submit" 
             className="btn btn-primary"
-            disabled={loading || !formData.title.trim() || !formData.content.trim()}
+            disabled={updating || !formData.title.trim() || !formData.content.trim()}
           >
-            {loading ? 'Creating...' : 'Create Post'}
+            {updating ? 'Updating...' : 'Update Post'}
           </button>
         </div>
       </form>
@@ -248,4 +276,4 @@ const CreatePost: React.FC = () => {
   );
 };
 
-export default CreatePost;
+export default EditPost;

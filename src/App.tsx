@@ -4,6 +4,7 @@ import Layout from './components/Layout/Layout';
 import Home from './components/Home/Home';
 import PostList from './components/Blog/PostList';
 import CreatePost from './components/Blog/CreatePost';
+import EditPost from './components/Blog/EditPost';
 import PostDetail from './components/Blog/PostDetail';
 import ChatRoom from './components/Chat/ChatRoom';
 import FileRepository from './components/Files/FileRepository';
@@ -48,6 +49,14 @@ const App: React.FC = () => {
             element={
               <RedirectRoute>
                 <PostDetail />
+              </RedirectRoute>
+            } 
+          />
+          <Route 
+            path="/blog/:id/edit" 
+            element={
+              <RedirectRoute>
+                <EditPost />
               </RedirectRoute>
             } 
           />
