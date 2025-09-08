@@ -91,7 +91,7 @@ const OnlineUsers: React.FC = () => {
             height: '8px',
             borderRadius: '50%',
             backgroundColor: '#2ea043',
-            animation: 'pulse 2s infinite'
+            opacity: '0.8'
           }}
         />
         <span>{onlineCount} online</span>
@@ -171,14 +171,6 @@ const OnlineUsers: React.FC = () => {
           ))}
         </div>
       )}
-
-      <style jsx>{`
-        @keyframes pulse {
-          0% { opacity: 1; }
-          50% { opacity: 0.5; }
-          100% { opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 };
