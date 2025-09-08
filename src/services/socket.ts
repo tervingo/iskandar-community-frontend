@@ -6,7 +6,7 @@ const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:8000';
 class SocketService {
   private socket: Socket | null = null;
 
-  get socket() {
+  getSocket() {
     return this.socket;
   }
 

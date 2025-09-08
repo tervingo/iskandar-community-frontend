@@ -24,7 +24,7 @@ const OnlineUsers: React.FC = () => {
       setOnlineUsers(users);
     };
 
-    const socket = socketService.socket;
+    const socket = socketService.getSocket();
     if (!socket) return;
 
     // Handle connection
@@ -128,7 +128,7 @@ const OnlineUsers: React.FC = () => {
           >
             Usuarios conectados
           </div>
-          {onlineUsers.map((onlineUser, index) => (
+          {onlineUsers.map((onlineUser) => (
             <div 
               key={onlineUser.id}
               style={{
