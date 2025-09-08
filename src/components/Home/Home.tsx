@@ -15,13 +15,16 @@ const Home: React.FC = () => {
           />
         </div>
         
-        <div className="home-description">
+        <div className="home-description-iskandar">
           {/* 
             Replace this placeholder text with your explanation about the library.
             You can add multiple paragraphs by using multiple <p> tags.
           */}
             <p><b>Iskandar</b> es el nombre en árabe para Alejandro, e <b>Iskandariya</b> es el nombre para la ciudad de Alejandría, donde estaba 
-            la biblioteca más famosa del mundo, la biblioteca de Alejandría. </p>
+            la biblioteca más famosa del mundo, la <b>biblioteca de Alejandría</b>. </p>
+
+        </div>
+        <div className="home-description-community">
             <p>Este sitio quiere ser una pequeña comunidad virtual donde se pueda compartir información, opinión y conocimiento.</p>
           {/* 
             Example of how to add more paragraphs:

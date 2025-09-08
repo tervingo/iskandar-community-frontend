@@ -6,6 +6,10 @@ const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:8000';
 class SocketService {
   private socket: Socket | null = null;
 
+  get socket() {
+    return this.socket;
+  }
+
   connect(): void {
     if (!this.socket) {
       this.socket = io(SOCKET_URL);

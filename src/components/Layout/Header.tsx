@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import AuthModal from '../Auth/AuthModal';
 import ChangePassword from '../Auth/ChangePassword';
+import OnlineUsers from './OnlineUsers';
 import bibliotecaImage from '../../assets/images/biblioteca.jpg';
 
 
@@ -62,7 +63,10 @@ const Header: React.FC = () => {
           
           <div className="auth-section">
             {isAuthenticated ? (
-              <div className="user-menu">
+              <div className="user-menu" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ position: 'relative' }}>
+                  <OnlineUsers />
+                </div>
                 <span className="user-info">
                   Bienvenida/o, {user?.name}
                   {isAdmin && <span className="admin-badge"> (Admin)</span>}
@@ -70,7 +74,6 @@ const Header: React.FC = () => {
                 <button 
                   onClick={() => setShowPasswordChange(true)}
                   className="btn btn-sm btn-secondary"
-                  style={{ marginRight: '0.5rem' }}
                 >
                   Cambiar Contraseña
                 </button>
