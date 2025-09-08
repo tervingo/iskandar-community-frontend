@@ -4,7 +4,7 @@ import { useAuthStore } from '../../stores/authStore';
 import AuthModal from '../Auth/AuthModal';
 import ChangePassword from '../Auth/ChangePassword';
 import OnlineUsers from './OnlineUsers';
-import bibliotecaImage from '../../assets/images/biblioteca.jpg';
+import bibliotecaImage from '../../assets/images/iskandariya.jpg';
 
 
 const Header: React.FC = () => {

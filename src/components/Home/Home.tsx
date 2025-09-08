@@ -1,5 +1,5 @@
 import React from 'react';
-import bibliotecaImage from '../../assets/images/biblioteca.jpg';
+import bibliotecaImage from '../../assets/images/iskandariya.jpg';
 
 const Home: React.FC = () => {
   return (
@@ -25,7 +25,7 @@ const Home: React.FC = () => {
 
         </div>
         <div className="home-description-community">
-            <p>Este sitio quiere ser una pequeña comunidad virtual donde se pueda compartir información, opinión y conocimiento.</p>
+            <p>Este sitio pretende ser una comunidad virtual donde poder compartir información, opinión y conocimiento.</p>
           {/* 
             Example of how to add more paragraphs:
             <p>Add another paragraph here if needed.</p>
