@@ -333,7 +333,7 @@ const FileRepository: React.FC = () => {
         
         <div className="file-repository-main">
           <div className="header">
-            <h1>File Repository</h1>
+            <h1>Almacén de Archivos</h1>
             <div className="header-actions">
               <button 
                 onClick={() => {
@@ -342,7 +342,7 @@ const FileRepository: React.FC = () => {
                 }}
                 className="btn btn-primary"
               >
-                {showUploadForm ? 'Cancel' : 'Upload File'}
+                {showUploadForm ? 'Cancelar' : 'Subir Archivo'}
               </button>
               <button 
                 onClick={() => {
@@ -352,7 +352,7 @@ const FileRepository: React.FC = () => {
                 className="btn btn-secondary"
                 style={{ marginLeft: '0.5rem' }}
               >
-                {showUrlForm ? 'Cancel' : 'Add URL'}
+                {showUrlForm ? 'Cancelar' : 'Agregar URL'}
               </button>
             </div>
           </div>
@@ -362,7 +362,7 @@ const FileRepository: React.FC = () => {
           {error && <div className="error">Error: {error}</div>}
           
           <div className="form-group">
-            <label htmlFor="uploadedBy">Uploader</label>
+            <label htmlFor="uploadedBy">Subido por</label>
             <input
               type="text"
               id="uploadedBy"
@@ -373,7 +373,7 @@ const FileRepository: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="fileInput">Select File</label>
+            <label htmlFor="fileInput">Seleccionar Archivo</label>
             <input
               type="file"
               id="fileInput"
@@ -388,13 +388,13 @@ const FileRepository: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="categoryId">Category (Optional)</label>
+            <label htmlFor="categoryId">Categoría (Opcional)</label>
             <select
               id="categoryId"
               value={uploadForm.categoryId}
               onChange={(e) => setUploadForm({ ...uploadForm, categoryId: e.target.value })}
             >
-              <option value="">-- No Category --</option>
+              <option value="">-- Sin Categoría --</option>
               {categories.map(category => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -404,13 +404,13 @@ const FileRepository: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="description">Description (optional)</label>
+            <label htmlFor="description">Descripción (Opcional)</label>
             <input
               type="text"
               id="description"
               value={uploadForm.description}
               onChange={(e) => setUploadForm({ ...uploadForm, description: e.target.value })}
-              placeholder="Brief description of the file"
+              placeholder="Breve descripción del archivo"
             />
           </div>
 
@@ -428,7 +428,7 @@ const FileRepository: React.FC = () => {
               className="btn btn-primary"
               disabled={loading || !selectedFile || !uploadForm.uploadedBy.trim()}
             >
-              {loading ? 'Uploading...' : 'Upload File'}
+              {loading ? 'Subiendo...' : 'Subir Archivo'}
             </button>
           </div>
         </form>
@@ -439,12 +439,12 @@ const FileRepository: React.FC = () => {
           {error && <div className="error">Error: {error}</div>}
           
           <div className="form-group">
-            <label htmlFor="uploaderUrl">Uploader</label>
+            <label htmlFor="uploaderUrl">Subido por</label>
             <input
               type="text"
               id="uploaderUrl"
               value={user?.name || ''}
-              placeholder="Uploader name"
+              placeholder="Subido por"
               disabled
             />
           </div>
@@ -462,13 +462,13 @@ const FileRepository: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="urlCategoryId">Category (Optional)</label>
+            <label htmlFor="urlCategoryId">Categoría (Opcional)</label>
             <select
               id="urlCategoryId"
               value={urlForm.categoryId}
               onChange={(e) => setUrlForm({ ...urlForm, categoryId: e.target.value })}
             >
-              <option value="">-- No Category --</option>
+              <option value="">-- Sin Categoría --</option>
               {categories.map(category => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -478,13 +478,13 @@ const FileRepository: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="urlDescription">Description (optional)</label>
+            <label htmlFor="urlDescription">Descripción (Opcional)</label>
             <input
               type="text"
               id="urlDescription"
               value={urlForm.description}
               onChange={(e) => setUrlForm({ ...urlForm, description: e.target.value })}
-              placeholder="Brief description of the URL"
+              placeholder="Breve descripción de la URL"
             />
           </div>
 
@@ -502,18 +502,18 @@ const FileRepository: React.FC = () => {
               className="btn btn-primary"
               disabled={loading || !urlForm.url.trim()}
             >
-              {loading ? 'Adding URL...' : 'Add URL'}
+              {loading ? 'Agregando URL...' : 'Agregar URL'}
             </button>
           </div>
         </form>
       )}
 
       <div className="files">
-        {loading && <div className="loading">Loading files...</div>}
+        {loading && <div className="loading">Cargando archivos...</div>}
         
         {files.length === 0 ? (
           <div className="no-files">
-            <p>No files uploaded yet. Be the first to share a file!</p>
+            <p>No hay archivos subidos todavía. Sé el primero en compartir un archivo!</p>
           </div>
         ) : (
           <div className="file-grid">
@@ -534,7 +534,7 @@ const FileRepository: React.FC = () => {
                     <p className="file-description">{file.description}</p>
                   )}
                   <div className="file-meta">
-                    <span>Uploaded by {file.uploaded_by}</span>
+                    <span>Subido por {file.uploaded_by}</span>
                     <span>{new Date(file.uploaded_at).toLocaleDateString()}</span>
                   </div>
                 </div>
@@ -545,7 +545,7 @@ const FileRepository: React.FC = () => {
                       className="btn btn-primary btn-sm"
                       style={{ marginRight: '0.5rem' }}
                     >
-                      Open URL
+                      Abrir URL
                     </button>
                   ) : (
                     <button 
@@ -553,7 +553,7 @@ const FileRepository: React.FC = () => {
                       className="btn btn-primary btn-sm"
                       style={{ marginRight: '0.5rem' }}
                     >
-                      Download
+                      Descargar
                     </button>
                   )}
                   {file.file_type === 'application/pdf' && file.source_type !== 'url' && (
@@ -563,7 +563,7 @@ const FileRepository: React.FC = () => {
                       style={{ marginRight: '0.5rem' }}
                       disabled={loading}
                     >
-                      View PDF
+                      Ver PDF
                     </button>
                   )}
                   {isImageFile(file) && file.source_type !== 'url' && (
@@ -573,7 +573,7 @@ const FileRepository: React.FC = () => {
                       style={{ marginRight: '0.5rem' }}
                       disabled={loading}
                     >
-                      View Image
+                      Ver Imagen
                     </button>
                   )}
                   {isAudioFile(file) && file.source_type !== 'url' && (
@@ -583,7 +583,7 @@ const FileRepository: React.FC = () => {
                       style={{ marginRight: '0.5rem' }}
                       disabled={loading}
                     >
-                      Play Audio
+                      Reproducir Audio
                     </button>
                   )}
                   {canDeleteFile(file) && (
@@ -593,7 +593,7 @@ const FileRepository: React.FC = () => {
                       disabled={loading}
                       style={{ marginLeft: '0.5rem' }}
                     >
-                      Delete
+                      Eliminar
                     </button>
                   )}
                 </div>

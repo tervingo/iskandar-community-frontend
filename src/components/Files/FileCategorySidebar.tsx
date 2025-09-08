@@ -42,13 +42,13 @@ const FileCategorySidebar: React.FC<FileCategorySidebarProps> = ({
     return grouped;
   }, [files]);
 
-  if (loading) return <div className="category-sidebar loading">Loading categories...</div>;
+  if (loading) return <div className="category-sidebar loading">Cargando categorías...</div>;
   if (error) return <div className="category-sidebar error">Error: {error}</div>;
 
   return (
     <div className="category-sidebar">
       <div className="sidebar-header">
-        <h3>Categories</h3>
+        <h3>Categorías</h3>
       </div>
       
       <div className="categories-list">
@@ -58,7 +58,7 @@ const FileCategorySidebar: React.FC<FileCategorySidebarProps> = ({
           onClick={() => onCategorySelect(null)}
         >
           <div className="category-header">
-            <span className="category-name">All Files</span>
+            <span className="category-name">Todos los Archivos</span>
             <span className="post-count">({files.length})</span>
           </div>
         </div>
@@ -70,7 +70,7 @@ const FileCategorySidebar: React.FC<FileCategorySidebarProps> = ({
             onClick={() => onCategorySelect('uncategorized')}
           >
             <div className="category-header">
-              <span className="category-name">Uncategorized</span>
+              <span className="category-name">Sin Categoría</span>
               <span className="post-count">({filesByCategory['uncategorized'].length})</span>
             </div>
           </div>

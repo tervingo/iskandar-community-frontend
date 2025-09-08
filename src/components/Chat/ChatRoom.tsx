@@ -38,9 +38,9 @@ const ChatRoom: React.FC = () => {
         <h1>Community Chat</h1>
         <div className="connection-status">
           {connected ? (
-            <span className="status connected">🟢 Connected</span>
+            <span className="status connected">🟢 Conectado</span>
           ) : (
-            <span className="status disconnected">🔴 Disconnected</span>
+            <span className="status disconnected">🔴 Desconectado</span>
           )}
         </div>
       </div>
@@ -48,11 +48,11 @@ const ChatRoom: React.FC = () => {
       {isAuthenticated && user && (
         <>
           <div className="messages">
-            {loading && <div className="loading">Loading messages...</div>}
+            {loading && <div className="loading">Cargando mensajes...</div>}
             {error && <div className="error">Error: {error}</div>}
             
             <div style={{padding: '10px', background: '#f0f0f0', marginBottom: '10px', fontSize: '12px'}}>
-              Chatting as: "{user.name}" {user.role === 'admin' && '(Admin)'}
+             Escribiendo como: "{user.name}" {user.role === 'admin' && '(Admin)'}
             </div>
             
             {messages.map((message, index) => (
@@ -76,7 +76,7 @@ const ChatRoom: React.FC = () => {
               type="text"
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
-              placeholder="Type your message..."
+              placeholder="Escribe tu mensaje..."
               required
             />
             <button 
@@ -84,7 +84,7 @@ const ChatRoom: React.FC = () => {
               disabled={!messageInput.trim()}
               className="btn btn-primary"
             >
-              Send
+              Enviar
             </button>
           </form>
         </>

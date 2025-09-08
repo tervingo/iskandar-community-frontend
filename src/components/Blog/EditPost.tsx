@@ -113,20 +113,20 @@ const EditPost: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="loading">Loading post...</div>;
+  if (loading) return <div className="loading">Cargando post...</div>;
   if (error) return <div className="error">Error: {error}</div>;
-  if (!currentPost) return <div className="error">Post not found</div>;
-  if (!canEdit) return <div className="error">You don't have permission to edit this post</div>;
+  if (!currentPost) return <div className="error">Post no encontrado</div>;
+  if (!canEdit) return <div className="error">No tienes permiso para editar este post</div>;
 
   return (
     <div className="edit-post">
       <div className="header">
-        <h1>Edit Post</h1>
+        <h1>Editar Post</h1>
         <Link 
           to={`/blog/${id}`}
           className="btn btn-secondary"
         >
-          ← Back to Post
+          ← Volver al Post
         </Link>
       </div>
 
@@ -134,25 +134,25 @@ const EditPost: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="post-form">
         <div className="form-group">
-          <label htmlFor="author_name">Author</label>
+          <label htmlFor="author_name">Autor</label>
           <input
             type="text"
             id="author_name"
             value={currentPost.author_name}
-            placeholder="Author name"
+            placeholder="Nombre del Autor"
             disabled
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="category_id">Category (Optional)</label>
+          <label htmlFor="category_id">Categoría (Opcional)</label>
           <select
             id="category_id"
             name="category_id"
             value={formData.category_id}
             onChange={handleChange}
           >
-            <option value="">-- No Category --</option>
+            <option value="">-- Sin Categoría --</option>
             {categories.map(category => (
               <option key={category.id} value={category.id}>
                 {category.name}
@@ -162,35 +162,35 @@ const EditPost: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="title">Post Title</label>
+          <label htmlFor="title">Título del Post</label>
           <input
             type="text"
             id="title"
             name="title"
             value={formData.title}
             onChange={handleChange}
-            placeholder="Enter post title"
+            placeholder="Introduce el título del post"
             required
           />
         </div>
 
         <div className="form-group">
           <div className="content-header">
-            <label htmlFor="content">Content</label>
+            <label htmlFor="content">Contenido</label>
             <div className="content-tabs">
               <button
                 type="button"
                 className={`tab-btn ${!showPreview ? 'active' : ''}`}
                 onClick={() => setShowPreview(false)}
               >
-                Write
+                Escribir
               </button>
               <button
                 type="button"
                 className={`tab-btn ${showPreview ? 'active' : ''}`}
                 onClick={() => setShowPreview(true)}
               >
-                Preview
+                Previsualizar
               </button>
               <button
                 type="button"
@@ -202,7 +202,7 @@ const EditPost: React.FC = () => {
                   border: '1px solid #3498db'
                 }}
               >
-                📎 Link File
+                📎 Enlazar archivo
               </button>
             </div>
           </div>
@@ -215,15 +215,15 @@ const EditPost: React.FC = () => {
                 name="content"
                 value={formData.content}
                 onChange={handleChange}
-                placeholder="Write your post content using Markdown formatting..."
+                placeholder="Escribe tu contenido del post usando formato Markdown..."
                 rows={12}
                 required
               />
               <div className="markdown-help">
                 <small>
-                  <strong>Markdown supported:</strong> **bold**, *italic*, `code`, 
+                  <strong>Markdown soportado:</strong> **bold**, *italic*, `code`, 
                   # Headers, - Lists, [links](url), ```code blocks```<br/>
-                  <strong>File links:</strong> Use "📎 Link File" button to insert file links
+                  <strong>Enlaces de archivos:</strong> Usa el botón "📎 Enlace de archivo" para insertar enlaces de archivos
                 </small>
               </div>
             </>
@@ -285,7 +285,7 @@ const EditPost: React.FC = () => {
                   )
                 }}
               >
-                {formData.content || '*No content to preview*'}
+                {formData.content || '*No hay contenido para previsualizar*'}
               </ReactMarkdown>
             </div>
           )}
@@ -296,14 +296,14 @@ const EditPost: React.FC = () => {
             to={`/blog/${id}`}
             className="btn btn-secondary"
           >
-            Cancel
+            Cancelar
           </Link>
           <button 
             type="submit" 
             className="btn btn-primary"
             disabled={updating || !formData.title.trim() || !formData.content.trim()}
           >
-            {updating ? 'Updating...' : 'Update Post'}
+            {updating ? 'Actualizando...' : 'Actualizar Post'}
           </button>
         </div>
       </form>

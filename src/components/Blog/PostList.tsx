@@ -15,7 +15,7 @@ const PostList: React.FC = () => {
     setSelectedCategoryId(categoryId);
   };
 
-  if (loading) return <div className="loading">Loading posts...</div>;
+  if (loading) return <div className="loading">Cargando posts...</div>;
   if (error) return <div className="error">Error: {error}</div>;
 
   return (
@@ -26,15 +26,15 @@ const PostList: React.FC = () => {
       />
       <div className="post-list">
       <div className="header">
-        <h1>Community Blog</h1>
+        <h1>Blog</h1>
         <Link to="/blog/create" className="btn btn-primary">
-          Create New Post
+          Crear Nuevo Post
         </Link>
       </div>
 
       {posts.length === 0 ? (
         <div className="no-posts">
-          <p>No posts yet. Be the first to create one!</p>
+          <p>No hay posts todavía. Sé el primero en crear uno!</p>
           <Link to="/blog/create" className="btn btn-primary">
             Create Post
           </Link>
@@ -53,7 +53,7 @@ const PostList: React.FC = () => {
                     <span>•</span>
                   </>
                 )}
-                <span>By {post.author_name}</span>
+                <span>Por {post.author_name}</span>
                 <span>•</span>
                 <span>{new Date(post.created_at).toLocaleDateString()}</span>
               </div>
@@ -64,7 +64,7 @@ const PostList: React.FC = () => {
                 }
               </div>
               <Link to={`/blog/${post.id}`} className="read-more">
-                Read More →
+                Leer Más →
               </Link>
             </article>
           ))}

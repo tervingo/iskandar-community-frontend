@@ -89,12 +89,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
   return (
     <div className="comment-section">
       <div className="comments-header">
-        <h3>Comments ({comments.length})</h3>
+        <h3>Comentarios ({comments.length})</h3>
         <button 
           onClick={() => setShowCommentForm(!showCommentForm)}
           className="btn btn-primary"
         >
-          {showCommentForm ? 'Cancel' : 'Add Comment'}
+          {showCommentForm ? 'Cancelar' : 'Agregar Comentario'}
         </button>
       </div>
 
@@ -108,7 +108,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
               name="author_name"
               value={commentForm.author_name}
               onChange={handleCommentChange}
-              placeholder="Your name"
+              placeholder="Tu nombre"
               required
             />
           </div>
@@ -118,7 +118,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
               name="content"
               value={commentForm.content}
               onChange={handleCommentChange}
-              placeholder="Write your comment..."
+              placeholder="Escribe tu comentario..."
               rows={4}
               required
             />
@@ -138,18 +138,18 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
               className="btn btn-primary"
               disabled={commentsLoading || !commentForm.author_name.trim() || !commentForm.content.trim()}
             >
-              {commentsLoading ? 'Posting...' : 'Post Comment'}
+              {commentsLoading ? 'Publicando...' : 'Publicar Comentario'}
             </button>
           </div>
         </form>
       )}
 
       <div className="comments">
-        {commentsLoading && <div className="loading">Loading comments...</div>}
+        {commentsLoading && <div className="loading">Cargando comentarios...</div>}
         
         {comments.length === 0 ? (
           <div className="no-comments">
-            <p>No comments yet. Be the first to comment!</p>
+            <p>No hay comentarios todavía. Sé el primero en comentar!</p>
           </div>
         ) : (
           comments.map((comment) => {
@@ -203,7 +203,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
                           className="btn btn-sm btn-primary"
                           disabled={commentsLoading || !editContent.trim()}
                         >
-                          {commentsLoading ? 'Updating...' : 'Update'}
+                          {commentsLoading ? 'Actualizando...' : 'Actualizar'}
                         </button>
                         <button 
                           onClick={handleCancelEdit}
@@ -211,7 +211,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
                           disabled={commentsLoading}
                           style={{ marginLeft: '0.5rem' }}
                         >
-                          Cancel
+                          Cancelar
                         </button>
                       </div>
                     </div>

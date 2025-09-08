@@ -44,25 +44,24 @@ const PostDetail: React.FC = () => {
     isAdmin || currentPost.author_name === user.name
   );
 
-  if (loading) return <div className="loading">Loading post...</div>;
+  if (loading) return <div className="loading">Cargando post...</div>;
   if (error) return <div className="error">Error: {error}</div>;
-  if (!currentPost) return <div className="error">Post not found</div>;
+  if (!currentPost) return <div className="error">Post no encontrado</div>;
 
   return (
     <div className="post-detail">
       <div className="header">
-        <Link to="/blog" className="btn btn-secondary">
-          ← Back to Blog
-        </Link>
-        
-        <div className="post-actions">
+        <div className="post-actions" style={{ display: 'flex', gap: '10px' }}>
+          <Link to="/blog" className="btn btn-secondary">
+            ← Volver al Blog
+          </Link>
+          
           {canEdit && (
             <Link
               to={`/blog/${id}/edit`}
               className="btn btn-primary"
-              style={{ marginLeft: '10px' }}
             >
-              Edit Post
+              Editar Post
             </Link>
           )}
           
@@ -71,9 +70,8 @@ const PostDetail: React.FC = () => {
               onClick={handleDelete}
               disabled={deleting}
               className="btn btn-danger"
-              style={{ marginLeft: '10px' }}
             >
-              {deleting ? 'Deleting...' : 'Delete Post'}
+              {deleting ? 'Borrando...' : 'Borrar Post'}
             </button>
           )}
         </div>
@@ -83,13 +81,13 @@ const PostDetail: React.FC = () => {
         <header className="post-header">
           <h1>{currentPost.title}</h1>
           <div className="post-meta">
-            <span>By {currentPost.author_name}</span>
+            <span>Por {currentPost.author_name}</span>
             <span>•</span>
             <span>{new Date(currentPost.created_at).toLocaleDateString()}</span>
             {currentPost.updated_at !== currentPost.created_at && (
               <>
                 <span>•</span>
-                <span>Updated {new Date(currentPost.updated_at).toLocaleDateString()}</span>
+                <span>Actualizado {new Date(currentPost.updated_at).toLocaleDateString()}</span>
               </>
             )}
           </div>

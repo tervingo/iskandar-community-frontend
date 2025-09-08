@@ -67,13 +67,13 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ selectedCategoryId, o
     );
   };
 
-  if (loading) return <div className="category-sidebar loading">Loading categories...</div>;
+  if (loading) return <div className="category-sidebar loading">Cargando categorías...</div>;
   if (error) return <div className="category-sidebar error">Error: {error}</div>;
 
   return (
     <div className="category-sidebar">
       <div className="sidebar-header">
-        <h3>Categories</h3>
+        <h3>Categorías</h3>
       </div>
       
       <div className="categories-list">
@@ -83,7 +83,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ selectedCategoryId, o
           onClick={() => onCategorySelect(null)}
         >
           <div className="category-header">
-            <span className="category-name">All Posts</span>
+            <span className="category-name">Todos los Posts</span>
             <span className="post-count">({posts.length})</span>
           </div>
         </div>
@@ -98,7 +98,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ selectedCategoryId, o
               <span className="category-toggle">
                 {expandedCategories.has('uncategorized') ? '▼' : '▶'}
               </span>
-              <span className="category-name">Uncategorized</span>
+              <span className="category-name">Sin Categoría</span>
               <span className="post-count">({postsByCategory['uncategorized'].length})</span>
             </div>
             {renderCategoryPosts(postsByCategory['uncategorized'], 'uncategorized')}

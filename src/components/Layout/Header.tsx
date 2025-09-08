@@ -31,7 +31,7 @@ const Header: React.FC = () => {
       <header className="header">
         <div className="header-content">
           <div className="logo">
-            <Link to="/">Iskandar Community</Link>
+            <Link to="/">Iskandar</Link>
           </div>
 
           <div className="header-nav-image">
@@ -43,19 +43,19 @@ const Header: React.FC = () => {
           </div>
           
           <nav className="nav">
-            <Link to="/home">Home</Link>
+            <Link to="/home">Inicio</Link>
             {isAuthenticated ? (
               <>
                 <Link to="/blog">Blog</Link>
                 <Link to="/chat">Chat</Link>
-                <Link to="/files">Files</Link>
+                <Link to="/files">Archivo</Link>
                 {isAdmin && <Link to="/admin">Admin</Link>}
               </>
             ) : (
               <>
                 <span className="nav-link-disabled" title="Login required">Blog</span>
                 <span className="nav-link-disabled" title="Login required">Chat</span>
-                <span className="nav-link-disabled" title="Login required">Files</span>
+                <span className="nav-link-disabled" title="Login required">Archivo</span>
               </>
             )}
           </nav>
@@ -64,7 +64,7 @@ const Header: React.FC = () => {
             {isAuthenticated ? (
               <div className="user-menu">
                 <span className="user-info">
-                  Welcome, {user?.name}
+                  Bienvenida/o, {user?.name}
                   {isAdmin && <span className="admin-badge"> (Admin)</span>}
                 </span>
                 <button 
@@ -72,13 +72,13 @@ const Header: React.FC = () => {
                   className="btn btn-sm btn-secondary"
                   style={{ marginRight: '0.5rem' }}
                 >
-                  Change Password
+                  Cambiar Contraseña
                 </button>
                 <button 
                   onClick={handleLogout}
                   className="btn btn-secondary"
                 >
-                  Logout
+                  Cerrar Sesión
                 </button>
               </div>
             ) : (
@@ -87,13 +87,13 @@ const Header: React.FC = () => {
                   onClick={handleLogin}
                   className="btn btn-primary"
                 >
-                  Login
+                  Iniciar Sesión
                 </button>
                 <button 
                   onClick={handleRegister}
                   className="btn btn-secondary"
                 >
-                  Register
+                  Registrarse
                 </button>
               </div>
             )}
