@@ -296,7 +296,6 @@ const FileRepository: React.FC = () => {
     
     files.forEach(file => {
       const categoryKey = file.category_id || 'no-category';
-      const categoryName = file.category_name || 'Sin Categoría';
       
       if (!grouped.has(categoryKey)) {
         grouped.set(categoryKey, []);

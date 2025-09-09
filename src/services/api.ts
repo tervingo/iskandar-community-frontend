@@ -219,3 +219,6 @@ export const authApi = {
     await api.post('/auth/change-password', passwordData);
   },
 };
+
+// Export the api instance for use in other modules
+export { api };

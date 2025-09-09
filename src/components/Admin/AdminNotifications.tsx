@@ -10,7 +10,7 @@ const AdminNotifications: React.FC = () => {
     include_unsubscribed: false
   });
   const [recipients, setRecipients] = useState<RecipientsResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingRecipients, setLoadingRecipients] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -34,14 +34,14 @@ const AdminNotifications: React.FC = () => {
 
   const loadRecipients = async () => {
     try {
-      setLoading(true);
+      setLoadingRecipients(true);
       const data = await notificationApi.getBroadcastRecipients(formData.include_unsubscribed);
       setRecipients(data);
     } catch (err) {
       console.error('Error loading recipients:', err);
       setError('Error al cargar la lista de destinatarios');
     } finally {
-      setLoading(false);
+      setLoadingRecipients(false);
     }
   };
 
@@ -116,7 +116,11 @@ const AdminNotifications: React.FC = () => {
       </div>
 
       {/* Recipients Summary */}
-      {recipients && (
+      {loadingRecipients ? (
+        <div className="recipients-summary">
+          <div className="loading">Cargando destinatarios...</div>
+        </div>
+      ) : recipients && (
         <div className="recipients-summary">
           <div className="recipients-stats">
             <div className="stat">
