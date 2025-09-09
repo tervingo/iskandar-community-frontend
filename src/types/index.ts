@@ -25,6 +25,8 @@ export interface Post {
   author_name: string;
   category_id?: string;
   category_name?: string;
+  is_published: boolean;
+  published_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -34,12 +36,18 @@ export interface PostCreate {
   content: string;
   author_name: string;
   category_id?: string;
+  is_published?: boolean;
 }
 
 export interface PostUpdate {
   title?: string;
   content?: string;
   category_id?: string;
+  is_published?: boolean;
+}
+
+export interface PostPublish {
+  is_published: boolean;
 }
 
 export interface Comment {

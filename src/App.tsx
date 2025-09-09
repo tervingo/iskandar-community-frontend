@@ -6,6 +6,7 @@ import PostList from './components/Blog/PostList';
 import CreatePost from './components/Blog/CreatePost';
 import EditPost from './components/Blog/EditPost';
 import PostDetail from './components/Blog/PostDetail';
+import MyDrafts from './components/Blog/MyDrafts';
 import ChatRoom from './components/Chat/ChatRoom';
 import FileRepository from './components/Files/FileRepository';
 import AdminPanel from './components/Admin/AdminPanel';
@@ -57,6 +58,14 @@ const App: React.FC = () => {
             element={
               <RedirectRoute>
                 <EditPost />
+              </RedirectRoute>
+            } 
+          />
+          <Route 
+            path="/blog/drafts" 
+            element={
+              <RedirectRoute>
+                <MyDrafts />
               </RedirectRoute>
             } 
           />

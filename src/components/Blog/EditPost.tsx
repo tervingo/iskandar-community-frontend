@@ -57,9 +57,7 @@ const EditPost: React.FC = () => {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (publishStatus?: boolean) => {
     if (!formData.title.trim() || !formData.content.trim() || !id || !canEdit) {
       return;
     }
@@ -70,7 +68,8 @@ const EditPost: React.FC = () => {
       const updateData = {
         title: formData.title,
         content: formData.content,
-        category_id: formData.category_id || undefined
+        category_id: formData.category_id || undefined,
+        ...(publishStatus !== undefined && { is_published: publishStatus })
       };
       
       await updatePost(id, updateData);
@@ -299,12 +298,46 @@ const EditPost: React.FC = () => {
             Cancelar
           </Link>
           <button 
-            type="submit" 
-            className="btn btn-primary"
+            type="button"
+            onClick={() => handleSubmit()}
+            className="btn btn-outline"
             disabled={updating || !formData.title.trim() || !formData.content.trim()}
+            style={{
+              backgroundColor: 'transparent',
+              border: '1px solid #6c757d',
+              color: '#6c757d'
+            }}
           >
-            {updating ? 'Actualizando...' : 'Actualizar Post'}
+            {updating ? 'Guardando...' : 'Guardar Cambios'}
           </button>
+          {currentPost && !currentPost.is_published && (
+            <button 
+              type="button"
+              onClick={() => handleSubmit(true)}
+              className="btn btn-success"
+              disabled={updating || !formData.title.trim() || !formData.content.trim()}
+              style={{
+                backgroundColor: '#27ae60',
+                borderColor: '#27ae60'
+              }}
+            >
+              {updating ? 'Publicando...' : 'Guardar y Publicar'}
+            </button>
+          )}
+          {currentPost && currentPost.is_published && (
+            <button 
+              type="button"
+              onClick={() => handleSubmit(false)}
+              className="btn btn-warning"
+              disabled={updating || !formData.title.trim() || !formData.content.trim()}
+              style={{
+                backgroundColor: '#f39c12',
+                borderColor: '#f39c12'
+              }}
+            >
+              {updating ? 'Despublicando...' : 'Guardar como Borrador'}
+            </button>
+          )}
         </div>
       </form>
 

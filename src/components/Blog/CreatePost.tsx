@@ -37,9 +37,7 @@ const CreatePost: React.FC = () => {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (isPublished: boolean) => {
     if (!formData.title.trim() || !formData.content.trim() || !user?.name) {
       return;
     }
@@ -48,13 +46,19 @@ const CreatePost: React.FC = () => {
       title: formData.title,
       content: formData.content,
       author_name: user.name,
-      category_id: formData.category_id || undefined
+      category_id: formData.category_id || undefined,
+      is_published: isPublished
     };
     
     await createPost(postData);
     
     if (!error) {
-      navigate('/blog');
+      if (isPublished) {
+        navigate('/blog');
+      } else {
+        // Navigate to drafts or show success message
+        navigate('/blog/drafts');
+      }
     }
   };
 
@@ -271,11 +275,25 @@ const CreatePost: React.FC = () => {
             Cancelar
           </button>
           <button 
-            type="submit" 
+            type="button"
+            onClick={() => handleSubmit(false)}
+            className="btn btn-outline"
+            disabled={loading || !formData.title.trim() || !formData.content.trim()}
+            style={{
+              backgroundColor: 'transparent',
+              border: '1px solid #6c757d',
+              color: '#6c757d'
+            }}
+          >
+            {loading ? 'Guardando...' : 'Guardar Borrador'}
+          </button>
+          <button 
+            type="button"
+            onClick={() => handleSubmit(true)}
             className="btn btn-primary"
             disabled={loading || !formData.title.trim() || !formData.content.trim()}
           >
-            {loading ? 'Creando...' : 'Crear Post'}
+            {loading ? 'Publicando...' : 'Publicar Post'}
           </button>
         </div>
       </form>

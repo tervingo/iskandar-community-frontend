@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useBlogStore } from '../../stores/blogStore';
 import { useAuthStore } from '../../stores/authStore';
+import { postsApi } from '../../services/api';
 import CommentSection from './CommentSection';
 import FileLink from './FileLinkRenderer';
 
@@ -13,6 +14,7 @@ const PostDetail: React.FC = () => {
   const { currentPost, loading, error, fetchPost, deletePost } = useBlogStore();
   const { user, isAdmin } = useAuthStore();
   const [deleting, setDeleting] = useState(false);
+  const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -34,6 +36,25 @@ const PostDetail: React.FC = () => {
     }
   };
 
+  const handlePublish = async (shouldPublish: boolean) => {
+    if (!id || !currentPost) return;
+    
+    const action = shouldPublish ? 'publicar' : 'despublicar';
+    if (window.confirm(`¿Estás seguro de que quieres ${action} este post?`)) {
+      setPublishing(true);
+      try {
+        await postsApi.publish(id, { is_published: shouldPublish });
+        // Refresh the post data to show updated status
+        await fetchPost(id);
+      } catch (error) {
+        console.error(`Error ${action}ing post:`, error);
+        alert(`Error al ${action} el post. Por favor intenta de nuevo.`);
+      } finally {
+        setPublishing(false);
+      }
+    }
+  };
+
   // Check if current user can delete this post
   const canDelete = user && currentPost && (
     isAdmin || currentPost.author_name === user.name
@@ -41,6 +62,11 @@ const PostDetail: React.FC = () => {
 
   // Check if current user can edit this post
   const canEdit = user && currentPost && (
+    isAdmin || currentPost.author_name === user.name
+  );
+
+  // Check if current user can publish/unpublish this post
+  const canPublish = user && currentPost && (
     isAdmin || currentPost.author_name === user.name
   );
 
@@ -64,6 +90,23 @@ const PostDetail: React.FC = () => {
               Editar Post
             </Link>
           )}
+
+          {canPublish && (
+            <button
+              onClick={() => handlePublish(!currentPost.is_published)}
+              disabled={publishing}
+              className={`btn ${currentPost.is_published ? 'btn-warning' : 'btn-success'}`}
+              style={{
+                backgroundColor: currentPost.is_published ? '#f39c12' : '#27ae60',
+                borderColor: currentPost.is_published ? '#f39c12' : '#27ae60'
+              }}
+            >
+              {publishing 
+                ? (currentPost.is_published ? 'Despublicando...' : 'Publicando...') 
+                : (currentPost.is_published ? 'Despublicar' : 'Publicar')
+              }
+            </button>
+          )}
           
           {canDelete && (
             <button
@@ -79,11 +122,30 @@ const PostDetail: React.FC = () => {
 
       <article className="post">
         <header className="post-header">
-          <h1>{currentPost.title}</h1>
+          <h1>
+            {currentPost.title}
+            {!currentPost.is_published && (
+              <span style={{
+                marginLeft: '10px',
+                padding: '4px 12px',
+                backgroundColor: '#f39c12',
+                color: 'white',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}>
+                BORRADOR
+              </span>
+            )}
+          </h1>
           <div className="post-meta">
             <span>Por {currentPost.author_name}</span>
             <span>•</span>
-            <span>{new Date(currentPost.created_at).toLocaleDateString()}</span>
+            {currentPost.is_published && currentPost.published_at ? (
+              <span>Publicado {new Date(currentPost.published_at).toLocaleDateString()}</span>
+            ) : (
+              <span>Creado {new Date(currentPost.created_at).toLocaleDateString()}</span>
+            )}
             {currentPost.updated_at !== currentPost.created_at && (
               <>
                 <span>•</span>

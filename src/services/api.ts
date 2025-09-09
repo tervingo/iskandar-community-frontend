@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Post, PostCreate, PostUpdate, Comment, CommentCreate, CommentUpdate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest, Category, CategoryCreate, CategoryUpdate } from '../types';
+import { Post, PostCreate, PostUpdate, PostPublish, Comment, CommentCreate, CommentUpdate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest, Category, CategoryCreate, CategoryUpdate } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -80,6 +80,16 @@ export const postsApi = {
 
   delete: async (id: string): Promise<void> => {
     await api.delete(`/posts/${id}`);
+  },
+
+  getMyDrafts: async (): Promise<Post[]> => {
+    const response = await api.get('/posts/drafts/my');
+    return response.data;
+  },
+
+  publish: async (id: string, publishData: PostPublish): Promise<Post> => {
+    const response = await api.put(`/posts/${id}/publish`, publishData);
+    return response.data;
   },
 };
 
