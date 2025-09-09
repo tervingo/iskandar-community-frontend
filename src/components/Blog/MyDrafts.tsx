@@ -5,7 +5,7 @@ import { postsApi } from '../../services/api';
 import { Post } from '../../types';
 
 const MyDrafts: React.FC = () => {
-  const { user, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [drafts, setDrafts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

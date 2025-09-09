@@ -84,6 +84,12 @@ const EditPost: React.FC = () => {
     }
   };
 
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // Form submit doesn't specify publish status, so keep current status
+    handleSubmit();
+  };
+
   const handleInsertFileLink = (file: FileItem, linkText: string) => {
     const fileLink = `{{file:${file.id}|${linkText}}}`;
     const textarea = textareaRef.current;
@@ -131,7 +137,7 @@ const EditPost: React.FC = () => {
 
       {error && <div className="error">Error: {error}</div>}
 
-      <form onSubmit={handleSubmit} className="post-form">
+      <form onSubmit={handleFormSubmit} className="post-form">
         <div className="form-group">
           <label htmlFor="author_name">Autor</label>
           <input
