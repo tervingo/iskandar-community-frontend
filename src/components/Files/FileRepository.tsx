@@ -290,6 +290,66 @@ const FileRepository: React.FC = () => {
     [files]
   );
 
+  // Group files by category
+  const groupedFiles = useMemo(() => {
+    const grouped = new Map<string, FileItem[]>();
+    
+    files.forEach(file => {
+      const categoryKey = file.category_id || 'no-category';
+      const categoryName = file.category_name || 'Sin Categoría';
+      
+      if (!grouped.has(categoryKey)) {
+        grouped.set(categoryKey, []);
+      }
+      grouped.get(categoryKey)!.push(file);
+    });
+    
+    // Convert to array and sort categories
+    const sortedGroups = Array.from(grouped.entries()).map(([categoryId, files]) => ({
+      categoryId,
+      categoryName: files[0]?.category_name || 'Sin Categoría',
+      files: files.sort((a, b) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime())
+    }));
+    
+    // Sort categories: named categories first, then "Sin Categoría"
+    return sortedGroups.sort((a, b) => {
+      if (a.categoryId === 'no-category') return 1;
+      if (b.categoryId === 'no-category') return -1;
+      return a.categoryName.localeCompare(b.categoryName);
+    });
+  }, [files]);
+
+  const getFileTypeDisplay = (file: FileItem): string => {
+    if (file.source_type === 'url') return 'URL';
+    
+    const type = file.file_type.toLowerCase();
+    if (type.includes('pdf')) return 'PDF';
+    if (type.startsWith('image/')) return 'IMAGEN';
+    if (type.startsWith('video/')) return 'VIDEO';
+    if (type.startsWith('audio/')) return 'AUDIO';
+    if (type.includes('word') || type.includes('document')) return 'DOCUMENTO';
+    if (type.includes('excel') || type.includes('spreadsheet')) return 'HOJA DE CÁLCULO';
+    if (type.includes('powerpoint') || type.includes('presentation')) return 'PRESENTACIÓN';
+    if (type.includes('text')) return 'TEXTO';
+    if (type.includes('zip') || type.includes('rar') || type.includes('compressed')) return 'ARCHIVO';
+    return 'ARCHIVO';
+  };
+
+  const getFileIcon = (file: FileItem): string => {
+    if (file.source_type === 'url') return '🔗';
+    
+    const type = file.file_type.toLowerCase();
+    if (type.includes('pdf')) return '📄';
+    if (type.startsWith('image/')) return '🖼️';
+    if (type.startsWith('video/')) return '🎥';
+    if (type.startsWith('audio/')) return '🎵';
+    if (type.includes('word') || type.includes('document')) return '📝';
+    if (type.includes('excel') || type.includes('spreadsheet')) return '📊';
+    if (type.includes('powerpoint') || type.includes('presentation')) return '📋';
+    if (type.includes('zip') || type.includes('rar')) return '🗜️';
+    return '📎';
+  };
+
   const isImageFile = (file: FileItem): boolean => {
     return file.file_type.startsWith('image/');
   };
@@ -516,86 +576,107 @@ const FileRepository: React.FC = () => {
             <p>No hay archivos subidos todavía. Sé el primero en compartir un archivo!</p>
           </div>
         ) : (
-          <div className="file-grid">
-            {files.map((file) => (
-              <div key={file.id} className="file-card">
-                <div className="file-icon">
-                  {file.source_type === 'url' ? '🔗' :
-                   file.file_type.startsWith('image/') ? '🖼️' : 
-                   file.file_type.startsWith('video/') ? '🎥' : 
-                   file.file_type.startsWith('audio/') ? '🎵' : 
-                   file.file_type.includes('pdf') ? '📄' : 
-                   '📎'}
-                </div>
-                <div className="file-info">
-                  <h3 className="file-name">{file.original_name}</h3>
-                  <p className="file-size">{formatFileSize(file.file_size)}</p>
-                  {file.description && (
-                    <p className="file-description">{file.description}</p>
-                  )}
-                  <div className="file-meta">
-                    <span>Subido por {file.uploaded_by}</span>
-                    <span>{new Date(file.uploaded_at).toLocaleDateString()}</span>
-                  </div>
-                </div>
-                <div className="file-actions">
-                  {file.source_type === 'url' ? (
-                    <button 
-                      onClick={() => window.open(file.original_url || file.cloudinary_url, '_blank')}
-                      className="btn btn-primary btn-sm"
-                      style={{ marginRight: '0.5rem' }}
-                    >
-                      Abrir URL
-                    </button>
-                  ) : (
-                    <button 
-                      onClick={() => handleDownload(file)}
-                      className="btn btn-primary btn-sm"
-                      style={{ marginRight: '0.5rem' }}
-                    >
-                      Descargar
-                    </button>
-                  )}
-                  {file.file_type === 'application/pdf' && file.source_type !== 'url' && (
-                    <button 
-                      onClick={() => handleViewPDF(file)}
-                      className="btn btn-secondary btn-sm"
-                      style={{ marginRight: '0.5rem' }}
-                      disabled={loading}
-                    >
-                      Ver PDF
-                    </button>
-                  )}
-                  {isImageFile(file) && file.source_type !== 'url' && (
-                    <button 
-                      onClick={() => handleViewImage(file)}
-                      className="btn btn-secondary btn-sm"
-                      style={{ marginRight: '0.5rem' }}
-                      disabled={loading}
-                    >
-                      Ver Imagen
-                    </button>
-                  )}
-                  {isAudioFile(file) && file.source_type !== 'url' && (
-                    <button 
-                      onClick={() => handlePlayAudio(file)}
-                      className="btn btn-secondary btn-sm"
-                      style={{ marginRight: '0.5rem' }}
-                      disabled={loading}
-                    >
-                      Reproducir Audio
-                    </button>
-                  )}
-                  {canDeleteFile(file) && (
-                    <button 
-                      onClick={() => handleDelete(file)}
-                      className="btn btn-danger btn-sm"
-                      disabled={loading}
-                      style={{ marginLeft: '0.5rem' }}
-                    >
-                      Eliminar
-                    </button>
-                  )}
+          <div className="files-by-category">
+            {groupedFiles.map((group) => (
+              <div key={group.categoryId} className="category-section">
+                <h2 className="category-header">
+                  <span className="category-icon">📁</span>
+                  <span className="category-name">{group.categoryName}</span>
+                  <span className="category-count">({group.files.length})</span>
+                </h2>
+                
+                <div className="file-grid-compact">
+                  {group.files.map((file) => (
+                    <div key={file.id} className="file-card-compact" title={file.description || file.original_name}>
+                      <div className="file-card-header">
+                        <span className="file-icon-compact">{getFileIcon(file)}</span>
+                        <div className="file-title-section">
+                          <h3 className="file-name-compact" title={file.original_name}>
+                            {file.original_name}
+                          </h3>
+                          <div className="file-type-size">
+                            <span className="file-type-badge">{getFileTypeDisplay(file)}</span>
+                            <span className="file-size-compact">{formatFileSize(file.file_size)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {file.description && (
+                        <p className="file-description-compact" title={file.description}>
+                          {file.description}
+                        </p>
+                      )}
+                      
+                      <div className="file-meta-compact">
+                        <span>por {file.uploaded_by}</span>
+                        <span>{new Date(file.uploaded_at).toLocaleDateString()}</span>
+                      </div>
+                      
+                      <div className="file-actions-compact">
+                        {file.source_type === 'url' ? (
+                          <button 
+                            onClick={() => window.open(file.original_url || file.cloudinary_url, '_blank')}
+                            className="btn btn-primary btn-xs"
+                            title="Abrir URL"
+                          >
+                            Abrir
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => handleDownload(file)}
+                            className="btn btn-primary btn-xs"
+                            title="Descargar archivo"
+                          >
+                            Descargar
+                          </button>
+                        )}
+                        
+                        {file.file_type === 'application/pdf' && file.source_type !== 'url' && (
+                          <button 
+                            onClick={() => handleViewPDF(file)}
+                            className="btn btn-secondary btn-xs"
+                            disabled={loading}
+                            title="Ver PDF"
+                          >
+                            Ver PDF
+                          </button>
+                        )}
+                        
+                        {isImageFile(file) && file.source_type !== 'url' && (
+                          <button 
+                            onClick={() => handleViewImage(file)}
+                            className="btn btn-secondary btn-xs"
+                            disabled={loading}
+                            title="Ver imagen"
+                          >
+                            Ver
+                          </button>
+                        )}
+                        
+                        {isAudioFile(file) && file.source_type !== 'url' && (
+                          <button 
+                            onClick={() => handlePlayAudio(file)}
+                            className="btn btn-secondary btn-xs"
+                            disabled={loading}
+                            title="Reproducir audio"
+                          >
+                            Play
+                          </button>
+                        )}
+                        
+                        {canDeleteFile(file) && (
+                          <button 
+                            onClick={() => handleDelete(file)}
+                            className="btn btn-danger btn-xs"
+                            disabled={loading}
+                            title="Eliminar archivo"
+                          >
+                            Eliminar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
