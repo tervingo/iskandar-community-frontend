@@ -62,5 +62,53 @@ export const notificationApi = {
   testNewPostNotification: async (): Promise<{ success: boolean; message: string }> => {
     const response = await api.get('/notifications/test/new-post');
     return response.data;
+  },
+
+  // Admin: Get all user email preferences
+  getAllUserPreferences: async (): Promise<{
+    success: boolean;
+    users: Array<{
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+      preferences: EmailPreferences;
+    }>;
+    total_count: number;
+  }> => {
+    const response = await api.get('/notifications/admin/users/preferences');
+    return response.data;
+  },
+
+  // Admin: Update specific user's email preferences
+  updateUserPreferencesAdmin: async (
+    userId: string, 
+    preferences: Partial<EmailPreferences>
+  ): Promise<{
+    success: boolean;
+    message: string;
+    user_id: string;
+    user_name: string;
+    preferences: EmailPreferences;
+  }> => {
+    const response = await api.put(`/notifications/admin/users/${userId}/preferences`, preferences);
+    return response.data;
+  },
+
+  // Admin: Bulk update multiple users' preferences
+  bulkUpdatePreferences: async (
+    userIds: string[],
+    preferences: Partial<EmailPreferences>
+  ): Promise<{
+    success: boolean;
+    message: string;
+    updated_count: number;
+    total_requested: number;
+  }> => {
+    const response = await api.post('/notifications/admin/preferences/bulk-update', {
+      user_ids: userIds,
+      preferences: preferences
+    });
+    return response.data;
   }
 };

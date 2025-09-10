@@ -133,6 +133,12 @@ const AdminPanel: React.FC = () => {
           <a href="/admin/categories" className="btn btn-secondary">
             Manage Categories
           </a>
+          <a href="/admin/notifications" className="btn btn-outline">
+            📧 Email Notifications
+          </a>
+          <a href="/admin/user-email-preferences" className="btn btn-outline">
+            👥 User Preferences
+          </a>
           <button 
             onClick={() => setShowCreateUser(true)}
             className="btn btn-primary"

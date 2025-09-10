@@ -11,6 +11,9 @@ import ChatRoom from './components/Chat/ChatRoom';
 import FileRepository from './components/Files/FileRepository';
 import AdminPanel from './components/Admin/AdminPanel';
 import CategoryManagement from './components/Admin/CategoryManagement';
+import AdminNotifications from './components/Admin/AdminNotifications';
+import UserEmailPreferences from './components/Admin/UserEmailPreferences';
+import EmailPreferences from './components/User/EmailPreferences';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import RedirectRoute from './components/Auth/RedirectRoute';
 import { useAuthStore } from './stores/authStore';
@@ -99,6 +102,30 @@ const App: React.FC = () => {
               <ProtectedRoute requireAdmin={true}>
                 <CategoryManagement />
               </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/notifications" 
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminNotifications />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/user-email-preferences" 
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <UserEmailPreferences />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/profile/email-preferences" 
+            element={
+              <RedirectRoute>
+                <EmailPreferences />
+              </RedirectRoute>
             } 
           />
         </Route>

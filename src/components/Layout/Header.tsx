@@ -73,6 +73,12 @@ const Header: React.FC = () => {
                   Bienvenida/o, {user?.name}
                   {isAdmin && <span className="admin-badge"> (Admin)</span>}
                 </span>
+                <Link 
+                  to="/profile/email-preferences"
+                  className="btn btn-sm btn-outline"
+                >
+                  📧 Email
+                </Link>
                 <button 
                   onClick={() => setShowPasswordChange(true)}
                   className="btn btn-sm btn-secondary"
