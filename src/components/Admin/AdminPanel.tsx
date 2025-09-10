@@ -21,6 +21,7 @@ const AdminPanel: React.FC = () => {
   });
   const [editUserData, setEditUserData] = useState({
     name: '',
+    email: '',
     role: 'normal' as 'admin' | 'normal',
     avatar: '',
     phone: '',
@@ -60,6 +61,7 @@ const AdminPanel: React.FC = () => {
     setEditingUser(user);
     setEditUserData({
       name: user.name,
+      email: user.email,
       role: user.role,
       avatar: user.avatar || '',
       phone: user.phone || '',
@@ -241,6 +243,15 @@ const AdminPanel: React.FC = () => {
                   type="text"
                   value={editUserData.name}
                   onChange={(e) => setEditUserData({...editUserData, name: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Email:</label>
+                <input
+                  type="email"
+                  value={editUserData.email}
+                  onChange={(e) => setEditUserData({...editUserData, email: e.target.value})}
                   required
                 />
               </div>
