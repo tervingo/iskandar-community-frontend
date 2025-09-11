@@ -14,6 +14,7 @@ import CategoryManagement from './components/Admin/CategoryManagement';
 import AdminNotifications from './components/Admin/AdminNotifications';
 import UserEmailPreferences from './components/Admin/UserEmailPreferences';
 import EmailPreferences from './components/User/EmailPreferences';
+import AccountManagement from './components/User/AccountManagement';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import RedirectRoute from './components/Auth/RedirectRoute';
 import { useAuthStore } from './stores/authStore';
@@ -125,6 +126,14 @@ const App: React.FC = () => {
             element={
               <RedirectRoute>
                 <EmailPreferences />
+              </RedirectRoute>
+            } 
+          />
+          <Route 
+            path="/account" 
+            element={
+              <RedirectRoute>
+                <AccountManagement />
               </RedirectRoute>
             } 
           />
