@@ -5,7 +5,7 @@ const Navigation: React.FC = () => {
   return (
     <nav className="navigation">
       <div className="nav-brand">
-        <h1>Iskandar Community</h1>
+        <h1>Yskandar</h1>
       </div>
       
       <div className="nav-links">

@@ -5,7 +5,7 @@ const Home: React.FC = () => {
   return (
     <div className="home-page">
       <div className="home-content">
-        <h1 className="home-title">Iskandar</h1>
+        <h1 className="home-title">Yskandar</h1>
         
         <div className="home-image-container">
           <img 

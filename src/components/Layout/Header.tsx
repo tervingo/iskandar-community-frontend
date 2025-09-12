@@ -30,7 +30,7 @@ const Header: React.FC = () => {
       <header className="header">
         <div className="header-content">
           <div className="logo">
-            <Link to="/">Iskandar</Link>
+            <Link to="/">Yskandar</Link>
           </div>
 
           <div className="header-nav-image">
