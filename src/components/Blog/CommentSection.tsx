@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { useBlogStore } from '../../stores/blogStore';
 import { useAuthStore } from '../../stores/authStore';
 import MarkdownHelp from './MarkdownHelp';
 import FileLinkSelector from './FileLinkSelector';
-import FileLink from './FileLinkRenderer';
-import { FileItem } from '../../types';
+import PostLinkSelector from './PostLinkSelector';
+import MarkdownProcessor from './MarkdownProcessor';
+import { FileItem, Post } from '../../types';
 
 interface CommentSectionProps {
   postId: string;
@@ -28,7 +27,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
   const [showEditPreview, setShowEditPreview] = useState(false);
   const [showMarkdownHelp, setShowMarkdownHelp] = useState(false);
   const [showFileLinkSelector, setShowFileLinkSelector] = useState(false);
+  const [showPostLinkSelector, setShowPostLinkSelector] = useState(false);
   const [showEditFileLinkSelector, setShowEditFileLinkSelector] = useState(false);
+  const [showEditPostLinkSelector, setShowEditPostLinkSelector] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -153,6 +154,59 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
     }
   };
 
+  const handleInsertPostLink = (post: Post, linkText: string) => {
+    const postLink = `{{post:${post.id}|${linkText}}}`;
+    const textarea = textareaRef.current;
+    
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const currentContent = commentForm.content;
+      
+      const newContent = 
+        currentContent.substring(0, start) +
+        postLink +
+        currentContent.substring(end);
+      
+      setCommentForm({
+        ...commentForm,
+        content: newContent
+      });
+      
+      // Set cursor position after the inserted link
+      setTimeout(() => {
+        textarea.focus();
+        const newCursorPosition = start + postLink.length;
+        textarea.setSelectionRange(newCursorPosition, newCursorPosition);
+      }, 0);
+    }
+  };
+
+  const handleInsertEditPostLink = (post: Post, linkText: string) => {
+    const postLink = `{{post:${post.id}|${linkText}}}`;
+    const textarea = editTextareaRef.current;
+    
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const currentContent = editContent;
+      
+      const newContent = 
+        currentContent.substring(0, start) +
+        postLink +
+        currentContent.substring(end);
+      
+      setEditContent(newContent);
+      
+      // Set cursor position after the inserted link
+      setTimeout(() => {
+        textarea.focus();
+        const newCursorPosition = start + postLink.length;
+        textarea.setSelectionRange(newCursorPosition, newCursorPosition);
+      }, 0);
+    }
+  };
+
   return (
     <div className="comment-section">
       <div className="comments-header">
@@ -213,6 +267,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
                 >
                   📎 Enlazar archivo
                 </button>
+                <button
+                  type="button"
+                  className="post-link-btn"
+                  onClick={() => setShowPostLinkSelector(true)}
+                  title="Enlazar post del blog"
+                  style={{
+                    backgroundColor: '#9b59b6',
+                    color: 'white',
+                    border: '1px solid #9b59b6'
+                  }}
+                >
+                  📄 Link Post
+                </button>
               </div>
               
               {!showPreview ? (
@@ -222,7 +289,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
                     name="content"
                     value={commentForm.content}
                     onChange={handleCommentChange}
-                    placeholder="Escribe tu comentario usando Markdown...&#10;&#10;Ejemplos:&#10;**negrita** *cursiva*&#10;[enlace](https://ejemplo.com)&#10;- Lista&#10;`código`&#10;{{file:id|texto}} para enlaces a archivos"
+                    placeholder="Escribe tu comentario usando Markdown...&#10;&#10;Ejemplos:&#10;**negrita** *cursiva*&#10;[enlace](https://ejemplo.com)&#10;- Lista&#10;`código`&#10;&#10;Usa botones 📎 y 📄 para enlaces a archivos y posts"
                     rows={4}
                     required
                     className="markdown-textarea"
@@ -236,65 +303,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
               ) : (
                 <div className="markdown-preview">
                   {commentForm.content.trim() ? (
-                    <ReactMarkdown 
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        // Handle paragraphs and other text-containing elements
-                        p: ({ children, ...props }) => {
-                          const processChildren = (children: React.ReactNode): React.ReactNode => {
-                            if (typeof children === 'string') {
-                              // Split by file links but keep the text flow
-                              const parts = children.split(/({{file:[^}]+}})/g);
-                              return parts.map((part, index) => {
-                                const fileMatch = part.match(/^{{file:([^|]+)\|([^}]+)}}$/);
-                                if (fileMatch) {
-                                  const [, fileId, linkText] = fileMatch;
-                                  return <FileLink key={index} fileId={fileId}>{linkText}</FileLink>;
-                                }
-                                return part;
-                              });
-                            }
-                            
-                            if (Array.isArray(children)) {
-                              return children.map((child, index) => (
-                                <React.Fragment key={index}>
-                                  {processChildren(child)}
-                                </React.Fragment>
-                              ));
-                            }
-                            
-                            return children;
-                          };
-                          
-                          return <p {...props}>{processChildren(children)}</p>;
-                        },
-                        // Handle other elements that might contain text
-                        span: ({ children, ...props }) => {
-                          const processChildren = (children: React.ReactNode): React.ReactNode => {
-                            if (typeof children === 'string') {
-                              const parts = children.split(/({{file:[^}]+}})/g);
-                              return parts.map((part, index) => {
-                                const fileMatch = part.match(/^{{file:([^|]+)\|([^}]+)}}$/);
-                                if (fileMatch) {
-                                  const [, fileId, linkText] = fileMatch;
-                                  return <FileLink key={index} fileId={fileId}>{linkText}</FileLink>;
-                                }
-                                return part;
-                              });
-                            }
-                            return children;
-                          };
-                          
-                          return <span {...props}>{processChildren(children)}</span>;
-                        },
-                        // Handle regular links
-                        a: ({node, ...props}) => (
-                          <a {...props} target="_blank" rel="noopener noreferrer" />
-                        )
-                      }}
-                    >
-                      {commentForm.content}
-                    </ReactMarkdown>
+                    <MarkdownProcessor content={commentForm.content} />
                   ) : (
                     <p className="preview-empty">Nada que mostrar en vista previa</p>
                   )}
@@ -401,6 +410,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
                           >
                             📎 Enlazar archivo
                           </button>
+                          <button
+                            type="button"
+                            className="post-link-btn"
+                            onClick={() => setShowEditPostLinkSelector(true)}
+                            title="Enlazar post del blog"
+                            style={{
+                              backgroundColor: '#9b59b6',
+                              color: 'white',
+                              border: '1px solid #9b59b6'
+                            }}
+                          >
+                            📄 Link Post
+                          </button>
                         </div>
                         
                         {!showEditPreview ? (
@@ -411,70 +433,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
                             rows={3}
                             className="markdown-textarea"
                             disabled={commentsLoading}
-                            placeholder="Edita tu comentario usando Markdown...&#10;Usa {{file:id|texto}} para enlaces a archivos"
+                            placeholder="Edita tu comentario usando Markdown...&#10;Usa botones 📎 y 📄 para enlaces"
                           />
                         ) : (
                           <div className="markdown-preview">
                             {editContent.trim() ? (
-                              <ReactMarkdown 
-                                remarkPlugins={[remarkGfm]}
-                                components={{
-                                  // Handle paragraphs and other text-containing elements
-                                  p: ({ children, ...props }) => {
-                                    const processChildren = (children: React.ReactNode): React.ReactNode => {
-                                      if (typeof children === 'string') {
-                                        // Split by file links but keep the text flow
-                                        const parts = children.split(/({{file:[^}]+}})/g);
-                                        return parts.map((part, index) => {
-                                          const fileMatch = part.match(/^{{file:([^|]+)\|([^}]+)}}$/);
-                                          if (fileMatch) {
-                                            const [, fileId, linkText] = fileMatch;
-                                            return <FileLink key={index} fileId={fileId}>{linkText}</FileLink>;
-                                          }
-                                          return part;
-                                        });
-                                      }
-                                      
-                                      if (Array.isArray(children)) {
-                                        return children.map((child, index) => (
-                                          <React.Fragment key={index}>
-                                            {processChildren(child)}
-                                          </React.Fragment>
-                                        ));
-                                      }
-                                      
-                                      return children;
-                                    };
-                                    
-                                    return <p {...props}>{processChildren(children)}</p>;
-                                  },
-                                  // Handle other elements that might contain text
-                                  span: ({ children, ...props }) => {
-                                    const processChildren = (children: React.ReactNode): React.ReactNode => {
-                                      if (typeof children === 'string') {
-                                        const parts = children.split(/({{file:[^}]+}})/g);
-                                        return parts.map((part, index) => {
-                                          const fileMatch = part.match(/^{{file:([^|]+)\|([^}]+)}}$/);
-                                          if (fileMatch) {
-                                            const [, fileId, linkText] = fileMatch;
-                                            return <FileLink key={index} fileId={fileId}>{linkText}</FileLink>;
-                                          }
-                                          return part;
-                                        });
-                                      }
-                                      return children;
-                                    };
-                                    
-                                    return <span {...props}>{processChildren(children)}</span>;
-                                  },
-                                  // Handle regular links
-                                  a: ({node, ...props}) => (
-                                    <a {...props} target="_blank" rel="noopener noreferrer" />
-                                  )
-                                }}
-                              >
-                                {editContent}
-                              </ReactMarkdown>
+                              <MarkdownProcessor content={editContent} />
                             ) : (
                               <p className="preview-empty">Nada que mostrar en vista previa</p>
                             )}
@@ -501,65 +465,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
                     </div>
                   ) : (
                     <div className="comment-markdown">
-                      <ReactMarkdown 
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          // Handle paragraphs and other text-containing elements
-                          p: ({ children, ...props }) => {
-                            const processChildren = (children: React.ReactNode): React.ReactNode => {
-                              if (typeof children === 'string') {
-                                // Split by file links but keep the text flow
-                                const parts = children.split(/({{file:[^}]+}})/g);
-                                return parts.map((part, index) => {
-                                  const fileMatch = part.match(/^{{file:([^|]+)\|([^}]+)}}$/);
-                                  if (fileMatch) {
-                                    const [, fileId, linkText] = fileMatch;
-                                    return <FileLink key={index} fileId={fileId}>{linkText}</FileLink>;
-                                  }
-                                  return part;
-                                });
-                              }
-                              
-                              if (Array.isArray(children)) {
-                                return children.map((child, index) => (
-                                  <React.Fragment key={index}>
-                                    {processChildren(child)}
-                                  </React.Fragment>
-                                ));
-                              }
-                              
-                              return children;
-                            };
-                            
-                            return <p {...props}>{processChildren(children)}</p>;
-                          },
-                          // Handle other elements that might contain text
-                          span: ({ children, ...props }) => {
-                            const processChildren = (children: React.ReactNode): React.ReactNode => {
-                              if (typeof children === 'string') {
-                                const parts = children.split(/({{file:[^}]+}})/g);
-                                return parts.map((part, index) => {
-                                  const fileMatch = part.match(/^{{file:([^|]+)\|([^}]+)}}$/);
-                                  if (fileMatch) {
-                                    const [, fileId, linkText] = fileMatch;
-                                    return <FileLink key={index} fileId={fileId}>{linkText}</FileLink>;
-                                  }
-                                  return part;
-                                });
-                              }
-                              return children;
-                            };
-                            
-                            return <span {...props}>{processChildren(children)}</span>;
-                          },
-                          // Handle regular links
-                          a: ({node, ...props}) => (
-                            <a {...props} target="_blank" rel="noopener noreferrer" />
-                          )
-                        }}
-                      >
-                        {comment.content}
-                      </ReactMarkdown>
+                      <MarkdownProcessor content={comment.content} />
                     </div>
                   )}
                 </div>
@@ -580,10 +486,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
         onSelectFile={handleInsertFileLink}
       />
       
+      <PostLinkSelector
+        isOpen={showPostLinkSelector}
+        onClose={() => setShowPostLinkSelector(false)}
+        onSelectPost={handleInsertPostLink}
+      />
+      
       <FileLinkSelector
         isOpen={showEditFileLinkSelector}
         onClose={() => setShowEditFileLinkSelector(false)}
         onSelectFile={handleInsertEditFileLink}
+      />
+
+      <PostLinkSelector
+        isOpen={showEditPostLinkSelector}
+        onClose={() => setShowEditPostLinkSelector(false)}
+        onSelectPost={handleInsertEditPostLink}
       />
     </div>
   );

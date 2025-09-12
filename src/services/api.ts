@@ -87,6 +87,14 @@ export const postsApi = {
     return response.data;
   },
 
+  getAllIncludingDrafts: async (categoryId?: string, includeUnpublished: boolean = false): Promise<Post[]> => {
+    const params: any = {};
+    if (categoryId) params.category_id = categoryId;
+    if (includeUnpublished) params.include_unpublished = true;
+    const response = await api.get('/posts/all', { params });
+    return response.data;
+  },
+
   publish: async (id: string, publishData: PostPublish): Promise<Post> => {
     const response = await api.put(`/posts/${id}/publish`, publishData);
     return response.data;
@@ -218,6 +226,12 @@ export const authApi = {
   changePassword: async (passwordData: PasswordChangeRequest): Promise<void> => {
     await api.post('/auth/change-password', passwordData);
   },
+};
+
+// Alias for posts API (for compatibility with existing components)
+export const blogApi = {
+  ...postsApi,
+  getAllIncludingDrafts: postsApi.getAllIncludingDrafts
 };
 
 // Export the api instance for use in other modules

@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { useBlogStore } from '../../stores/blogStore';
 import { useAuthStore } from '../../stores/authStore';
 import { useCategoryStore } from '../../stores/categoryStore';
-import FileLink from './FileLinkRenderer';
 import FileLinkSelector from './FileLinkSelector';
-import { FileItem } from '../../types';
+import PostLinkSelector from './PostLinkSelector';
+import MarkdownProcessor from './MarkdownProcessor';
+import { FileItem, Post } from '../../types';
 
 const EditPost: React.FC = () => {
   const navigate = useNavigate();
@@ -32,6 +31,7 @@ const EditPost: React.FC = () => {
   const [updating, setUpdating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showFileLinkSelector, setShowFileLinkSelector] = useState(false);
+  const [showPostLinkSelector, setShowPostLinkSelector] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Update form data when currentPost is loaded
@@ -113,6 +113,34 @@ const EditPost: React.FC = () => {
       setTimeout(() => {
         textarea.focus();
         const newPosition = start + fileLink.length;
+        textarea.setSelectionRange(newPosition, newPosition);
+      }, 0);
+    }
+  };
+
+  const handleInsertPostLink = (post: Post, linkText: string) => {
+    const postLink = `{{post:${post.id}|${linkText}}}`;
+    const textarea = textareaRef.current;
+    
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const currentContent = formData.content;
+      
+      const newContent = 
+        currentContent.substring(0, start) +
+        postLink +
+        currentContent.substring(end);
+      
+      setFormData({
+        ...formData,
+        content: newContent
+      });
+      
+      // Set cursor position after the inserted link
+      setTimeout(() => {
+        textarea.focus();
+        const newPosition = start + postLink.length;
         textarea.setSelectionRange(newPosition, newPosition);
       }, 0);
     }
@@ -209,6 +237,18 @@ const EditPost: React.FC = () => {
               >
                 📎 Enlazar archivo
               </button>
+              <button
+                type="button"
+                className="tab-btn post-link-btn"
+                onClick={() => setShowPostLinkSelector(true)}
+                style={{
+                  backgroundColor: '#9b59b6',
+                  color: 'white',
+                  border: '1px solid #9b59b6'
+                }}
+              >
+                📄 Link Post
+              </button>
             </div>
           </div>
           
@@ -228,70 +268,14 @@ const EditPost: React.FC = () => {
                 <small>
                   <strong>Markdown soportado:</strong> **bold**, *italic*, `code`, 
                   # Headers, - Lists, [links](url), ```code blocks```<br/>
-                  <strong>Enlaces de archivos:</strong> Usa el botón "📎 Enlace de archivo" para insertar enlaces de archivos
+                  <strong>Enlaces de archivos:</strong> Usa el botón "📎 Enlace de archivo" para insertar enlaces de archivos<br/>
+                  <strong>Enlaces de posts:</strong> Usa el botón "📄 Link Post" para insertar enlaces a otros posts
                 </small>
               </div>
             </>
           ) : (
             <div className="preview-content">
-              <ReactMarkdown 
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  // Handle paragraphs and other text-containing elements
-                  p: ({ children, ...props }) => {
-                    const processChildren = (children: React.ReactNode): React.ReactNode => {
-                      if (typeof children === 'string') {
-                        const parts = children.split(/({{file:[^}]+}})/g);
-                        return parts.map((part, index) => {
-                          const fileMatch = part.match(/^{{file:([^|]+)\|([^}]+)}}$/);
-                          if (fileMatch) {
-                            const [, fileId, linkText] = fileMatch;
-                            return <FileLink key={index} fileId={fileId}>{linkText}</FileLink>;
-                          }
-                          return part;
-                        });
-                      }
-                      
-                      if (Array.isArray(children)) {
-                        return children.map((child, index) => (
-                          <React.Fragment key={index}>
-                            {processChildren(child)}
-                          </React.Fragment>
-                        ));
-                      }
-                      
-                      return children;
-                    };
-                    
-                    return <p {...props}>{processChildren(children)}</p>;
-                  },
-                  span: ({ children, ...props }) => {
-                    const processChildren = (children: React.ReactNode): React.ReactNode => {
-                      if (typeof children === 'string') {
-                        const parts = children.split(/({{file:[^}]+}})/g);
-                        return parts.map((part, index) => {
-                          const fileMatch = part.match(/^{{file:([^|]+)\|([^}]+)}}$/);
-                          if (fileMatch) {
-                            const [, fileId, linkText] = fileMatch;
-                            return <FileLink key={index} fileId={fileId}>{linkText}</FileLink>;
-                          }
-                          return part;
-                        });
-                      }
-                      return children;
-                    };
-                    
-                    return <span {...props}>{processChildren(children)}</span>;
-                  },
-                  a: ({ href, children, ...props }) => (
-                    <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
-                      {children}
-                    </a>
-                  )
-                }}
-              >
-                {formData.content || '*No hay contenido para previsualizar*'}
-              </ReactMarkdown>
+              <MarkdownProcessor content={formData.content || '*No hay contenido para previsualizar*'} />
             </div>
           )}
         </div>
@@ -352,6 +336,13 @@ const EditPost: React.FC = () => {
         isOpen={showFileLinkSelector}
         onClose={() => setShowFileLinkSelector(false)}
         onSelectFile={handleInsertFileLink}
+      />
+
+      {/* Post Link Selector Modal */}
+      <PostLinkSelector
+        isOpen={showPostLinkSelector}
+        onClose={() => setShowPostLinkSelector(false)}
+        onSelectPost={handleInsertPostLink}
       />
     </div>
   );

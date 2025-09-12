@@ -11,7 +11,7 @@ interface BlogStore {
   error: string | null;
 
   // Posts actions
-  fetchPosts: (categoryId?: string) => Promise<void>;
+  fetchPosts: (categoryId?: string, includeUnpublished?: boolean) => Promise<void>;
   fetchPost: (id: string) => Promise<void>;
   createPost: (post: PostCreate) => Promise<void>;
   updatePost: (id: string, post: PostUpdate) => Promise<void>;
@@ -36,10 +36,15 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
   commentsLoading: false,
   error: null,
 
-  fetchPosts: async (categoryId?: string) => {
+  fetchPosts: async (categoryId?: string, includeUnpublished?: boolean) => {
     set({ loading: true, error: null });
     try {
-      const posts = await postsApi.getAll(categoryId);
+      let posts;
+      if (includeUnpublished) {
+        posts = await postsApi.getAllIncludingDrafts(categoryId, includeUnpublished);
+      } else {
+        posts = await postsApi.getAll(categoryId);
+      }
       set({ posts, loading: false });
     } catch (error) {
       set({ error: 'Failed to fetch posts', loading: false });
