@@ -9,7 +9,7 @@ interface AuthStore {
   error: string | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  heartbeatInterval: NodeJS.Timeout | null;
+  heartbeatInterval: ReturnType<typeof setInterval> | null;
 
   // Actions
   login: (credentials: LoginRequest) => Promise<boolean>;
