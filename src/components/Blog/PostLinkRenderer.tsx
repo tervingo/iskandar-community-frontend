@@ -69,17 +69,8 @@ const PostLink: React.FC<PostLinkProps> = ({ postId, children }) => {
   };
 
   const handleClick = () => {
-    // Before opening new window, store temp token for cross-window access
-    const token = sessionStorage.getItem('auth_token');
-    if (token) {
-      localStorage.setItem('auth_token_temp', token);
-      // Clear temp token after a short delay
-      setTimeout(() => {
-        localStorage.removeItem('auth_token_temp');
-      }, 10000);
-    }
-
-    window.open(getPostUrl(), '_blank', 'noopener,noreferrer');
+    // Open post links in the same tab to maintain session
+    window.location.href = getPostUrl();
   };
 
   return (

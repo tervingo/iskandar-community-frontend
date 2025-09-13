@@ -20,7 +20,7 @@ interface AuthStore {
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
-  token: sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token_temp'),
+  token: sessionStorage.getItem('auth_token'),
   loading: false,
   error: null,
   isAuthenticated: false,
@@ -31,13 +31,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       const response: LoginResponse = await authApi.login(credentials);
       
-      // Store token in sessionStorage (and temporarily in localStorage for new windows)
+      // Store token only in sessionStorage
       sessionStorage.setItem('auth_token', response.access_token);
-      localStorage.setItem('auth_token_temp', response.access_token);
-      // Clear temp token after a short delay
-      setTimeout(() => {
-        localStorage.removeItem('auth_token_temp');
-      }, 5000);
       
       set({ 
         user: response.user,
@@ -58,6 +53,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   logout: () => {
     sessionStorage.removeItem('auth_token');
+    // Clean up any leftover localStorage tokens
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_token_temp');
     set({ 
@@ -94,20 +90,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   initAuth: () => {
     // Clean up any old persistent tokens from previous versions
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_token_temp');
 
-    // First try sessionStorage (main session)
-    let token = sessionStorage.getItem('auth_token');
-
-    // If no session token but there's a temp token (new window case)
-    if (!token) {
-      const tempToken = localStorage.getItem('auth_token_temp');
-      if (tempToken) {
-        // Move temp token to session for this window
-        sessionStorage.setItem('auth_token', tempToken);
-        token = tempToken;
-      }
-    }
-
+    // Only use sessionStorage
+    const token = sessionStorage.getItem('auth_token');
     if (token) {
       set({ token });
       get().getCurrentUser();
