@@ -20,7 +20,7 @@ interface AuthStore {
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
-  token: sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token'),
+  token: sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token_temp'),
   loading: false,
   error: null,
   isAuthenticated: false,
@@ -92,6 +92,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   clearError: () => set({ error: null }),
 
   initAuth: () => {
+    // Clean up any old persistent tokens from previous versions
+    localStorage.removeItem('auth_token');
+
     // First try sessionStorage (main session)
     let token = sessionStorage.getItem('auth_token');
 
