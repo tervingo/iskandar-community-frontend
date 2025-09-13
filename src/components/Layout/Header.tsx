@@ -92,13 +92,7 @@ const Header: React.FC = () => {
                 >
                   Iniciar Sesión
                 </button>
-                <button 
-                  onClick={handleRegister}
-                  className="btn btn-secondary"
-                >
-                  Registrarse
-                </button>
-              </div>
+               </div>
             )}
           </div>
         </div>

@@ -11,6 +11,8 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
   const [file, setFile] = useState<FileItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
 
   useEffect(() => {
     const fetchFile = async () => {
@@ -180,6 +182,76 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
     return '📎';
   };
 
+  // Render images inline
+  if (file.file_type.startsWith('image/')) {
+    return (
+      <div className="embedded-image" style={{ margin: '10px 0' }}>
+        {imageError ? (
+          // Show fallback link if image fails to load
+          <div
+            onClick={handleClick}
+            style={{
+              padding: '10px',
+              border: '2px dashed #ccc',
+              borderRadius: '4px',
+              textAlign: 'center',
+              cursor: 'pointer',
+              color: '#666'
+            }}
+          >
+            🖼️ {children || file.original_name}
+            <div style={{ fontSize: '12px', marginTop: '4px' }}>
+              (Click to view image)
+            </div>
+          </div>
+        ) : (
+          <>
+            {imageLoading && (
+              <div style={{
+                padding: '20px',
+                textAlign: 'center',
+                color: '#666',
+                fontSize: '14px'
+              }}>
+                Loading image...
+              </div>
+            )}
+            <img
+              src={file.cloudinary_url}
+              alt={file.original_name}
+              title={`${file.original_name} (${file.file_type}) - Click to view full size`}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '500px',
+                height: 'auto',
+                borderRadius: '4px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                cursor: 'pointer',
+                display: imageLoading ? 'none' : 'block',
+                objectFit: 'contain'
+              }}
+              onClick={handleClick}
+              onLoad={() => setImageLoading(false)}
+              onError={() => {
+                setImageError(true);
+                setImageLoading(false);
+              }}
+            />
+          </>
+        )}
+        <div style={{
+          fontSize: '12px',
+          color: '#666',
+          marginTop: '4px',
+          textAlign: 'center'
+        }}>
+          📷 {children || file.original_name}
+        </div>
+      </div>
+    );
+  }
+
+  // Render other file types as links
   return (
     <span
       onClick={handleClick}
