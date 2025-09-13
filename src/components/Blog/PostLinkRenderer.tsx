@@ -35,7 +35,7 @@ const PostLink: React.FC<PostLinkProps> = ({ postId, children }) => {
 
   const getPostUrl = () => {
     if (!post) return '#';
-    return `/blog/posts/${post.id}`;
+    return `/blog/${post.id}`;
   };
 
   if (loading) {
