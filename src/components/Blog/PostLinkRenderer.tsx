@@ -68,11 +68,27 @@ const PostLink: React.FC<PostLinkProps> = ({ postId, children }) => {
     return '📄';
   };
 
+  const handleClick = () => {
+    // Before opening new window, store temp token for cross-window access
+    const token = sessionStorage.getItem('auth_token');
+    if (token) {
+      localStorage.setItem('auth_token_temp', token);
+      // Clear temp token after a short delay
+      setTimeout(() => {
+        localStorage.removeItem('auth_token_temp');
+      }, 10000);
+    }
+
+    window.open(getPostUrl(), '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <a
       href={getPostUrl()}
-      target="_blank"
-      rel="noopener noreferrer"
+      onClick={(e) => {
+        e.preventDefault();
+        handleClick();
+      }}
       className="post-link"
       title={`${post.title} by ${post.author_name}`}
       style={{
@@ -81,7 +97,8 @@ const PostLink: React.FC<PostLinkProps> = ({ postId, children }) => {
         textDecoration: 'none',
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '4px'
+        gap: '4px',
+        cursor: 'pointer'
       }}
     >
       <span style={{ fontSize: '0.9em' }}>{getPostIcon(post)}</span>

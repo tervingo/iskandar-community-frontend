@@ -12,19 +12,25 @@ const MarkdownProcessor: React.FC<MarkdownProcessorProps> = ({ content }) => {
   // Pre-process the content to replace file and post links with special markers
   const processContent = (content: string): string => {
     let processedContent = content;
-    
-    // Replace file links [text](file:id) with {{FILE_LINK:id:text}}
+
+    // Replace file links {{file:id|text}} with {{FILE_LINK:id:text}}
+    processedContent = processedContent.replace(
+      /\{\{file:([a-fA-F0-9]+)\|([^}]+)\}\}/g,
+      '{{FILE_LINK:$1:$2}}'
+    );
+
+    // Also handle markdown-style file links [text](file:id) with {{FILE_LINK:id:text}}
     processedContent = processedContent.replace(
       /\[([^\]]+)\]\(file:([a-fA-F0-9]+)\)/g,
       '{{FILE_LINK:$2:$1}}'
     );
-    
+
     // Replace post links {{post:id|text}} with {{POST_LINK:id:text}}
     processedContent = processedContent.replace(
       /\{\{post:([a-fA-F0-9]+)\|([^}]+)\}\}/g,
       '{{POST_LINK:$1:$2}}'
     );
-    
+
     return processedContent;
   };
 
