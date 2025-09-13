@@ -227,6 +227,15 @@ export const authApi = {
   changePassword: async (passwordData: PasswordChangeRequest): Promise<void> => {
     await api.post('/auth/change-password', passwordData);
   },
+
+  heartbeat: async (): Promise<void> => {
+    await api.post('/auth/heartbeat');
+  },
+
+  getOnlineUsers: async (): Promise<{online_users: User[], count: number}> => {
+    const response = await api.get('/auth/online-users');
+    return response.data;
+  },
 };
 
 // Alias for posts API (for compatibility with existing components)

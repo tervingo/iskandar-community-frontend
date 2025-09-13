@@ -108,6 +108,7 @@ export interface User {
   is_active: boolean;
   avatar?: string;
   phone?: string;
+  last_seen?: string;
 }
 
 export interface LoginRequest {
