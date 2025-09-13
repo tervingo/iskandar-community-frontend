@@ -16,11 +16,6 @@ const Header: React.FC = () => {
     setShowAuthModal(true);
   };
 
-  const handleRegister = () => {
-    setAuthMode('register');
-    setShowAuthModal(true);
-  };
-
   const handleLogout = () => {
     logout();
   };
