@@ -52,9 +52,9 @@ const App: React.FC = () => {
           <Route 
             path="/blog/:id" 
             element={
-              <RedirectRoute>
+              <ProtectedRoute>
                 <PostDetail />
-              </RedirectRoute>
+              </ProtectedRoute>
             } 
           />
           <Route 

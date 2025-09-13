@@ -20,7 +20,7 @@ interface AuthStore {
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
-  token: sessionStorage.getItem('auth_token'),
+  token: localStorage.getItem('auth_token'),
   loading: false,
   error: null,
   isAuthenticated: false,
@@ -31,8 +31,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       const response: LoginResponse = await authApi.login(credentials);
       
-      // Store token in sessionStorage
-      sessionStorage.setItem('auth_token', response.access_token);
+      // Store token in localStorage
+      localStorage.setItem('auth_token', response.access_token);
       
       set({ 
         user: response.user,
@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
 
   logout: () => {
-    sessionStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_token');
     set({ 
       user: null, 
       token: null, 
@@ -85,7 +85,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   clearError: () => set({ error: null }),
 
   initAuth: () => {
-    const token = sessionStorage.getItem('auth_token');
+    const token = localStorage.getItem('auth_token');
     if (token) {
       set({ token });
       get().getCurrentUser();
