@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Post } from '../../types';
 import { blogApi } from '../../services/api';
 
@@ -12,7 +11,6 @@ const PostLink: React.FC<PostLinkProps> = ({ postId, children }) => {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -35,14 +33,9 @@ const PostLink: React.FC<PostLinkProps> = ({ postId, children }) => {
     }
   }, [postId]);
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!post) return;
-
-    // Navigate to the post
-    navigate(`/blog/posts/${post.id}`);
+  const getPostUrl = () => {
+    if (!post) return '#';
+    return `/blog/posts/${post.id}`;
   };
 
   if (loading) {
@@ -76,14 +69,16 @@ const PostLink: React.FC<PostLinkProps> = ({ postId, children }) => {
   };
 
   return (
-    <span
-      onClick={handleClick}
+    <a
+      href={getPostUrl()}
+      target="_blank"
+      rel="noopener noreferrer"
       className="post-link"
       title={`${post.title} by ${post.author_name}`}
       style={{
         color: '#3498db',
         borderBottom: '1px dotted #3498db',
-        cursor: 'pointer',
+        textDecoration: 'none',
         display: 'inline-flex',
         alignItems: 'center',
         gap: '4px'
@@ -91,7 +86,7 @@ const PostLink: React.FC<PostLinkProps> = ({ postId, children }) => {
     >
       <span style={{ fontSize: '0.9em' }}>{getPostIcon(post)}</span>
       {children}
-    </span>
+    </a>
   );
 };
 
