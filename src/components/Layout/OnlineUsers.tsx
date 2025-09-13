@@ -13,9 +13,11 @@ const OnlineUsers: React.FC = () => {
 
     try {
       const response = await authApi.getOnlineUsers();
+      console.log('Online users fetched:', response); // Debug log
       setOnlineUsers(response.online_users);
     } catch (error) {
       console.warn('Failed to fetch online users:', error);
+      // Keep existing users on error instead of clearing
     }
   }, [isAuthenticated]);
 
@@ -34,7 +36,7 @@ const OnlineUsers: React.FC = () => {
     };
   }, [isAuthenticated, user, fetchOnlineUsers]);
 
-  if (!isAuthenticated || onlineUsers.length === 0) {
+  if (!isAuthenticated) {
     return null;
   }
 
@@ -104,7 +106,7 @@ const OnlineUsers: React.FC = () => {
             zIndex: 1000
           }}
         >
-          <div 
+          <div
             style={{
               fontSize: '11px',
               color: '#656d76',
@@ -114,7 +116,20 @@ const OnlineUsers: React.FC = () => {
           >
             Usuarios conectados
           </div>
-          {onlineUsers.map((onlineUser) => (
+          {onlineUsers.length === 0 ? (
+            <div
+              style={{
+                fontSize: '12px',
+                color: '#656d76',
+                padding: '8px 4px',
+                textAlign: 'center',
+                fontStyle: 'italic'
+              }}
+            >
+              No hay usuarios conectados
+            </div>
+          ) : (
+            onlineUsers.map((onlineUser) => (
             <div
               key={onlineUser.id}
               style={{
@@ -154,7 +169,8 @@ const OnlineUsers: React.FC = () => {
                 </span>
               )}
             </div>
-          ))}
+          ))
+          )}
         </div>
       )}
     </div>
