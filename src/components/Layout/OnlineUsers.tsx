@@ -1,58 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '../../stores/authStore';
-import { socketService } from '../../services/socket';
-
-interface OnlineUser {
-  id: string;
-  name: string;
-  role?: string;
-}
+import { authApi } from '../../services/api';
+import { User } from '../../types';
 
 const OnlineUsers: React.FC = () => {
   const { user, isAuthenticated } = useAuthStore();
-  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const fetchOnlineUsers = useCallback(async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      const response = await authApi.getOnlineUsers();
+      setOnlineUsers(response.online_users);
+    } catch (error) {
+      console.warn('Failed to fetch online users:', error);
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!isAuthenticated || !user) return;
 
-    // Connect to socket if not already connected
-    socketService.connect();
+    // Initial fetch
+    fetchOnlineUsers();
 
-    // Listen for online users updates
-    const handleUsersUpdate = (users: OnlineUser[]) => {
-      setOnlineUsers(users);
-    };
-
-    const socket = socketService.getSocket();
-    if (!socket) return;
-
-    // Handle connection
-    const handleConnect = () => {
-      socket.emit('user_online', {
-        id: user.id,
-        name: user.name,
-        role: user.role
-      });
-    };
-
-    // Check if already connected
-    if (socket.connected) {
-      handleConnect();
-    } else {
-      socket.on('connect', handleConnect);
-    }
-
-    // Listen for updates
-    socket.on('users_online_update', handleUsersUpdate);
+    // Poll every 30 seconds for online users
+    const interval = setInterval(fetchOnlineUsers, 30000);
 
     // Cleanup on unmount
     return () => {
-      socket.emit('user_offline', user.id);
-      socket.off('connect', handleConnect);
-      socket.off('users_online_update', handleUsersUpdate);
+      clearInterval(interval);
     };
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, fetchOnlineUsers]);
 
   if (!isAuthenticated || onlineUsers.length === 0) {
     return null;
@@ -62,9 +42,15 @@ const OnlineUsers: React.FC = () => {
 
   return (
     <div className="online-users">
-      <div 
+      <div
         className="online-indicator"
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => {
+          setIsExpanded(!isExpanded);
+          // Refresh online users when opening dropdown
+          if (!isExpanded) {
+            fetchOnlineUsers();
+          }
+        }}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -129,7 +115,7 @@ const OnlineUsers: React.FC = () => {
             Usuarios conectados
           </div>
           {onlineUsers.map((onlineUser) => (
-            <div 
+            <div
               key={onlineUser.id}
               style={{
                 display: 'flex',
@@ -141,7 +127,7 @@ const OnlineUsers: React.FC = () => {
                 backgroundColor: onlineUser.id === user?.id ? 'rgba(46, 160, 67, 0.08)' : 'transparent'
               }}
             >
-              <div 
+              <div
                 style={{
                   width: '6px',
                   height: '6px',
@@ -154,7 +140,7 @@ const OnlineUsers: React.FC = () => {
                 {onlineUser.id === user?.id && ' (tú)'}
               </span>
               {onlineUser.role === 'admin' && (
-                <span 
+                <span
                   style={{
                     fontSize: '10px',
                     color: '#0969da',
