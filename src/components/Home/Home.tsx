@@ -20,7 +20,7 @@ const Home: React.FC = () => {
             Replace this placeholder text with your explanation about the library.
             You can add multiple paragraphs by using multiple <p> tags.
           */}
-            <p><b>Iskandar</b> es el nombre en árabe para Alejandro, e <b>Iskandariya</b> es el nombre para la ciudad de Alejandría, donde estaba 
+            <p><b>Yskandar</b> es el nombre en árabe para Alejandro, e <b>Yskandariya</b> es el nombre para la ciudad de Alejandría, donde estaba 
             la biblioteca más famosa del mundo, la <b>biblioteca de Alejandría</b>. </p>
 
         </div>

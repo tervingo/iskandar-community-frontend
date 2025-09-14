@@ -95,6 +95,9 @@ export interface FileItem {
   category_name?: string;
   source_type?: string;
   original_url?: string;
+  video_id?: string;
+  embed_url?: string;
+  thumbnail_url?: string;
 }
 
 // Authentication types

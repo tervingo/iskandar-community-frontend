@@ -19,6 +19,11 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
       try {
         setLoading(true);
         const fileData = await filesApi.getById(fileId);
+        console.log('FileLinkRenderer - File data:', fileData); // Debug log
+        console.log('FileLinkRenderer - File type:', fileData.file_type); // Debug log
+        console.log('FileLinkRenderer - Source type:', fileData.source_type); // Debug log
+        console.log('FileLinkRenderer - Video ID:', fileData.video_id); // Debug log
+        console.log('FileLinkRenderer - Embed URL:', fileData.embed_url); // Debug log
         setFile(fileData);
         setError(null);
       } catch (err) {
@@ -174,6 +179,7 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
   }
 
   const getFileIcon = (file: FileItem) => {
+    if (file.file_type === 'video/youtube') return '▶️';
     if (file.source_type === 'url') return '🔗';
     if (file.file_type.startsWith('image/')) return '🖼️';
     if (file.file_type.startsWith('video/')) return '🎥';
@@ -246,6 +252,67 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
           textAlign: 'center'
         }}>
           📷 {children || file.original_name}
+        </div>
+      </div>
+    );
+  }
+
+  // Render YouTube videos inline
+  if (file.file_type === 'video/youtube' && file.embed_url) {
+    console.log('Rendering YouTube video with embed URL:', file.embed_url); // Debug log
+    return (
+      <div className="embedded-youtube" style={{ margin: '10px 0' }}>
+        <div style={{
+          position: 'relative',
+          paddingBottom: '56.25%', // 16:9 aspect ratio
+          height: 0,
+          overflow: 'hidden',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}>
+          <iframe
+            src={file.embed_url}
+            title={file.original_name}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              borderRadius: '8px'
+            }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            loading="lazy"
+          />
+        </div>
+        <div style={{
+          fontSize: '12px',
+          color: '#666',
+          marginTop: '8px',
+          textAlign: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '6px'
+        }}>
+          <span>▶️</span>
+          <span>{children || file.original_name}</span>
+          <a
+            href={file.original_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: '#3498db',
+              textDecoration: 'none',
+              fontSize: '11px',
+              marginLeft: '8px',
+              opacity: 0.8
+            }}
+          >
+            (View on YouTube)
+          </a>
         </div>
       </div>
     );
