@@ -144,3 +144,27 @@ export interface PasswordChangeRequest {
   current_password: string;
   new_password: string;
 }
+
+// News types
+export interface News {
+  id: string;
+  title: string;
+  url: string;
+  comment?: string;
+  created_by: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface NewsCreate {
+  title: string;
+  url: string;
+  comment?: string;
+  created_by: string;
+}
+
+export interface NewsUpdate {
+  title?: string;
+  url?: string;
+  comment?: string;
+}

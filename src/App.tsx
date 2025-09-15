@@ -9,6 +9,7 @@ import PostDetail from './components/Blog/PostDetail';
 import MyDrafts from './components/Blog/MyDrafts';
 import ChatRoom from './components/Chat/ChatRoom';
 import FileRepository from './components/Files/FileRepository';
+import News from './components/News/News';
 import AdminPanel from './components/Admin/AdminPanel';
 import CategoryManagement from './components/Admin/CategoryManagement';
 import AdminNotifications from './components/Admin/AdminNotifications';
@@ -81,13 +82,21 @@ const App: React.FC = () => {
               </RedirectRoute>
             } 
           />
-          <Route 
-            path="/files" 
+          <Route
+            path="/files"
             element={
               <RedirectRoute>
                 <FileRepository />
               </RedirectRoute>
-            } 
+            }
+          />
+          <Route
+            path="/news"
+            element={
+              <RedirectRoute>
+                <News />
+              </RedirectRoute>
+            }
           />
           <Route 
             path="/admin" 

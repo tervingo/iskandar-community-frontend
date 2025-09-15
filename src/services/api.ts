@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Post, PostCreate, PostUpdate, PostPublish, Comment, CommentCreate, CommentUpdate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest, Category, CategoryCreate, CategoryUpdate } from '../types';
+import { Post, PostCreate, PostUpdate, PostPublish, Comment, CommentCreate, CommentUpdate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest, Category, CategoryCreate, CategoryUpdate, News, NewsCreate, NewsUpdate } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -234,6 +234,38 @@ export const authApi = {
 
   getOnlineUsers: async (): Promise<{online_users: User[], count: number}> => {
     const response = await api.get('/auth/online-users');
+    return response.data;
+  },
+};
+
+// News API
+export const newsApi = {
+  getAll: async (): Promise<News[]> => {
+    const response = await api.get('/news');
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<News> => {
+    const response = await api.get(`/news/${id}`);
+    return response.data;
+  },
+
+  create: async (news: Omit<NewsCreate, 'created_by'>): Promise<News> => {
+    const response = await api.post('/news', news);
+    return response.data;
+  },
+
+  update: async (id: string, news: NewsUpdate): Promise<News> => {
+    const response = await api.put(`/news/${id}`, news);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/news/${id}`);
+  },
+
+  initialize: async (): Promise<{ message: string; sample_article_id?: string; collection_name: string }> => {
+    const response = await api.post('/news/initialize');
     return response.data;
   },
 };

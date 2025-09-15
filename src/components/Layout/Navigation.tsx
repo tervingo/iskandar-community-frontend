@@ -21,11 +21,17 @@ const Navigation: React.FC = () => {
         >
           💬 Chat
         </NavLink>
-        <NavLink 
-          to="/files" 
+        <NavLink
+          to="/files"
           className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
         >
           📁 Files
+        </NavLink>
+        <NavLink
+          to="/news"
+          className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
+        >
+          📰 Noticias
         </NavLink>
       </div>
     </nav>
