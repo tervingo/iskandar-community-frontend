@@ -260,15 +260,29 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
   // Render YouTube videos inline
   if (file.file_type === 'video/youtube' && file.embed_url) {
     console.log('Rendering YouTube video with embed URL:', file.embed_url); // Debug log
+
+    // Determine display title - prefer children over original_name, and clean up generic titles
+    let displayTitle = children || file.original_name;
+    if (typeof displayTitle === 'string' && (
+      displayTitle.includes('YouTube Video') && displayTitle.length < 20
+    )) {
+      displayTitle = 'YouTube Video';
+    }
+
+    // Check if this is a YouTube Shorts URL for different aspect ratio
+    const isShorts = file.original_url?.includes('/shorts/');
+    const aspectRatio = isShorts ? '56.25%' : '56.25%'; // Keep 16:9 for consistency, Shorts will fit
+
     return (
       <div className="embedded-youtube" style={{ margin: '10px 0' }}>
         <div style={{
           position: 'relative',
-          paddingBottom: '56.25%', // 16:9 aspect ratio
+          paddingBottom: aspectRatio,
           height: 0,
           overflow: 'hidden',
           borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          backgroundColor: '#000' // Background for loading state
         }}>
           <iframe
             src={file.embed_url}
@@ -282,23 +296,43 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
               border: 'none',
               borderRadius: '8px'
             }}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
             allowFullScreen
             loading="lazy"
           />
         </div>
         <div style={{
-          fontSize: '12px',
-          color: '#666',
+          fontSize: '13px',
+          color: '#555',
           marginTop: '8px',
-          textAlign: 'center',
+          padding: '8px 12px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '6px',
+          border: '1px solid #e9ecef',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '6px'
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px'
         }}>
-          <span>▶️</span>
-          <span>{children || file.original_name}</span>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            flex: 1,
+            minWidth: 0 // Allow text to truncate
+          }}>
+            <span style={{ fontSize: '16px' }}>{isShorts ? '📱' : '▶️'}</span>
+            <span style={{
+              fontWeight: '500',
+              color: '#333',
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap'
+            }}>
+              {isShorts ? `${displayTitle} (Short)` : displayTitle}
+            </span>
+          </div>
           <a
             href={file.original_url}
             target="_blank"
@@ -306,12 +340,24 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
             style={{
               color: '#3498db',
               textDecoration: 'none',
-              fontSize: '11px',
-              marginLeft: '8px',
-              opacity: 0.8
+              fontSize: '12px',
+              fontWeight: '500',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              border: '1px solid #3498db',
+              transition: 'all 0.2s ease',
+              flexShrink: 0
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#3498db';
+              e.currentTarget.style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#3498db';
             }}
           >
-            (View on YouTube)
+            Watch on YouTube
           </a>
         </div>
       </div>

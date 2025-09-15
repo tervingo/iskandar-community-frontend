@@ -335,8 +335,11 @@ const FileRepository: React.FC = () => {
   };
 
   const getFileIcon = (file: FileItem): string => {
+    if (file.file_type === 'video/youtube') {
+      return file.original_url?.includes('/shorts/') ? '📱' : '▶️';
+    }
     if (file.source_type === 'url') return '🔗';
-    
+
     const type = file.file_type.toLowerCase();
     if (type.includes('pdf')) return '📄';
     if (type.startsWith('image/')) return '🖼️';
@@ -586,94 +589,174 @@ const FileRepository: React.FC = () => {
                 
                 <div className="file-grid-compact">
                   {group.files.map((file) => (
-                    <div key={file.id} className="file-card-compact" title={file.description || file.original_name}>
-                      <div className="file-card-header">
-                        <span className="file-icon-compact">{getFileIcon(file)}</span>
-                        <div className="file-title-section">
-                          <h3 className="file-name-compact" title={file.original_name}>
-                            {file.original_name}
-                          </h3>
-                          <div className="file-type-size">
-                            <span className="file-type-badge">{getFileTypeDisplay(file)}</span>
-                            <span className="file-size-compact">{formatFileSize(file.file_size)}</span>
+                    <div key={file.id} className={`file-card-compact ${file.file_type === 'video/youtube' ? 'youtube-video-card' : ''}`} title={file.description || file.original_name}>
+                      {/* YouTube Video Embed */}
+                      {file.file_type === 'video/youtube' && file.embed_url ? (
+                        <div className="youtube-embed-container">
+                          <div className="youtube-video-wrapper" style={{
+                            position: 'relative',
+                            paddingBottom: '56.25%', // 16:9 aspect ratio
+                            height: 0,
+                            overflow: 'hidden',
+                            borderRadius: '8px',
+                            marginBottom: '12px',
+                            backgroundColor: '#000',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                          }}>
+                            <iframe
+                              src={file.embed_url}
+                              title={file.original_name}
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                border: 'none',
+                                borderRadius: '8px'
+                              }}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                              allowFullScreen
+                              loading="lazy"
+                            />
+                          </div>
+
+                          <div className="file-card-header">
+                            <span className="file-icon-compact">{file.original_url?.includes('/shorts/') ? '📱' : '▶️'}</span>
+                            <div className="file-title-section">
+                              <h3 className="file-name-compact" title={file.original_name}>
+                                {file.original_name}{file.original_url?.includes('/shorts/') ? ' (Short)' : ''}
+                              </h3>
+                              <div className="file-type-size">
+                                <span className="file-type-badge">{getFileTypeDisplay(file)}</span>
+                                <span className="file-size-compact">{formatFileSize(file.file_size)}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {file.description && (
+                            <p className="file-description-compact" title={file.description}>
+                              {file.description}
+                            </p>
+                          )}
+
+                          <div className="file-meta-compact">
+                            <span>por {file.uploaded_by}</span>
+                            <span>{new Date(file.uploaded_at).toLocaleDateString()}</span>
+                          </div>
+
+                          <div className="file-actions-compact">
+                            <button
+                              onClick={() => window.open(file.original_url || file.cloudinary_url, '_blank')}
+                              className="btn btn-secondary btn-xs"
+                              title="Ver en YouTube"
+                            >
+                              Ver en YouTube
+                            </button>
+
+                            {canDeleteFile(file) && (
+                              <button
+                                onClick={() => handleDelete(file)}
+                                className="btn btn-danger btn-xs"
+                                disabled={loading}
+                                title="Eliminar archivo"
+                              >
+                                Eliminar
+                              </button>
+                            )}
                           </div>
                         </div>
-                      </div>
-                      
-                      {file.description && (
-                        <p className="file-description-compact" title={file.description}>
-                          {file.description}
-                        </p>
+                      ) : (
+                        <>
+                          <div className="file-card-header">
+                            <span className="file-icon-compact">{getFileIcon(file)}</span>
+                            <div className="file-title-section">
+                              <h3 className="file-name-compact" title={file.original_name}>
+                                {file.original_name}
+                              </h3>
+                              <div className="file-type-size">
+                                <span className="file-type-badge">{getFileTypeDisplay(file)}</span>
+                                <span className="file-size-compact">{formatFileSize(file.file_size)}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {file.description && (
+                            <p className="file-description-compact" title={file.description}>
+                              {file.description}
+                            </p>
+                          )}
+
+                          <div className="file-meta-compact">
+                            <span>por {file.uploaded_by}</span>
+                            <span>{new Date(file.uploaded_at).toLocaleDateString()}</span>
+                          </div>
+
+                          <div className="file-actions-compact">
+                            {file.source_type === 'url' ? (
+                              <button
+                                onClick={() => window.open(file.original_url || file.cloudinary_url, '_blank')}
+                                className="btn btn-primary btn-xs"
+                                title="Abrir URL"
+                              >
+                                Abrir
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleDownload(file)}
+                                className="btn btn-primary btn-xs"
+                                title="Descargar archivo"
+                              >
+                                Descargar
+                              </button>
+                            )}
+
+                            {file.file_type === 'application/pdf' && file.source_type !== 'url' && (
+                              <button
+                                onClick={() => handleViewPDF(file)}
+                                className="btn btn-secondary btn-xs"
+                                disabled={loading}
+                                title="Ver PDF"
+                              >
+                                Ver PDF
+                              </button>
+                            )}
+
+                            {isImageFile(file) && file.source_type !== 'url' && (
+                              <button
+                                onClick={() => handleViewImage(file)}
+                                className="btn btn-secondary btn-xs"
+                                disabled={loading}
+                                title="Ver imagen"
+                              >
+                                Ver
+                              </button>
+                            )}
+
+                            {isAudioFile(file) && file.source_type !== 'url' && (
+                              <button
+                                onClick={() => handlePlayAudio(file)}
+                                className="btn btn-secondary btn-xs"
+                                disabled={loading}
+                                title="Reproducir audio"
+                              >
+                                Play
+                              </button>
+                            )}
+
+                            {canDeleteFile(file) && (
+                              <button
+                                onClick={() => handleDelete(file)}
+                                className="btn btn-danger btn-xs"
+                                disabled={loading}
+                                title="Eliminar archivo"
+                              >
+                                Eliminar
+                              </button>
+                            )}
+                          </div>
+                        </>
                       )}
-                      
-                      <div className="file-meta-compact">
-                        <span>por {file.uploaded_by}</span>
-                        <span>{new Date(file.uploaded_at).toLocaleDateString()}</span>
-                      </div>
-                      
-                      <div className="file-actions-compact">
-                        {file.source_type === 'url' ? (
-                          <button 
-                            onClick={() => window.open(file.original_url || file.cloudinary_url, '_blank')}
-                            className="btn btn-primary btn-xs"
-                            title="Abrir URL"
-                          >
-                            Abrir
-                          </button>
-                        ) : (
-                          <button 
-                            onClick={() => handleDownload(file)}
-                            className="btn btn-primary btn-xs"
-                            title="Descargar archivo"
-                          >
-                            Descargar
-                          </button>
-                        )}
-                        
-                        {file.file_type === 'application/pdf' && file.source_type !== 'url' && (
-                          <button 
-                            onClick={() => handleViewPDF(file)}
-                            className="btn btn-secondary btn-xs"
-                            disabled={loading}
-                            title="Ver PDF"
-                          >
-                            Ver PDF
-                          </button>
-                        )}
-                        
-                        {isImageFile(file) && file.source_type !== 'url' && (
-                          <button 
-                            onClick={() => handleViewImage(file)}
-                            className="btn btn-secondary btn-xs"
-                            disabled={loading}
-                            title="Ver imagen"
-                          >
-                            Ver
-                          </button>
-                        )}
-                        
-                        {isAudioFile(file) && file.source_type !== 'url' && (
-                          <button 
-                            onClick={() => handlePlayAudio(file)}
-                            className="btn btn-secondary btn-xs"
-                            disabled={loading}
-                            title="Reproducir audio"
-                          >
-                            Play
-                          </button>
-                        )}
-                        
-                        {canDeleteFile(file) && (
-                          <button 
-                            onClick={() => handleDelete(file)}
-                            className="btn btn-danger btn-xs"
-                            disabled={loading}
-                            title="Eliminar archivo"
-                          >
-                            Eliminar
-                          </button>
-                        )}
-                      </div>
                     </div>
                   ))}
                 </div>
