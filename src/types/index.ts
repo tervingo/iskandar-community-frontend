@@ -160,7 +160,6 @@ export interface NewsCreate {
   title: string;
   url: string;
   comment?: string;
-  created_by: string;
 }
 
 export interface NewsUpdate {

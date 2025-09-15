@@ -250,7 +250,7 @@ export const newsApi = {
     return response.data;
   },
 
-  create: async (news: Omit<NewsCreate, 'created_by'>): Promise<News> => {
+  create: async (news: NewsCreate): Promise<News> => {
     const response = await api.post('/news', news);
     return response.data;
   },
