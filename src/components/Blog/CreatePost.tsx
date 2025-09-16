@@ -270,9 +270,9 @@ const CreatePost: React.FC = () => {
             className="btn btn-outline"
             disabled={loading || !formData.title.trim() || !formData.content.trim()}
             style={{
-              backgroundColor: 'transparent',
+              backgroundColor: 'chartreuse',
               border: '1px solid #6c757d',
-              color: '#6c757d'
+              color: 'black'
             }}
           >
             {loading ? 'Guardando...' : 'Guardar Borrador'}
@@ -282,6 +282,11 @@ const CreatePost: React.FC = () => {
             onClick={() => handleSubmit(true)}
             className="btn btn-primary"
             disabled={loading || !formData.title.trim() || !formData.content.trim()}
+            style={{
+              backgroundColor: 'aqua',
+              borderColor: 'aqua',
+              color: 'black'
+            }}
           >
             {loading ? 'Publicando...' : 'Publicar Post'}
           </button>

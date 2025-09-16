@@ -293,9 +293,9 @@ const EditPost: React.FC = () => {
             className="btn btn-outline"
             disabled={updating || !formData.title.trim() || !formData.content.trim()}
             style={{
-              backgroundColor: 'transparent',
+              backgroundColor: 'chartreuse',
               border: '1px solid #6c757d',
-              color: '#6c757d'
+              color: 'black'
             }}
           >
             {updating ? 'Guardando...' : 'Guardar Cambios'}
@@ -307,8 +307,9 @@ const EditPost: React.FC = () => {
               className="btn btn-success"
               disabled={updating || !formData.title.trim() || !formData.content.trim()}
               style={{
-                backgroundColor: '#27ae60',
-                borderColor: '#27ae60'
+                backgroundColor: 'aqua',
+                borderColor: 'aqua',
+                color: 'black'
               }}
             >
               {updating ? 'Publicando...' : 'Guardar y Publicar'}
