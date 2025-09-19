@@ -141,7 +141,10 @@ const AdminPanel: React.FC = () => {
           <a href="/admin/user-email-preferences" className="btn btn-outline">
             👥 User Preferences
           </a>
-          <button 
+          <a href="/admin/activity-logs" className="btn btn-outline">
+            📊 Activity Logs
+          </a>
+          <button
             onClick={() => setShowCreateUser(true)}
             className="btn btn-primary"
           >

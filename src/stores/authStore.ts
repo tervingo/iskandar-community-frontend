@@ -13,7 +13,7 @@ interface AuthStore {
 
   // Actions
   login: (credentials: LoginRequest) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   getCurrentUser: () => Promise<void>;
   clearError: () => void;
   initAuth: () => void;
@@ -58,9 +58,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
 
-  logout: () => {
+  logout: async () => {
     // Stop heartbeat first
     get().stopHeartbeat();
+
+    // Log the logout event before clearing the token
+    try {
+      console.log('Calling authApi.logout()...');
+      const result = await authApi.logout();
+      console.log('authApi.logout() completed successfully:', result);
+    } catch (error) {
+      // Even if logout logging fails, proceed with logout
+      console.error('Failed to log logout event:', error);
+    }
 
     sessionStorage.removeItem('auth_token');
     // Clean up any leftover localStorage tokens

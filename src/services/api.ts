@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Post, PostCreate, PostUpdate, PostPublish, Comment, CommentCreate, CommentUpdate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest, Category, CategoryCreate, CategoryUpdate, News, NewsCreate, NewsUpdate } from '../types';
+import { Post, PostCreate, PostUpdate, PostPublish, Comment, CommentCreate, CommentUpdate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest, Category, CategoryCreate, CategoryUpdate, News, NewsCreate, NewsUpdate, UserActivityLog, ActivityLogFilters, ActivityStats } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -195,6 +195,12 @@ export const authApi = {
     return response.data;
   },
 
+  logout: async (): Promise<any> => {
+    console.log('authApi.logout: Making POST request to /auth/logout');
+    const response = await api.post('/auth/logout');
+    console.log('authApi.logout: Response received:', response.data);
+    return response.data;
+  },
 
   getCurrentUser: async (): Promise<User> => {
     const response = await api.get('/auth/me');
@@ -266,6 +272,38 @@ export const newsApi = {
 
   initialize: async (): Promise<{ message: string; sample_article_id?: string; collection_name: string }> => {
     const response = await api.post('/news/initialize');
+    return response.data;
+  },
+};
+
+// Activity Logs API
+export const activityLogsApi = {
+  getAll: async (filters?: ActivityLogFilters): Promise<UserActivityLog[]> => {
+    const params = new URLSearchParams();
+    if (filters?.username) params.append('username', filters.username);
+    if (filters?.event_type) params.append('event_type', filters.event_type);
+    if (filters?.success !== undefined) params.append('success', filters.success.toString());
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.offset) params.append('offset', filters.offset.toString());
+
+    const response = await api.get(`/activity-logs?${params.toString()}`);
+    return response.data;
+  },
+
+  getStats: async (days: number = 30): Promise<ActivityStats> => {
+    const response = await api.get(`/activity-logs/stats?days=${days}`);
+    return response.data;
+  },
+
+  getUserLogs: async (username: string, limit: number = 50): Promise<UserActivityLog[]> => {
+    const response = await api.get(`/activity-logs/users/${username}?limit=${limit}`);
+    return response.data;
+  },
+
+  cleanup: async (days: number = 90): Promise<{ message: string; deleted_count: number; cutoff_date: string; days: number }> => {
+    const response = await api.delete(`/activity-logs/cleanup?days=${days}`);
     return response.data;
   },
 };

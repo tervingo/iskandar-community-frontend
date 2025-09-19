@@ -16,8 +16,8 @@ const Header: React.FC = () => {
     setShowAuthModal(true);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
   };
 
   return (

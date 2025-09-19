@@ -167,3 +167,49 @@ export interface NewsUpdate {
   url?: string;
   comment?: string;
 }
+
+// User Activity Log types
+export enum ActivityEventType {
+  LOGIN = "login",
+  LOGOUT = "logout",
+  PASSWORD_CHANGE = "password_change"
+}
+
+export interface UserActivityLog {
+  id: string;
+  timestamp: string;
+  username: string;
+  event_type: ActivityEventType;
+  ip_address?: string;
+  user_agent?: string;
+  success: boolean;
+  additional_info?: Record<string, any>;
+}
+
+export interface ActivityLogFilters {
+  username?: string;
+  event_type?: ActivityEventType;
+  success?: boolean;
+  start_date?: string;
+  end_date?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface ActivityStats {
+  period: {
+    start_date: string;
+    end_date: string;
+    days: number;
+  };
+  events: Record<string, {
+    successful: number;
+    failed: number;
+    total: number;
+  }>;
+  totals: {
+    total_events: number;
+    successful_events: number;
+    failed_events: number;
+  };
+}

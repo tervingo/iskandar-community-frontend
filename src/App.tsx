@@ -14,6 +14,7 @@ import AdminPanel from './components/Admin/AdminPanel';
 import CategoryManagement from './components/Admin/CategoryManagement';
 import AdminNotifications from './components/Admin/AdminNotifications';
 import UserEmailPreferences from './components/Admin/UserEmailPreferences';
+import UserActivityLogs from './components/Admin/UserActivityLogs';
 import EmailPreferences from './components/User/EmailPreferences';
 import AccountManagement from './components/User/AccountManagement';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
@@ -122,13 +123,21 @@ const App: React.FC = () => {
               </ProtectedRoute>
             } 
           />
-          <Route 
-            path="/admin/user-email-preferences" 
+          <Route
+            path="/admin/user-email-preferences"
             element={
               <ProtectedRoute requireAdmin={true}>
                 <UserEmailPreferences />
               </ProtectedRoute>
-            } 
+            }
+          />
+          <Route
+            path="/admin/activity-logs"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <UserActivityLogs />
+              </ProtectedRoute>
+            }
           />
           <Route 
             path="/profile/email-preferences" 
