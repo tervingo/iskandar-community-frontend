@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { useBlogStore } from '../../stores/blogStore';
 import { useAuthStore } from '../../stores/authStore';
 import { postsApi } from '../../services/api';
-import { Post } from '../../types';
 import CategorySidebar from './CategorySidebar';
 
 const PostList: React.FC = () => {
