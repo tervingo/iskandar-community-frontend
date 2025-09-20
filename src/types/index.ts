@@ -27,6 +27,7 @@ export interface Post {
   category_name?: string;
   is_published: boolean;
   published_at?: string;
+  pin_priority: number;
   created_at: string;
   updated_at: string;
 }
@@ -37,6 +38,7 @@ export interface PostCreate {
   author_name: string;
   category_id?: string;
   is_published?: boolean;
+  pin_priority?: number;
 }
 
 export interface PostUpdate {
@@ -44,10 +46,15 @@ export interface PostUpdate {
   content?: string;
   category_id?: string;
   is_published?: boolean;
+  pin_priority?: number;
 }
 
 export interface PostPublish {
   is_published: boolean;
+}
+
+export interface PostPinPriority {
+  pin_priority: number;
 }
 
 export interface Comment {

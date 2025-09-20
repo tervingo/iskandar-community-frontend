@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Post, PostCreate, PostUpdate, PostPublish, Comment, CommentCreate, CommentUpdate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest, Category, CategoryCreate, CategoryUpdate, News, NewsCreate, NewsUpdate, UserActivityLog, ActivityLogFilters, ActivityStats } from '../types';
+import { Post, PostCreate, PostUpdate, PostPublish, PostPinPriority, Comment, CommentCreate, CommentUpdate, ChatMessage, ChatMessageCreate, FileItem, LoginRequest, LoginResponse, RegisterRequest, User, PasswordChangeRequest, Category, CategoryCreate, CategoryUpdate, News, NewsCreate, NewsUpdate, UserActivityLog, ActivityLogFilters, ActivityStats } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -98,6 +98,11 @@ export const postsApi = {
 
   publish: async (id: string, publishData: PostPublish): Promise<Post> => {
     const response = await api.put(`/posts/${id}/publish`, publishData);
+    return response.data;
+  },
+
+  updatePinPriority: async (id: string, priorityData: PostPinPriority): Promise<Post> => {
+    const response = await api.put(`/posts/${id}/pin-priority`, priorityData);
     return response.data;
   },
 };
