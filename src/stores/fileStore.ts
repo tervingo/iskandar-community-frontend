@@ -26,7 +26,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       const files = await filesApi.getAll(categoryId);
       set({ files, loading: false });
     } catch (error) {
-      set({ error: 'Failed to fetch files', loading: false });
+      set({ error: 'Error al cargar los archivos', loading: false });
     }
   },
 
@@ -37,7 +37,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       const { files } = get();
       set({ files: [newFile, ...files], loading: false });
     } catch (error) {
-      set({ error: 'Failed to upload file', loading: false });
+      set({ error: 'Error al subir el archivo', loading: false });
     }
   },
 
@@ -48,7 +48,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       const { files } = get();
       set({ files: [newFile, ...files], loading: false });
     } catch (error) {
-      set({ error: 'Failed to add URL', loading: false });
+      set({ error: 'Error al agregar la URL', loading: false });
     }
   },
 
@@ -60,7 +60,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       const updatedFiles = files.filter(file => file.id !== id);
       set({ files: updatedFiles, loading: false });
     } catch (error) {
-      set({ error: 'Failed to delete file', loading: false });
+      set({ error: 'Error al eliminar el archivo', loading: false });
     }
   },
 

@@ -8,7 +8,7 @@ interface RegisterProps {
 const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
   return (
     <div className="auth-form">
-      <h2>Account Registration</h2>
+      <h2>Registro de Cuenta</h2>
       
       <div className="info-message" style={{ 
         backgroundColor: '#e3f2fd', 
@@ -18,12 +18,12 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
         marginBottom: '20px',
         color: '#1976d2'
       }}>
-        <h3 style={{ marginTop: 0, marginBottom: '12px' }}>Registration is Admin-Only</h3>
+        <h3 style={{ marginTop: 0, marginBottom: '12px' }}>El registro es solo para administradores</h3>
         <p style={{ marginBottom: '12px' }}>
-          This is a private community. New accounts can only be created by administrators.
+          Esta es una comunidad privada. Las nuevas cuentas solo pueden ser creadas por administradores.
         </p>
         <p style={{ marginBottom: 0 }}>
-          <strong>If you need an account:</strong> Please contact an administrator to create your account.
+          <strong>Si necesitas una cuenta:</strong> Por favor contacta a un administrador para crear tu cuenta.
         </p>
       </div>
 
@@ -34,7 +34,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
         padding: '16px',
         marginBottom: '20px'
       }}>
-        <h4 style={{ marginTop: 0, marginBottom: '8px' }}>Admin Login Details:</h4>
+        <h4 style={{ marginTop: 0, marginBottom: '8px' }}>Detalles de acceso de administrador:</h4>
         <p style={{ margin: 0, fontFamily: 'monospace', fontSize: '14px' }}>
           Email: admin@iskandar.com<br />
           Password: admin123
@@ -43,13 +43,13 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
 
       {onSwitchToLogin && (
         <p className="switch-auth">
-          Already have an account?{' '}
+          ¿Ya tienes una cuenta?{' '}
           <button 
             type="button" 
             className="link-button"
             onClick={onSwitchToLogin}
           >
-            Login here
+            Iniciar sesión aquí
           </button>
         </p>
       )}

@@ -49,11 +49,11 @@ const Header: React.FC = () => {
               </>
             ) : (
               <>
-                <span className="nav-link-disabled" title="Login required">Blog</span>
-                <span className="nav-link-disabled" title="Login required">Mis Borradores</span>
-                <span className="nav-link-disabled" title="Login required">Noticias</span>
-                <span className="nav-link-disabled" title="Login required">Chat</span>
-                <span className="nav-link-disabled" title="Login required">Archivo</span>
+                <span className="nav-link-disabled" title="Inicio de sesión requerido">Blog</span>
+                <span className="nav-link-disabled" title="Inicio de sesión requerido">Mis Borradores</span>
+                <span className="nav-link-disabled" title="Inicio de sesión requerido">Noticias</span>
+                <span className="nav-link-disabled" title="Inicio de sesión requerido">Chat</span>
+                <span className="nav-link-disabled" title="Inicio de sesión requerido">Archivo</span>
               </>
             )}
           </nav>

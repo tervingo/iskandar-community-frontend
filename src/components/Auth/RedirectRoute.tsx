@@ -16,7 +16,7 @@ const RedirectRoute: React.FC<RedirectRouteProps> = ({
   const { isAuthenticated, isAdmin, loading } = useAuthStore();
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return <div className="loading">Cargando...</div>;
   }
 
   if (!isAuthenticated) {

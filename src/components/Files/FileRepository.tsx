@@ -251,14 +251,14 @@ const FileRepository: React.FC = () => {
             <div class="header">
               <span>📄 ${file.original_name}</span>
               <div class="actions">
-                <a href="${file.cloudinary_url}" target="_blank">Direct View</a>
-                <a href="${file.cloudinary_url}" download="${file.original_name}">Download</a>
+                <a href="${file.cloudinary_url}" target="_blank">Vista Directa</a>
+                <a href="${file.cloudinary_url}" download="${file.original_name}">Descargar</a>
               </div>
             </div>
             <div class="pdf-container">
-              <div class="loading">Loading PDF viewer...</div>
+              <div class="loading">Cargando visor de PDF...</div>
               <iframe src="${googlePdfViewer}" onload="this.previousElementSibling.style.display='none'">
-                <p>Unable to load PDF viewer. <a href="${file.cloudinary_url}" target="_blank">Click here to view directly</a></p>
+                <p>No se puede cargar el visor de PDF. <a href="${file.cloudinary_url}" target="_blank">Haz clic aquí para ver directamente</a></p>
               </iframe>
             </div>
           </body>

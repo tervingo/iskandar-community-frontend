@@ -165,7 +165,7 @@ const FileLinkSelector: React.FC<FileLinkSelectorProps> = ({
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search files..."
+              placeholder="Buscar archivos..."
               style={{
                 padding: '6px 12px',
                 border: '1px solid #ddd',

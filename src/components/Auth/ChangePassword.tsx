@@ -25,17 +25,17 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onClose, onSuccess }) =
     setError(null);
 
     if (passwordData.new_password !== confirmPassword) {
-      setError('New passwords do not match');
+      setError('Las nuevas contraseñas no coinciden');
       return;
     }
 
     if (passwordData.new_password.length < 6) {
-      setError('New password must be at least 6 characters long');
+      setError('La nueva contraseña debe tener al menos 6 caracteres');
       return;
     }
 
     if (passwordData.current_password === passwordData.new_password) {
-      setError('New password must be different from current password');
+      setError('La nueva contraseña debe ser diferente de la actual');
       return;
     }
 
@@ -60,7 +60,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onClose, onSuccess }) =
       }, 2000);
       
     } catch (error: any) {
-      setError(error.response?.data?.detail || 'Failed to change password');
+      setError(error.response?.data?.detail || 'Error al cambiar la contraseña');
     } finally {
       setLoading(false);
     }
@@ -188,7 +188,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onClose, onSuccess }) =
         <div className="form-actions">
           {onClose && (
             <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
-              Cancel
+              Cancelar
             </button>
           )}
           <button 
@@ -196,7 +196,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ onClose, onSuccess }) =
             className="btn btn-primary"
             disabled={loading}
           >
-            {loading ? 'Changing Password...' : 'Change Password'}
+            {loading ? 'Cambiando contraseña...' : 'Cambiar Contraseña'}
           </button>
         </div>
       </form>

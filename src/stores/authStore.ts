@@ -51,7 +51,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       
       return true;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || 'Login failed';
+      const errorMessage = error.response?.data?.detail || 'Error al iniciar sesión';
       set({ error: errorMessage, loading: false });
       return false;
     }
@@ -69,7 +69,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       console.log('authApi.logout() completed successfully:', result);
     } catch (error) {
       // Even if logout logging fails, proceed with logout
-      console.error('Failed to log logout event:', error);
+      console.error('Error al registrar evento de cierre de sesión:', error);
     }
 
     sessionStorage.removeItem('auth_token');
@@ -136,7 +136,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
           await authApi.heartbeat();
         } catch (error: any) {
-          console.warn('Heartbeat failed:', error);
+          console.warn('Error de latido:', error);
           // If heartbeat fails due to invalid token, logout
           if (error?.response?.status === 401) {
             get().logout();

@@ -194,7 +194,7 @@ const PostLinkSelector: React.FC<PostLinkSelectorProps> = ({
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search posts..."
+              placeholder="Buscar entradas..."
               style={{
                 padding: '6px 12px',
                 border: '1px solid #ddd',

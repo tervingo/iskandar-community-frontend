@@ -28,8 +28,8 @@ const Home: React.FC = () => {
             <p>Este sitio pretende ser una comunidad virtual donde poder compartir información, opinión y conocimiento.</p>
           {/* 
             Example of how to add more paragraphs:
-            <p>Add another paragraph here if needed.</p>
-            <p>And another one here.</p>
+            <p>Agrega otro párrafo aquí si es necesario.</p>
+            <p>Y otro más aquí.</p>
           */}
         </div>
       </div>

@@ -179,14 +179,14 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
             <button 
               onClick={handleDownload}
               className="btn btn-sm btn-secondary"
-              title="Download audio file"
+              title="Descargar archivo de audio"
             >
-              📥 Download
+              📥 Descargar
             </button>
             <button 
               onClick={onClose}
               className="btn btn-sm btn-secondary"
-              title="Close (Esc)"
+              title="Cerrar (Esc)"
             >
               ✕
             </button>
@@ -204,7 +204,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
           preload="metadata"
         >
           <source src={currentAudio.cloudinary_url} />
-          Your browser does not support the audio element.
+          Tu navegador no soporta el elemento de audio.
         </audio>
 
         {/* Main Player Area */}
@@ -216,7 +216,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
             </div>
             {loading && (
               <div className="audio-loading">
-                Loading audio...
+                Cargando audio...
               </div>
             )}
             {error && (
@@ -226,7 +226,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                   onClick={() => setError(null)}
                   className="btn btn-sm btn-primary"
                 >
-                  Retry
+                  Reintentar
                 </button>
               </div>
             )}
@@ -239,7 +239,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                 onClick={goToPrevious}
                 disabled={currentIndex === 0}
                 className="btn btn-secondary"
-                title="Previous track (←)"
+                title="Pista anterior (←)"
               >
                 ⏮
               </button>
@@ -248,7 +248,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                 onClick={togglePlay}
                 disabled={loading || !!error}
                 className="btn btn-primary play-pause-btn"
-                title="Play/Pause (Space)"
+                title="Reproducir/Pausar (Espacio)"
               >
                 {loading ? '⏳' : isPlaying ? '⏸' : '▶'}
               </button>
@@ -257,7 +257,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                 onClick={goToNext}
                 disabled={currentIndex === audioFiles.length - 1}
                 className="btn btn-secondary"
-                title="Next track (→)"
+                title="Siguiente pista (→)"
               >
                 ⏭
               </button>
@@ -289,7 +289,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                 value={volume}
                 onChange={(e) => setVolume(parseFloat(e.target.value))}
                 className="volume-slider"
-                title="Volume (↑/↓)"
+                title="Volumen (↑/↓)"
               />
               <span className="volume-display">{Math.round(volume * 100)}%</span>
             </div>
@@ -302,7 +302,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
             <p className="audio-description">{currentAudio.description}</p>
           )}
           <div className="audio-details">
-            <span>Uploaded by {currentAudio.uploaded_by}</span>
+            <span>Subido por {currentAudio.uploaded_by}</span>
             <span>•</span>
             <span>{new Date(currentAudio.uploaded_at).toLocaleDateString()}</span>
             <span>•</span>
@@ -313,7 +313,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
         {/* Playlist */}
         {audioFiles.length > 1 && (
           <div className="audio-playlist">
-            <h4>Playlist ({audioFiles.length} tracks)</h4>
+            <h4>Lista de reproducción ({audioFiles.length} pistas)</h4>
             <div className="playlist-items">
               {audioFiles.map((audio, index) => (
                 <button

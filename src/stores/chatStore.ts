@@ -30,7 +30,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       const messages = await chatApi.getMessages();
       set({ messages, loading: false });
     } catch (error) {
-      set({ error: 'Failed to fetch messages', loading: false });
+      set({ error: 'Error al cargar los mensajes', loading: false });
     }
   },
 
@@ -47,7 +47,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       // Refetch messages to update the UI
       await get().fetchMessages();
     } catch (error) {
-      set({ error: 'Failed to send message' });
+      set({ error: 'Error al enviar el mensaje' });
     }
   },
 

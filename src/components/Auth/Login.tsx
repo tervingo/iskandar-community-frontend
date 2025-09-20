@@ -50,7 +50,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, shouldReset }) => {
 
   return (
     <div className="auth-form">
-      <h2>Login</h2>
+      <h2>Iniciar Sesión</h2>
       
       {error && (
         <div className="error-message">
@@ -60,7 +60,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, shouldReset }) => {
 
       <form onSubmit={handleSubmit} autoComplete="off">
         <div className="form-group">
-          <label htmlFor={`name-${fieldKey}`}>Name:</label>
+          <label htmlFor={`name-${fieldKey}`}>Usuario:</label>
           <input
             type="text"
             id={`name-${fieldKey}`}
@@ -69,7 +69,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, shouldReset }) => {
             onChange={handleChange}
             required
             disabled={loading}
-            placeholder="Enter your name"
+            placeholder="Escribe tu nombre de usuario"
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
@@ -77,7 +77,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, shouldReset }) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor={`password-${fieldKey}`}>Password:</label>
+          <label htmlFor={`password-${fieldKey}`}>Contraseña:</label>
           <div className="password-input-container">
             <input
               type={showPassword ? "text" : "password"}
@@ -107,7 +107,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, shouldReset }) => {
           className="btn btn-primary"
           disabled={loading}
         >
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
         </button>
       </form>
 

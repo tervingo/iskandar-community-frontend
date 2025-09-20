@@ -100,14 +100,14 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
             <button 
               onClick={handleDownload}
               className="btn btn-sm btn-secondary"
-              title="Download image"
+              title="Descargar imagen"
             >
-              📥 Download
+              📥 Descargar
             </button>
             <button 
               onClick={onClose}
               className="btn btn-sm btn-secondary"
-              title="Close (Esc)"
+              title="Cerrar (Esc)"
             >
               ✕
             </button>
@@ -121,7 +121,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
               className="image-nav-btn image-nav-prev"
               onClick={goToPrevious}
               disabled={currentIndex === 0}
-              title="Previous image (←)"
+              title="Imagen anterior (←)"
             >
               ←
             </button>
@@ -129,7 +129,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({
               className="image-nav-btn image-nav-next"
               onClick={goToNext}
               disabled={currentIndex === images.length - 1}
-              title="Next image (→)"
+              title="Siguiente imagen (→)"
             >
               →
             </button>

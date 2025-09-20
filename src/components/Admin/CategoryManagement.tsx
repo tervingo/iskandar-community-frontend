@@ -40,7 +40,7 @@ const CategoryManagement: React.FC = () => {
       try {
         await initializeDefaults();
         setError(null);
-        alert('Default categories initialized successfully!');
+        alert('¡Categorías predeterminadas inicializadas exitosamente!');
       } catch (error: any) {
         console.error('Failed to initialize categories:', error);
       }
@@ -109,7 +109,7 @@ const CategoryManagement: React.FC = () => {
             onClick={() => setShowCreateForm(true)}
             className="btn btn-primary"
           >
-            Create Category
+            Crear Categoría
           </button>
         </div>
       </div>
@@ -125,10 +125,10 @@ const CategoryManagement: React.FC = () => {
       {showCreateForm && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Create New Category</h3>
+            <h3>Crear Nueva Categoría</h3>
             <form onSubmit={handleCreateCategory}>
               <div className="form-group">
-                <label>Name:</label>
+                <label>Nombre:</label>
                 <input
                   type="text"
                   value={newCategory.name}
@@ -137,7 +137,7 @@ const CategoryManagement: React.FC = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Description:</label>
+                <label>Descripción:</label>
                 <textarea
                   value={newCategory.description || ''}
                   onChange={(e) => setNewCategory({...newCategory, description: e.target.value})}
@@ -145,13 +145,13 @@ const CategoryManagement: React.FC = () => {
                 />
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">Create</button>
+                <button type="submit" className="btn btn-primary">Crear</button>
                 <button 
                   type="button" 
                   onClick={() => setShowCreateForm(false)}
                   className="btn btn-secondary"
                 >
-                  Cancel
+                  Cancelar
                 </button>
               </div>
             </form>
@@ -163,10 +163,10 @@ const CategoryManagement: React.FC = () => {
       {editingCategory && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Edit Category: {editingCategory.name}</h3>
+            <h3>Editar Categoría: {editingCategory.name}</h3>
             <form onSubmit={handleUpdateCategory}>
               <div className="form-group">
-                <label>Name:</label>
+                <label>Nombre:</label>
                 <input
                   type="text"
                   value={editCategoryData.name || ''}
@@ -175,7 +175,7 @@ const CategoryManagement: React.FC = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Description:</label>
+                <label>Descripción:</label>
                 <textarea
                   value={editCategoryData.description || ''}
                   onChange={(e) => setEditCategoryData({...editCategoryData, description: e.target.value})}
@@ -189,17 +189,17 @@ const CategoryManagement: React.FC = () => {
                     checked={editCategoryData.is_active}
                     onChange={(e) => setEditCategoryData({...editCategoryData, is_active: e.target.checked})}
                   />
-                  Active
+                  Activo
                 </label>
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">Update</button>
+                <button type="submit" className="btn btn-primary">Actualizar</button>
                 <button 
                   type="button" 
                   onClick={() => setEditingCategory(null)}
                   className="btn btn-secondary"
                 >
-                  Cancel
+                  Cancelar
                 </button>
               </div>
             </form>
@@ -209,18 +209,18 @@ const CategoryManagement: React.FC = () => {
 
       {/* Categories Table */}
       <div className="categories-table">
-        <h2>Categories</h2>
+        <h2>Categorías</h2>
         {loading ? (
-          <div className="loading">Loading categories...</div>
+          <div className="loading">Cargando categorías...</div>
         ) : (
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Creado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -230,7 +230,7 @@ const CategoryManagement: React.FC = () => {
                   <td>{category.description || '-'}</td>
                   <td>
                     <span className={`status-badge ${category.is_active ? 'active' : 'inactive'}`}>
-                      {category.is_active ? 'Active' : 'Inactive'}
+                      {category.is_active ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
                   <td>{new Date(category.created_at).toLocaleDateString()}</td>
@@ -239,13 +239,13 @@ const CategoryManagement: React.FC = () => {
                       onClick={() => handleEditCategory(category)}
                       className="btn btn-small"
                     >
-                      Edit
+                      Editar
                     </button>
                     <button 
                       onClick={() => handleDeleteCategory(category)}
                       className="btn btn-small btn-danger"
                     >
-                      Delete
+                      Eliminar
                     </button>
                   </td>
                 </tr>

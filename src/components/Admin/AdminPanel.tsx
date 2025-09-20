@@ -108,7 +108,7 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleDeleteUser = async (user: User) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
       try {
         const userId = user.id || (user as any)._id;
         if (!userId) {
@@ -124,31 +124,31 @@ const AdminPanel: React.FC = () => {
   };
 
   if (!isAdmin) {
-    return <div className="access-denied">Admin access required.</div>;
+    return <div className="access-denied">Se requiere acceso de administrador.</div>;
   }
 
   return (
     <div className="admin-panel">
       <div className="admin-header">
-        <h1>Admin Panel</h1>
+        <h1>Panel de Administración</h1>
         <div className="header-actions">
           <a href="/admin/categories" className="btn btn-secondary">
-            Manage Categories
+            Gestionar Categorías
           </a>
           <a href="/admin/notifications" className="btn btn-outline">
-            📧 Email Notifications
+            📧 Notificaciones por Correo
           </a>
           <a href="/admin/user-email-preferences" className="btn btn-outline">
-            👥 User Preferences
+            👥 Preferencias de Usuario
           </a>
           <a href="/admin/activity-logs" className="btn btn-outline">
-            📊 Activity Logs
+            📊 Registros de Actividad
           </a>
           <button
             onClick={() => setShowCreateUser(true)}
             className="btn btn-primary"
           >
-            Create User
+            Crear Usuario
           </button>
         </div>
       </div>
@@ -163,10 +163,10 @@ const AdminPanel: React.FC = () => {
       {showCreateUser && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Create New User</h3>
+            <h3>Crear Nuevo Usuario</h3>
             <form onSubmit={handleCreateUser}>
               <div className="form-group">
-                <label>Email:</label>
+                <label>Correo:</label>
                 <input
                   type="email"
                   value={newUser.email}
@@ -175,7 +175,7 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Name:</label>
+                <label>Nombre:</label>
                 <input
                   type="text"
                   value={newUser.name}
@@ -184,17 +184,17 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Role:</label>
+                <label>Rol:</label>
                 <select
                   value={newUser.role}
                   onChange={(e) => setNewUser({...newUser, role: e.target.value as 'admin' | 'normal'})}
                 >
                   <option value="normal">Normal</option>
-                  <option value="admin">Admin</option>
+                  <option value="admin">Administrador</option>
                 </select>
               </div>
               <div className="form-group">
-                <label>Avatar URL (optional):</label>
+                <label>URL del Avatar (opcional):</label>
                 <input
                   type="url"
                   value={newUser.avatar || ''}
@@ -203,7 +203,7 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Phone (optional):</label>
+                <label>Teléfono (opcional):</label>
                 <input
                   type="tel"
                   value={newUser.phone || ''}
@@ -212,7 +212,7 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Password:</label>
+                <label>Contraseña:</label>
                 <input
                   type="password"
                   value={newUser.password}
@@ -221,13 +221,13 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">Create</button>
+                <button type="submit" className="btn btn-primary">Crear</button>
                 <button 
                   type="button" 
                   onClick={() => setShowCreateUser(false)}
                   className="btn btn-secondary"
                 >
-                  Cancel
+                  Cancelar
                 </button>
               </div>
             </form>
@@ -238,10 +238,10 @@ const AdminPanel: React.FC = () => {
       {showEditUser && editingUser && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Edit User: {editingUser.name}</h3>
+            <h3>Editar Usuario: {editingUser.name}</h3>
             <form onSubmit={handleUpdateUser}>
               <div className="form-group">
-                <label>Name:</label>
+                <label>Nombre:</label>
                 <input
                   type="text"
                   value={editUserData.name}
@@ -250,7 +250,7 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Email:</label>
+                <label>Correo:</label>
                 <input
                   type="email"
                   value={editUserData.email}
@@ -259,17 +259,17 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Role:</label>
+                <label>Rol:</label>
                 <select
                   value={editUserData.role}
                   onChange={(e) => setEditUserData({...editUserData, role: e.target.value as 'admin' | 'normal'})}
                 >
                   <option value="normal">Normal</option>
-                  <option value="admin">Admin</option>
+                  <option value="admin">Administrador</option>
                 </select>
               </div>
               <div className="form-group">
-                <label>Avatar URL (optional):</label>
+                <label>URL del Avatar (opcional):</label>
                 <input
                   type="url"
                   value={editUserData.avatar}
@@ -278,7 +278,7 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Phone (optional):</label>
+                <label>Teléfono (opcional):</label>
                 <input
                   type="tel"
                   value={editUserData.phone}
@@ -287,13 +287,13 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">Update</button>
+                <button type="submit" className="btn btn-primary">Actualizar</button>
                 <button 
                   type="button" 
                   onClick={() => setShowEditUser(false)}
                   className="btn btn-secondary"
                 >
-                  Cancel
+                  Cancelar
                 </button>
               </div>
             </form>
@@ -302,21 +302,21 @@ const AdminPanel: React.FC = () => {
       )}
 
       <div className="users-table">
-        <h2>Users</h2>
+        <h2>Usuarios</h2>
         {loading ? (
-          <div className="loading">Loading users...</div>
+          <div className="loading">Cargando usuarios...</div>
         ) : (
           <table>
             <thead>
               <tr>
                 <th>Avatar</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Creado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -339,7 +339,7 @@ const AdminPanel: React.FC = () => {
                   </td>
                   <td>
                     <span className={`status-badge ${user.is_active ? 'active' : 'inactive'}`}>
-                      {user.is_active ? 'Active' : 'Inactive'}
+                      {user.is_active ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
                   <td>{new Date(user.created_at).toLocaleDateString()}</td>
@@ -348,19 +348,19 @@ const AdminPanel: React.FC = () => {
                       onClick={() => handleEditUser(user)}
                       className="btn btn-small"
                     >
-                      Edit
+                      Editar
                     </button>
                     <button 
                       onClick={() => handleToggleUserStatus(user)}
                       className="btn btn-small"
                     >
-                      {user.is_active ? 'Deactivate' : 'Activate'}
+                      {user.is_active ? 'Desactivar' : 'Activar'}
                     </button>
                     <button 
                       onClick={() => handleDeleteUser(user)}
                       className="btn btn-small btn-danger"
                     >
-                      Delete
+                      Eliminar
                     </button>
                   </td>
                 </tr>

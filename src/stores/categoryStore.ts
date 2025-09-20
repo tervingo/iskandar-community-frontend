@@ -32,7 +32,7 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
       const categories = await categoriesApi.getAll();
       set({ categories, loading: false });
     } catch (error) {
-      set({ error: 'Failed to fetch categories', loading: false });
+      set({ error: 'Error al cargar las categorías', loading: false });
     }
   },
 
@@ -42,7 +42,7 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
       const allCategories = await categoriesApi.getAllAdmin();
       set({ allCategories, loading: false });
     } catch (error) {
-      set({ error: 'Failed to fetch categories', loading: false });
+      set({ error: 'Error al cargar las categorías', loading: false });
     }
   },
 
@@ -57,7 +57,7 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
         loading: false 
       });
     } catch (error) {
-      set({ error: 'Failed to create category', loading: false });
+      set({ error: 'Error al crear la categoría', loading: false });
     }
   },
 
@@ -81,7 +81,7 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
         loading: false 
       });
     } catch (error) {
-      set({ error: 'Failed to update category', loading: false });
+      set({ error: 'Error al actualizar la categoría', loading: false });
     }
   },
 
@@ -98,7 +98,7 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
         loading: false 
       });
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to delete category';
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Error al eliminar la categoría';
       set({ error: errorMessage, loading: false });
       throw error;
     }
@@ -111,7 +111,7 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
       // Refresh categories after initialization
       await get().fetchCategories();
     } catch (error) {
-      set({ error: 'Failed to initialize default categories', loading: false });
+      set({ error: 'Error al inicializar las categorías predeterminadas', loading: false });
     }
   },
 

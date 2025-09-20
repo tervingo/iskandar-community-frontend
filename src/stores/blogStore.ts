@@ -47,7 +47,7 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       }
       set({ posts, loading: false });
     } catch (error) {
-      set({ error: 'Failed to fetch posts', loading: false });
+      set({ error: 'Error al cargar las entradas', loading: false });
     }
   },
 
@@ -57,7 +57,7 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       const post = await postsApi.getById(id);
       set({ currentPost: post, loading: false });
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to fetch post';
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Error al cargar la entrada';
       set({ error: errorMessage, loading: false, currentPost: null });
     }
   },
@@ -69,7 +69,7 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       const { posts } = get();
       set({ posts: [newPost, ...posts], loading: false });
     } catch (error) {
-      set({ error: 'Failed to create post', loading: false });
+      set({ error: 'Error al crear la entrada', loading: false });
     }
   },
 
@@ -83,7 +83,7 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       );
       set({ posts: updatedPosts, currentPost: updatedPost, loading: false });
     } catch (error) {
-      set({ error: 'Failed to update post', loading: false });
+      set({ error: 'Error al actualizar la entrada', loading: false });
     }
   },
 
@@ -97,7 +97,7 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       const newCurrentPost = currentPost?.id === id ? null : currentPost;
       set({ posts: updatedPosts, currentPost: newCurrentPost, loading: false });
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to delete post';
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Error al eliminar la entrada';
       set({ error: errorMessage, loading: false });
       throw error; // Re-throw to allow component to handle the error
     }
@@ -109,7 +109,7 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       const comments = await commentsApi.getByPostId(postId);
       set({ comments, commentsLoading: false });
     } catch (error) {
-      set({ error: 'Failed to fetch comments', commentsLoading: false });
+      set({ error: 'Error al cargar los comentarios', commentsLoading: false });
     }
   },
 
@@ -120,7 +120,7 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       const { comments } = get();
       set({ comments: [...comments, newComment], commentsLoading: false });
     } catch (error) {
-      set({ error: 'Failed to create comment', commentsLoading: false });
+      set({ error: 'Error al crear el comentario', commentsLoading: false });
     }
   },
 
@@ -134,7 +134,7 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       );
       set({ comments: updatedComments, commentsLoading: false });
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to update comment';
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Error al actualizar el comentario';
       set({ error: errorMessage, commentsLoading: false });
       throw error; // Re-throw to allow component to handle the error
     }
@@ -148,7 +148,7 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       const updatedComments = comments.filter(comment => comment.id !== id);
       set({ comments: updatedComments, commentsLoading: false });
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to delete comment';
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Error al eliminar el comentario';
       set({ error: errorMessage, commentsLoading: false });
       throw error; // Re-throw to allow component to handle the error
     }
