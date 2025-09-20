@@ -27,16 +27,21 @@ const PostList: React.FC = () => {
       <div className="post-list">
       <div className="header">
         <h1>Blog</h1>
-        <Link to="/blog/create" className="btn btn-primary">
-          Crear Nuevo Post
-        </Link>
+        <div className="header-actions">
+          <Link to="/blog/drafts" className="btn btn-secondary">
+            Mis Borradores
+          </Link>
+          <Link to="/blog/create" className="btn btn-primary">
+            Crear Nuevo Post
+          </Link>
+        </div>
       </div>
 
       {posts.length === 0 ? (
         <div className="no-posts">
           <p>No hay posts todavía. Sé el primero en crear uno!</p>
           <Link to="/blog/create" className="btn btn-primary">
-            Create Post
+            Crear Post
           </Link>
         </div>
       ) : (

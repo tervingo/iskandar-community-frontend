@@ -41,7 +41,6 @@ const Header: React.FC = () => {
             {isAuthenticated ? (
               <>
                 <Link to="/blog">Blog</Link>
-                <Link to="/blog/drafts">Mis Borradores</Link>
                 <Link to="/news">Noticias</Link>
                 <Link to="/chat">Chat</Link>
                 <Link to="/files">Archivo</Link>
@@ -50,7 +49,6 @@ const Header: React.FC = () => {
             ) : (
               <>
                 <span className="nav-link-disabled" title="Inicio de sesión requerido">Blog</span>
-                <span className="nav-link-disabled" title="Inicio de sesión requerido">Mis Borradores</span>
                 <span className="nav-link-disabled" title="Inicio de sesión requerido">Noticias</span>
                 <span className="nav-link-disabled" title="Inicio de sesión requerido">Chat</span>
                 <span className="nav-link-disabled" title="Inicio de sesión requerido">Archivo</span>

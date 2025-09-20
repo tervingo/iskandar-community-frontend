@@ -293,7 +293,7 @@ const EditPost: React.FC = () => {
             className="btn btn-outline"
             disabled={updating || !formData.title.trim() || !formData.content.trim()}
             style={{
-              backgroundColor: 'chartreuse',
+              backgroundColor: 'aqua',
               border: '1px solid #6c757d',
               color: 'black'
             }}
@@ -307,8 +307,8 @@ const EditPost: React.FC = () => {
               className="btn btn-success"
               disabled={updating || !formData.title.trim() || !formData.content.trim()}
               style={{
-                backgroundColor: 'aqua',
-                borderColor: 'aqua',
+                backgroundColor: 'chartreuse',
+                borderColor: 'chartreuse',
                 color: 'black'
               }}
             >
