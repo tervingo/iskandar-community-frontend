@@ -179,7 +179,8 @@ export interface NewsUpdate {
 export enum ActivityEventType {
   LOGIN = "login",
   LOGOUT = "logout",
-  PASSWORD_CHANGE = "password_change"
+  PASSWORD_CHANGE = "password_change",
+  POST_VIEW = "post_view"
 }
 
 export interface UserActivityLog {

@@ -74,6 +74,8 @@ const UserActivityLogs: React.FC = () => {
         return '🚪';
       case ActivityEventType.PASSWORD_CHANGE:
         return '🔑';
+      case ActivityEventType.POST_VIEW:
+        return '👁️';
       default:
         return '📝';
     }
@@ -89,9 +91,38 @@ const UserActivityLogs: React.FC = () => {
         return '#f39c12';
       case ActivityEventType.PASSWORD_CHANGE:
         return '#3498db';
+      case ActivityEventType.POST_VIEW:
+        return '#9b59b6';
       default:
         return '#95a5a6';
     }
+  };
+
+  const formatAdditionalInfo = (log: UserActivityLog): React.ReactNode => {
+    if (!log.additional_info) return 'N/A';
+
+    // Special formatting for POST_VIEW events
+    if (log.event_type === ActivityEventType.POST_VIEW && log.additional_info.post_title) {
+      return (
+        <div>
+          <strong>Entrada visitada:</strong> {log.additional_info.post_title}
+          <details style={{ marginTop: '4px' }}>
+            <summary style={{ cursor: 'pointer', fontSize: '12px' }}>Ver todos los detalles</summary>
+            <pre style={{ fontSize: '11px', marginTop: '4px' }}>
+              {JSON.stringify(log.additional_info, null, 2)}
+            </pre>
+          </details>
+        </div>
+      );
+    }
+
+    // Default formatting for other events
+    return (
+      <details>
+        <summary>Ver detalles</summary>
+        <pre>{JSON.stringify(log.additional_info, null, 2)}</pre>
+      </details>
+    );
   };
 
   return (
@@ -161,6 +192,7 @@ const UserActivityLogs: React.FC = () => {
               <option value={ActivityEventType.LOGIN}>Login</option>
               <option value={ActivityEventType.LOGOUT}>Logout</option>
               <option value={ActivityEventType.PASSWORD_CHANGE}>Cambio de Contraseña</option>
+              <option value={ActivityEventType.POST_VIEW}>Vista de Entrada</option>
             </select>
           </div>
 
@@ -250,12 +282,7 @@ const UserActivityLogs: React.FC = () => {
                     </td>
                     <td className="ip-address">{log.ip_address || 'N/A'}</td>
                     <td className="additional-info">
-                      {log.additional_info && (
-                        <details>
-                          <summary>Ver detalles</summary>
-                          <pre>{JSON.stringify(log.additional_info, null, 2)}</pre>
-                        </details>
-                      )}
+                      {formatAdditionalInfo(log)}
                     </td>
                   </tr>
                 ))}
