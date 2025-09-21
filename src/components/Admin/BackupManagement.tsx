@@ -53,7 +53,7 @@ const BackupManagement: React.FC = () => {
       fetchBackupStatus();
       fetchBackupList();
     }
-  }, [isAdmin, user]); // También escuchar cambios en user
+  }, [isAdmin]); // Solo escuchar cambios en isAdmin
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
