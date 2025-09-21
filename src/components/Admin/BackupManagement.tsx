@@ -39,7 +39,7 @@ interface BackupResult {
 }
 
 const BackupManagement: React.FC = () => {
-  const { isAdmin, user } = useAuthStore();
+  const { isAdmin} = useAuthStore();
   const [status, setStatus] = useState<BackupStatus | null>(null);
   const [backups, setBackups] = useState<BackupFile[]>([]);
   const [loading, setLoading] = useState(false);
