@@ -49,7 +49,7 @@ const BackupManagement: React.FC = () => {
   const [hasToken, setHasToken] = useState<boolean | null>(null); // null = checking, true/false = result
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('auth_token') || localStorage.getItem('token');
     setHasToken(!!token);
 
     if (isAdmin && token) {
@@ -59,7 +59,7 @@ const BackupManagement: React.FC = () => {
   }, [isAdmin]); // Solo escuchar cambios en isAdmin
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('auth_token') || localStorage.getItem('token');
     if (!token) {
       throw new Error('No authentication token found. Please login again.');
     }
