@@ -48,14 +48,18 @@ const BackupManagement: React.FC = () => {
   const [creatingBackup, setCreatingBackup] = useState(false);
 
   useEffect(() => {
-    if (isAdmin) {
+    const token = localStorage.getItem('token');
+    if (isAdmin && token) {
       fetchBackupStatus();
       fetchBackupList();
     }
-  }, [isAdmin]);
+  }, [isAdmin, user]); // También escuchar cambios en user
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found. Please login again.');
+    }
     return {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -191,6 +195,19 @@ const BackupManagement: React.FC = () => {
 
   if (!isAdmin) {
     return <div className="access-denied">Se requiere acceso de administrador.</div>;
+  }
+
+  // Check if we have a valid token
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return (
+      <div className="backup-management">
+        <div className="error-message">
+          No se encontró token de autenticación. Por favor, cierra sesión y vuelve a iniciar sesión.
+          <button onClick={() => window.location.href = '/home'}>Ir al inicio</button>
+        </div>
+      </div>
+    );
   }
 
   return (
