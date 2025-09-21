@@ -3888,3 +3888,269 @@ body {
     padding: 0.5rem;
   }
 }
+
+/* Backup Management Styles */
+.backup-management {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+.backup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #eee;
+}
+
+.backup-header h1 {
+  color: #2c3e50;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Status Grid */
+.backup-status {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.backup-status h3 {
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 6px;
+  border-left: 4px solid #ddd;
+}
+
+.status-item.enabled {
+  border-left-color: #27ae60;
+}
+
+.status-item.disabled {
+  border-left-color: #e74c3c;
+}
+
+.status-icon {
+  font-size: 1.5rem;
+}
+
+.status-item strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.status-item p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Recommendations */
+.recommendations {
+  background: #e8f4fd;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 4px solid #3498db;
+}
+
+.recommendations h4 {
+  margin-bottom: 0.5rem;
+  color: #2980b9;
+}
+
+.recommendations ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.recommendations li {
+  margin-bottom: 0.25rem;
+}
+
+/* Backups List */
+.backups-list {
+  margin-bottom: 2rem;
+}
+
+.backups-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.backups-header h3 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.no-backups {
+  text-align: center;
+  padding: 3rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #666;
+}
+
+.no-backups p {
+  margin-bottom: 0.5rem;
+}
+
+/* Backups Table */
+.backups-table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.backups-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.backups-table th {
+  background: #34495e;
+  color: white;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.backups-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.backups-table tr:hover {
+  background: #f8f9fa;
+}
+
+.backup-name {
+  font-family: monospace;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.backup-location {
+  background: #3498db;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Info Grid */
+.backup-info {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+.backup-info h4 {
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.info-item {
+  background: white;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 4px solid #3498db;
+}
+
+.info-item strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.info-item p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Messages */
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 4px solid #28a745;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Responsive Design for Backup Management */
+@media (max-width: 768px) {
+  .backup-management {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .backup-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    flex-direction: column;
+  }
+
+  .status-grid,
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .backups-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .backups-table {
+    overflow-x: auto;
+  }
+
+  .backups-table table {
+    min-width: 600px;
+  }
+}

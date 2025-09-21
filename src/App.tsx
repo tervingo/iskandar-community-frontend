@@ -15,6 +15,7 @@ import CategoryManagement from './components/Admin/CategoryManagement';
 import AdminNotifications from './components/Admin/AdminNotifications';
 import UserEmailPreferences from './components/Admin/UserEmailPreferences';
 import UserActivityLogs from './components/Admin/UserActivityLogs';
+import BackupManagement from './components/Admin/BackupManagement';
 import EmailPreferences from './components/User/EmailPreferences';
 import AccountManagement from './components/User/AccountManagement';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
@@ -139,7 +140,15 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          <Route 
+          <Route
+            path="/admin/backup"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <BackupManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/profile/email-preferences" 
             element={
               <RedirectRoute>

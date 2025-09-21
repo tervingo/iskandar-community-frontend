@@ -144,6 +144,9 @@ const AdminPanel: React.FC = () => {
           <a href="/admin/activity-logs" className="btn btn-outline">
             📊 Registros de Actividad
           </a>
+          <a href="/admin/backup" className="btn btn-outline">
+            🗄️ Gestión de Backups
+          </a>
           <button
             onClick={() => setShowCreateUser(true)}
             className="btn btn-primary"
