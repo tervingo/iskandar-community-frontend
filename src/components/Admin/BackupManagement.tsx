@@ -46,9 +46,12 @@ const BackupManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [creatingBackup, setCreatingBackup] = useState(false);
+  const [hasToken, setHasToken] = useState<boolean | null>(null); // null = checking, true/false = result
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    setHasToken(!!token);
+
     if (isAdmin && token) {
       fetchBackupStatus();
       fetchBackupList();
@@ -197,9 +200,17 @@ const BackupManagement: React.FC = () => {
     return <div className="access-denied">Se requiere acceso de administrador.</div>;
   }
 
-  // Check if we have a valid token
-  const token = localStorage.getItem('token');
-  if (!token) {
+  // Show loading while checking token
+  if (hasToken === null) {
+    return (
+      <div className="backup-management">
+        <div className="loading">Verificando autenticación...</div>
+      </div>
+    );
+  }
+
+  // Show error if no token
+  if (hasToken === false) {
     return (
       <div className="backup-management">
         <div className="error-message">
