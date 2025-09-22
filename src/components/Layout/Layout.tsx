@@ -9,6 +9,16 @@ const Layout: React.FC = () => {
       <main className="main-content">
         <Outlet />
       </main>
+      <footer className="app-footer">
+        <div className="footer-content">
+          <p>&copy; 2025 Yskandar. Todos los derechos reservados.</p>
+          <div className="footer-links">
+            <a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer">
+              Política de Privacidad
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
