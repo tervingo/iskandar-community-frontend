@@ -95,8 +95,8 @@ const CategoryManagement: React.FC = () => {
 
   return (
     <div className="category-management">
-      <div className="admin-header">
-        <h1>Category Management</h1>
+      <div className="admin-section-header">
+        <h2>Gestión de Categorías</h2>
         <div className="header-actions">
           <button 
             onClick={handleInitializeDefaults}

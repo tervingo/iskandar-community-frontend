@@ -129,24 +129,9 @@ const AdminPanel: React.FC = () => {
 
   return (
     <div className="admin-panel">
-      <div className="admin-header">
-        <h1>Panel de Administración</h1>
+      <div className="admin-section-header">
+        <h2>Gestión de Usuarios</h2>
         <div className="header-actions">
-          <a href="/admin/categories" className="btn btn-secondary">
-            Gestionar Categorías
-          </a>
-          <a href="/admin/notifications" className="btn btn-outline">
-            📧 Notificaciones por Correo
-          </a>
-          <a href="/admin/user-email-preferences" className="btn btn-outline">
-            👥 Preferencias de Usuario
-          </a>
-          <a href="/admin/activity-logs" className="btn btn-outline">
-            📊 Registros de Actividad
-          </a>
-          <a href="/admin/backup" className="btn btn-outline">
-            🗄️ Gestión de Backups
-          </a>
           <button
             onClick={() => setShowCreateUser(true)}
             className="btn btn-primary"

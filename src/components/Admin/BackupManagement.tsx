@@ -223,8 +223,8 @@ const BackupManagement: React.FC = () => {
 
   return (
     <div className="backup-management">
-      <div className="backup-header">
-        <h1>🗄️ Gestión de Backups</h1>
+      <div className="admin-section-header">
+        <h2>🗄️ Gestión de Backups</h2>
         <div className="header-actions">
           <button
             onClick={createManualBackup}

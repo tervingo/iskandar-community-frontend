@@ -10,12 +10,7 @@ import MyDrafts from './components/Blog/MyDrafts';
 import ChatRoom from './components/Chat/ChatRoom';
 import FileRepository from './components/Files/FileRepository';
 import News from './components/News/News';
-import AdminPanel from './components/Admin/AdminPanel';
-import CategoryManagement from './components/Admin/CategoryManagement';
-import AdminNotifications from './components/Admin/AdminNotifications';
-import UserEmailPreferences from './components/Admin/UserEmailPreferences';
-import UserActivityLogs from './components/Admin/UserActivityLogs';
-import BackupManagement from './components/Admin/BackupManagement';
+import UnifiedAdminPanel from './components/Admin/UnifiedAdminPanel';
 import EmailPreferences from './components/User/EmailPreferences';
 import AccountManagement from './components/User/AccountManagement';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
@@ -100,51 +95,11 @@ const App: React.FC = () => {
               </RedirectRoute>
             }
           />
-          <Route 
-            path="/admin" 
-            element={
-              <ProtectedRoute requireAdmin={true}>
-                <AdminPanel />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin/categories" 
-            element={
-              <ProtectedRoute requireAdmin={true}>
-                <CategoryManagement />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin/notifications" 
-            element={
-              <ProtectedRoute requireAdmin={true}>
-                <AdminNotifications />
-              </ProtectedRoute>
-            } 
-          />
           <Route
-            path="/admin/user-email-preferences"
+            path="/admin/*"
             element={
               <ProtectedRoute requireAdmin={true}>
-                <UserEmailPreferences />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/activity-logs"
-            element={
-              <ProtectedRoute requireAdmin={true}>
-                <UserActivityLogs />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/backup"
-            element={
-              <ProtectedRoute requireAdmin={true}>
-                <BackupManagement />
+                <UnifiedAdminPanel />
               </ProtectedRoute>
             }
           />

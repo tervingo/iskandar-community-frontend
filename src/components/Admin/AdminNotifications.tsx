@@ -110,8 +110,8 @@ const AdminNotifications: React.FC = () => {
 
   return (
     <div className="admin-notifications">
-      <div className="admin-notifications-header">
-        <h1>📢 Notificaciones Administrativas</h1>
+      <div className="admin-section-header">
+        <h2>📢 Notificaciones Administrativas</h2>
         <p>Envía anuncios importantes a todos los miembros de la comunidad.</p>
       </div>
 
