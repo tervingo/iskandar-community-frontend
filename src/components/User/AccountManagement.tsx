@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import EmailPreferences from './EmailPreferences';
+import TelegramSettings from './TelegramSettings';
 import ChangePassword from '../Auth/ChangePassword';
 import './AccountManagement.css';
 
 const AccountManagement: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'email' | 'password'>('email');
+  const [activeTab, setActiveTab] = useState<'email' | 'telegram' | 'password'>('email');
   const [showChangePassword, setShowChangePassword] = useState(false);
 
   return (
@@ -22,6 +23,12 @@ const AccountManagement: React.FC = () => {
           📧 Preferencias de Email
         </button>
         <button
+          className={`tab-button ${activeTab === 'telegram' ? 'active' : ''}`}
+          onClick={() => setActiveTab('telegram')}
+        >
+          🤖 Telegram
+        </button>
+        <button
           className={`tab-button ${activeTab === 'password' ? 'active' : ''}`}
           onClick={() => setActiveTab('password')}
         >
@@ -35,7 +42,13 @@ const AccountManagement: React.FC = () => {
             <EmailPreferences />
           </div>
         )}
-        
+
+        {activeTab === 'telegram' && (
+          <div className="tab-content">
+            <TelegramSettings />
+          </div>
+        )}
+
         {activeTab === 'password' && (
           <div className="tab-content">
             <div className="password-section">
