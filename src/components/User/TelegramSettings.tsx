@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuthStore } from '../../stores/authStore';
 
 interface TelegramPreferences {
   enabled: boolean;
@@ -10,12 +9,11 @@ interface TelegramPreferences {
 }
 
 interface TelegramConfig {
-  telegram_id: string | null;
+  telegram_id: string;
   telegram_preferences: TelegramPreferences;
 }
 
 const TelegramSettings: React.FC = () => {
-  const { user } = useAuthStore();
   const [config, setConfig] = useState<TelegramConfig>({
     telegram_id: '',
     telegram_preferences: {
