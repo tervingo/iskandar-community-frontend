@@ -1,0 +1,385 @@
+import React, { useState, useEffect, useRef } from 'react';
+import AgoraRTC, {
+  IAgoraRTCClient,
+  ILocalVideoTrack,
+  ILocalAudioTrack,
+  IRemoteVideoTrack,
+  IRemoteAudioTrack,
+  UID
+} from 'agora-rtc-sdk-ng';
+import { useAuthStore } from '../../stores/authStore';
+import { useSocket } from '../../hooks/useSocket';
+import { FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash, FaDesktop, FaPhone } from 'react-icons/fa';
+
+interface VideoCallRoomProps {
+  callId: string;
+  onLeave: () => void;
+}
+
+interface RemoteUser {
+  uid: UID;
+  videoTrack?: IRemoteVideoTrack;
+  audioTrack?: IRemoteAudioTrack;
+  username?: string;
+}
+
+const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
+  const [client, setClient] = useState<IAgoraRTCClient | null>(null);
+  const [localVideoTrack, setLocalVideoTrack] = useState<ILocalVideoTrack | null>(null);
+  const [localAudioTrack, setLocalAudioTrack] = useState<ILocalAudioTrack | null>(null);
+  const [remoteUsers, setRemoteUsers] = useState<Map<UID, RemoteUser>>(new Map());
+  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const localVideoRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuthStore();
+  const socket = useSocket();
+
+  // App ID - In production, get this from environment variables
+  const APP_ID = import.meta.env.VITE_AGORA_APP_ID || 'your_agora_app_id';
+
+  useEffect(() => {
+    const initializeCall = async () => {
+      try {
+        // Create Agora client
+        const agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+        setClient(agoraClient);
+
+        // Set up event handlers
+        agoraClient.on('user-published', handleUserPublished);
+        agoraClient.on('user-unpublished', handleUserUnpublished);
+        agoraClient.on('user-left', handleUserLeft);
+
+        // Generate token (in production, get from your backend)
+        const token = await generateToken(callId);
+
+        // Join channel
+        await agoraClient.join(APP_ID, callId, token, user?.id);
+
+        // Create and publish local tracks
+        const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+        setLocalAudioTrack(audioTrack);
+        setLocalVideoTrack(videoTrack);
+
+        // Play local video
+        if (localVideoRef.current) {
+          videoTrack.play(localVideoRef.current);
+        }
+
+        // Publish tracks
+        await agoraClient.publish([audioTrack, videoTrack]);
+
+        // Join socket room for call coordination
+        socket?.emit('join_video_call_room', {
+          call_id: callId,
+          user_name: user?.name
+        });
+
+      } catch (error) {
+        console.error('Error initializing call:', error);
+      }
+    };
+
+    if (user && socket) {
+      initializeCall();
+    }
+
+    return () => {
+      cleanup();
+    };
+  }, [callId, user, socket]);
+
+  const generateToken = async (channelName: string): Promise<string> => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/video-calls/generate-token?channel_name=${channelName}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      return data.token;
+    } catch (error) {
+      console.error('Error generating token:', error);
+      return '';
+    }
+  };
+
+  const handleUserPublished = async (user: any, mediaType: 'video' | 'audio') => {
+    await client?.subscribe(user, mediaType);
+
+    if (mediaType === 'video') {
+      setRemoteUsers(prev => {
+        const newMap = new Map(prev);
+        const existingUser = newMap.get(user.uid) || { uid: user.uid };
+        const updatedUser: RemoteUser = { ...existingUser, videoTrack: user.videoTrack };
+        newMap.set(user.uid, updatedUser);
+        return newMap;
+      });
+    }
+
+    if (mediaType === 'audio') {
+      setRemoteUsers(prev => {
+        const newMap = new Map(prev);
+        const existingUser = newMap.get(user.uid) || { uid: user.uid };
+        const updatedUser: RemoteUser = { ...existingUser, audioTrack: user.audioTrack };
+        newMap.set(user.uid, updatedUser);
+        return newMap;
+      });
+      user.audioTrack?.play();
+    }
+  };
+
+  const handleUserUnpublished = (user: any, mediaType: 'video' | 'audio') => {
+    if (mediaType === 'video') {
+      setRemoteUsers(prev => {
+        const newMap = new Map(prev);
+        const existingUser = newMap.get(user.uid);
+        if (existingUser) {
+          const updatedUser: RemoteUser = { ...existingUser, videoTrack: undefined };
+          newMap.set(user.uid, updatedUser);
+        }
+        return newMap;
+      });
+    }
+  };
+
+  const handleUserLeft = (user: any) => {
+    setRemoteUsers(prev => {
+      const newMap = new Map(prev);
+      newMap.delete(user.uid);
+      return newMap;
+    });
+  };
+
+  const toggleAudio = async () => {
+    if (localAudioTrack) {
+      await localAudioTrack.setEnabled(!isAudioEnabled);
+      setIsAudioEnabled(!isAudioEnabled);
+
+      socket?.emit('video_call_signal', {
+        call_id: callId,
+        signal_type: 'audio_toggle',
+        signal_data: { enabled: !isAudioEnabled },
+        user_name: user?.name
+      });
+    }
+  };
+
+  const toggleVideo = async () => {
+    if (localVideoTrack) {
+      await localVideoTrack.setEnabled(!isVideoEnabled);
+      setIsVideoEnabled(!isVideoEnabled);
+
+      socket?.emit('video_call_signal', {
+        call_id: callId,
+        signal_type: 'video_toggle',
+        signal_data: { enabled: !isVideoEnabled },
+        user_name: user?.name
+      });
+    }
+  };
+
+  const startScreenShare = async () => {
+    if (isScreenSharing) {
+      // Stop screen sharing
+      if (localVideoTrack && client) {
+        await client.unpublish([localVideoTrack]);
+        localVideoTrack.stop();
+        localVideoTrack.close();
+
+        // Create new camera track
+        const videoTrack = await AgoraRTC.createCameraVideoTrack();
+        setLocalVideoTrack(videoTrack);
+
+        if (localVideoRef.current) {
+          videoTrack.play(localVideoRef.current);
+        }
+
+        await client.publish([videoTrack]);
+        setIsScreenSharing(false);
+      }
+    } else {
+      // Start screen sharing
+      try {
+        if (localVideoTrack && client) {
+          await client.unpublish([localVideoTrack]);
+          localVideoTrack.stop();
+          localVideoTrack.close();
+
+          // Create screen track
+          const screenTracks = await AgoraRTC.createScreenVideoTrack({
+            encoderConfig: "1080p_1",
+            optimizationMode: "detail"
+          });
+
+          // Handle both single track and array of tracks
+          const videoTrack = Array.isArray(screenTracks) ? screenTracks[0] : screenTracks;
+          setLocalVideoTrack(videoTrack);
+
+          if (localVideoRef.current) {
+            videoTrack.play(localVideoRef.current);
+          }
+
+          await client.publish([videoTrack]);
+          setIsScreenSharing(true);
+
+          // Handle screen share end
+          videoTrack.on('track-ended', async () => {
+            await startScreenShare(); // This will stop screen sharing
+          });
+        }
+      } catch (error) {
+        console.error('Error starting screen share:', error);
+      }
+    }
+
+    socket?.emit('video_call_signal', {
+      call_id: callId,
+      signal_type: 'screen_share',
+      signal_data: { enabled: !isScreenSharing },
+      user_name: user?.name
+    });
+  };
+
+  const leaveCall = async () => {
+    await cleanup();
+
+    // Leave socket room
+    socket?.emit('leave_video_call_room', {
+      call_id: callId,
+      user_name: user?.name
+    });
+
+    // Update call status in backend
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/video-calls/leave-call/${callId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+    } catch (error) {
+      console.error('Error leaving call:', error);
+    }
+
+    onLeave();
+  };
+
+  const cleanup = async () => {
+    if (localAudioTrack) {
+      localAudioTrack.stop();
+      localAudioTrack.close();
+      setLocalAudioTrack(null);
+    }
+
+    if (localVideoTrack) {
+      localVideoTrack.stop();
+      localVideoTrack.close();
+      setLocalVideoTrack(null);
+    }
+
+    if (client) {
+      await client.leave();
+      setClient(null);
+    }
+
+    setRemoteUsers(new Map());
+  };
+
+  return (
+    <div className="video-call-room">
+      <div className="video-grid">
+        {/* Local video */}
+        <div className="video-container local-video">
+          <div ref={localVideoRef} className="video-player"></div>
+          <div className="video-overlay">
+            <span className="username">You {isScreenSharing && '(Screen)'}</span>
+            {!isAudioEnabled && <FaMicrophoneSlash className="muted-icon" />}
+            {!isVideoEnabled && <FaVideoSlash className="video-off-icon" />}
+          </div>
+        </div>
+
+        {/* Remote videos */}
+        {Array.from(remoteUsers.values()).map((remoteUser) => (
+          <RemoteVideo
+            key={remoteUser.uid}
+            remoteUser={remoteUser}
+          />
+        ))}
+      </div>
+
+      <div className="call-controls">
+        <button
+          className={`control-btn ${!isAudioEnabled ? 'muted' : ''}`}
+          onClick={toggleAudio}
+          title={isAudioEnabled ? 'Mute' : 'Unmute'}
+        >
+          {isAudioEnabled ? <FaMicrophone /> : <FaMicrophoneSlash />}
+        </button>
+
+        <button
+          className={`control-btn ${!isVideoEnabled ? 'video-off' : ''}`}
+          onClick={toggleVideo}
+          title={isVideoEnabled ? 'Turn off video' : 'Turn on video'}
+        >
+          {isVideoEnabled ? <FaVideo /> : <FaVideoSlash />}
+        </button>
+
+        <button
+          className={`control-btn ${isScreenSharing ? 'screen-sharing' : ''}`}
+          onClick={startScreenShare}
+          title={isScreenSharing ? 'Stop sharing' : 'Share screen'}
+        >
+          <FaDesktop />
+        </button>
+
+        <button
+          className="control-btn leave-btn"
+          onClick={leaveCall}
+          title="Leave call"
+        >
+          <FaPhone />
+        </button>
+      </div>
+
+      <div className="call-info">
+        <span>Call ID: {callId}</span>
+        <span>Participants: {remoteUsers.size + 1}</span>
+      </div>
+    </div>
+  );
+};
+
+// Component for remote video streams
+interface RemoteVideoProps {
+  remoteUser: RemoteUser;
+}
+
+const RemoteVideo: React.FC<RemoteVideoProps> = ({ remoteUser }) => {
+  const videoRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (remoteUser.videoTrack && videoRef.current) {
+      remoteUser.videoTrack.play(videoRef.current);
+    }
+
+    return () => {
+      if (remoteUser.videoTrack) {
+        remoteUser.videoTrack.stop();
+      }
+    };
+  }, [remoteUser.videoTrack]);
+
+  return (
+    <div className="video-container remote-video">
+      <div ref={videoRef} className="video-player"></div>
+      <div className="video-overlay">
+        <span className="username">{remoteUser.username || `User ${remoteUser.uid}`}</span>
+      </div>
+    </div>
+  );
+};
+
+export default VideoCallRoom;

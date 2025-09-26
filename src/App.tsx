@@ -10,6 +10,8 @@ import MyDrafts from './components/Blog/MyDrafts';
 import ChatRoom from './components/Chat/ChatRoom';
 import FileRepository from './components/Files/FileRepository';
 import News from './components/News/News';
+import VideoCallsPage from './components/VideoCall/VideoCallsPage';
+import IncomingCallModal from './components/VideoCall/IncomingCallModal';
 import UnifiedAdminPanel from './components/Admin/UnifiedAdminPanel';
 import EmailPreferences from './components/User/EmailPreferences';
 import AccountManagement from './components/User/AccountManagement';
@@ -17,6 +19,7 @@ import ProtectedRoute from './components/Auth/ProtectedRoute';
 import RedirectRoute from './components/Auth/RedirectRoute';
 import { useAuthStore } from './stores/authStore';
 import './App.css';
+import './styles/videoCall.css';
 
 const App: React.FC = () => {
   const { initAuth } = useAuthStore();
@@ -96,6 +99,14 @@ const App: React.FC = () => {
             }
           />
           <Route
+            path="/video-calls"
+            element={
+              <RedirectRoute>
+                <VideoCallsPage />
+              </RedirectRoute>
+            }
+          />
+          <Route
             path="/admin/*"
             element={
               <ProtectedRoute requireAdmin={true}>
@@ -121,6 +132,7 @@ const App: React.FC = () => {
           />
         </Route>
       </Routes>
+      <IncomingCallModal onCallAccepted={() => {}} />
     </Router>
   );
 };
