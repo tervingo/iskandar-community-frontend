@@ -1,39 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSocket } from '../../hooks/useSocket';
 import { useAuthStore } from '../../stores/authStore';
+import { authApi } from '../../services/api';
+import { User } from '../../types';
 import { FaVideo, FaCircle } from 'react-icons/fa';
-
-interface OnlineUser {
-  id: string;
-  name: string;
-  role: string;
-}
 
 interface OnlineUsersListProps {
   onStartCall: (userId: string) => void;
 }
 
 const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
-  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const socket = useSocket();
 
-  useEffect(() => {
-    if (socket) {
-      socket.on('users_online_update', (users: OnlineUser[]) => {
-        // Filter out current user
-        const filteredUsers = users.filter(u => u.id !== user?.id);
-        setOnlineUsers(filteredUsers);
-      });
-    }
+  const fetchOnlineUsers = useCallback(async () => {
+    if (!isAuthenticated) return;
 
+    try {
+      const response = await authApi.getOnlineUsers();
+      // Filter out current user
+      const filteredUsers = response.online_users.filter(u => u.id !== user?.id);
+      setOnlineUsers(filteredUsers);
+    } catch (error) {
+      console.warn('Failed to fetch online users for video calls:', error);
+    }
+  }, [isAuthenticated, user?.id]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+
+    // Initial fetch
+    fetchOnlineUsers();
+
+    // Poll every 15 seconds for online users (more frequent than header for better UX)
+    const interval = setInterval(fetchOnlineUsers, 15000);
+
+    // Cleanup on unmount
     return () => {
-      if (socket) {
-        socket.off('users_online_update');
-      }
+      clearInterval(interval);
     };
-  }, [socket, user]);
+  }, [isAuthenticated, user, fetchOnlineUsers]);
 
   const startVideoCall = async (targetUserId: string) => {
     if (!user || !socket) return;
@@ -102,7 +110,16 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
 
   return (
     <div className="online-users-list">
-      <h3>Online Users</h3>
+      <div className="section-header">
+        <h3>Online Users</h3>
+        <button
+          className="btn btn-secondary"
+          onClick={fetchOnlineUsers}
+          disabled={loading}
+        >
+          🔄 Refresh
+        </button>
+      </div>
 
       {onlineUsers.length === 0 ? (
         <div className="empty-state">
