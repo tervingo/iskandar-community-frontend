@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useVideoCallInvitations } from '../../hooks/useSocket';
 import { useAuthStore } from '../../stores/authStore';
 import { FaVideo, FaPhone, FaPhoneSlash } from 'react-icons/fa';
@@ -11,6 +11,7 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
   const { incomingCall, respondToCall } = useVideoCallInvitations();
   const { user } = useAuthStore();
   const [timer, setTimer] = useState(30);
+  const beepIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (incomingCall) {
@@ -29,7 +30,13 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
       // Play incoming call sound (optional)
       playIncomingCallSound();
 
-      return () => clearInterval(interval);
+      return () => {
+        clearInterval(interval);
+        stopBeeping();
+      };
+    } else {
+      // Stop beeping when no incoming call
+      stopBeeping();
     }
   }, [incomingCall]);
 
@@ -50,7 +57,7 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
       oscillator.stop(audioContext.currentTime + 0.2);
 
       // Repeat beeping
-      const beepInterval = setInterval(() => {
+      beepIntervalRef.current = setInterval(() => {
         if (incomingCall) {
           const osc = audioContext.createOscillator();
           const gain = audioContext.createGain();
@@ -64,7 +71,10 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
           osc.start();
           osc.stop(audioContext.currentTime + 0.2);
         } else {
-          clearInterval(beepInterval);
+          if (beepIntervalRef.current) {
+            clearInterval(beepIntervalRef.current);
+            beepIntervalRef.current = null;
+          }
         }
       }, 1000);
 
@@ -73,8 +83,16 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
     }
   };
 
+  const stopBeeping = () => {
+    if (beepIntervalRef.current) {
+      clearInterval(beepIntervalRef.current);
+      beepIntervalRef.current = null;
+    }
+  };
+
   const handleAccept = () => {
     if (incomingCall && user) {
+      stopBeeping();
       respondToCall(incomingCall.call_id, 'accepted', user.name);
       onCallAccepted(incomingCall.call_id);
     }
@@ -82,6 +100,7 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
 
   const handleDecline = () => {
     if (incomingCall && user) {
+      stopBeeping();
       respondToCall(incomingCall.call_id, 'declined', user.name);
     }
   };

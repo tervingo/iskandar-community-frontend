@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import Home from './components/Home/Home';
@@ -11,6 +11,7 @@ import ChatRoom from './components/Chat/ChatRoom';
 import FileRepository from './components/Files/FileRepository';
 import News from './components/News/News';
 import VideoCallsPage from './components/VideoCall/VideoCallsPage';
+import VideoCallRoomWrapper from './components/VideoCall/VideoCallRoomWrapper';
 import IncomingCallModal from './components/VideoCall/IncomingCallModal';
 import UnifiedAdminPanel from './components/Admin/UnifiedAdminPanel';
 import EmailPreferences from './components/User/EmailPreferences';
@@ -23,6 +24,7 @@ import './styles/videoCall.css';
 
 const App: React.FC = () => {
   const { initAuth } = useAuthStore();
+  const [activeCallId, setActiveCallId] = useState<string | null>(null);
 
   useEffect(() => {
     initAuth();
@@ -107,6 +109,14 @@ const App: React.FC = () => {
             }
           />
           <Route
+            path="/video-call/:callId"
+            element={
+              <RedirectRoute>
+                <VideoCallRoomWrapper />
+              </RedirectRoute>
+            }
+          />
+          <Route
             path="/admin/*"
             element={
               <ProtectedRoute requireAdmin={true}>
@@ -132,7 +142,9 @@ const App: React.FC = () => {
           />
         </Route>
       </Routes>
-      <IncomingCallModal onCallAccepted={() => {}} />
+      <IncomingCallModal onCallAccepted={(callId) => {
+        window.location.href = `/video-call/${callId}`;
+      }} />
     </Router>
   );
 };
