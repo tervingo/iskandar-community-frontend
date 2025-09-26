@@ -11,7 +11,7 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
   const { incomingCall, respondToCall } = useVideoCallInvitations();
   const { user } = useAuthStore();
   const [timer, setTimer] = useState(30);
-  const beepIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const beepIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (incomingCall) {

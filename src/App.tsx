@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import Home from './components/Home/Home';
@@ -24,7 +24,6 @@ import './styles/videoCall.css';
 
 const App: React.FC = () => {
   const { initAuth } = useAuthStore();
-  const [activeCallId, setActiveCallId] = useState<string | null>(null);
 
   useEffect(() => {
     initAuth();
