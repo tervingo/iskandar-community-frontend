@@ -99,12 +99,14 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
         }, 30000);
 
       } else {
-        throw new Error('Failed to create call');
+        const errorData = await response.json();
+        console.error('Video call creation failed:', response.status, errorData);
+        throw new Error(errorData.detail || `HTTP ${response.status}: Failed to create call`);
       }
     } catch (error) {
       console.error('Error starting video call:', error);
       setLoading(false);
-      alert('Failed to start video call');
+      alert(`Failed to start video call: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 

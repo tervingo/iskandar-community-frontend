@@ -49,12 +49,13 @@ const CreateCallModal: React.FC<CreateCallModalProps> = ({ onClose, onCallCreate
         const roomData = await response.json();
         onCallCreated(roomData.id);
       } else {
-        const error = await response.json();
-        alert(error.detail || 'Failed to create meeting room');
+        const errorData = await response.json();
+        console.error('Meeting room creation failed:', response.status, errorData);
+        alert(errorData.detail || `HTTP ${response.status}: Failed to create meeting room`);
       }
     } catch (error) {
       console.error('Error creating meeting room:', error);
-      alert('Failed to create meeting room');
+      alert(`Failed to create meeting room: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
