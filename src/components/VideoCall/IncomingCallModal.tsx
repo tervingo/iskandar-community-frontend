@@ -92,20 +92,26 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
 
   const handleAccept = () => {
     console.log('IncomingCallModal: handleAccept called', { incomingCall, user });
-    if (incomingCall && user && incomingCall.call_id) {
-      console.log('IncomingCallModal: Accepting call', incomingCall.call_id);
-      stopBeeping();
-      respondToCall(incomingCall.call_id, 'accepted', user.name);
-      console.log('IncomingCallModal: Calling onCallAccepted with', incomingCall.call_id);
-      onCallAccepted(incomingCall.call_id);
-    } else {
-      console.log('IncomingCallModal: Cannot accept call - missing incomingCall, user, or call_id');
-      console.log('IncomingCallModal: incomingCall:', incomingCall);
-      console.log('IncomingCallModal: user:', user);
-      if (incomingCall) {
-        console.log('IncomingCallModal: incomingCall.call_id:', incomingCall.call_id);
-      }
+
+    if (!incomingCall) {
+      console.log('IncomingCallModal: No incoming call data');
+      return;
     }
+
+    if (!user) {
+      console.log('IncomingCallModal: No user data');
+      return;
+    }
+
+    console.log('IncomingCallModal: Full incomingCall object:', incomingCall);
+    console.log('IncomingCallModal: incomingCall.call_id:', incomingCall.call_id);
+
+    // Try to proceed even if call_id is null to see what happens
+    console.log('IncomingCallModal: Accepting call with call_id:', incomingCall.call_id);
+    stopBeeping();
+    respondToCall(incomingCall.call_id, 'accepted', user.name);
+    console.log('IncomingCallModal: Calling onCallAccepted with call_id:', incomingCall.call_id);
+    onCallAccepted(incomingCall.call_id);
   };
 
   const handleDecline = () => {
