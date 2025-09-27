@@ -8,7 +8,8 @@ const VideoCallRoomWrapper: React.FC = () => {
 
   console.log('VideoCallRoomWrapper: callId from route params:', callId);
 
-  if (!callId) {
+  if (!callId || callId === 'null' || callId === 'undefined') {
+    console.log('VideoCallRoomWrapper: Invalid callId, redirecting to /video-calls');
     navigate('/video-calls');
     return null;
   }

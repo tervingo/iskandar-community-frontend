@@ -92,14 +92,19 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
 
   const handleAccept = () => {
     console.log('IncomingCallModal: handleAccept called', { incomingCall, user });
-    if (incomingCall && user) {
+    if (incomingCall && user && incomingCall.call_id) {
       console.log('IncomingCallModal: Accepting call', incomingCall.call_id);
       stopBeeping();
       respondToCall(incomingCall.call_id, 'accepted', user.name);
       console.log('IncomingCallModal: Calling onCallAccepted with', incomingCall.call_id);
       onCallAccepted(incomingCall.call_id);
     } else {
-      console.log('IncomingCallModal: Cannot accept call - missing incomingCall or user');
+      console.log('IncomingCallModal: Cannot accept call - missing incomingCall, user, or call_id');
+      console.log('IncomingCallModal: incomingCall:', incomingCall);
+      console.log('IncomingCallModal: user:', user);
+      if (incomingCall) {
+        console.log('IncomingCallModal: incomingCall.call_id:', incomingCall.call_id);
+      }
     }
   };
 
