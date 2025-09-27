@@ -78,14 +78,20 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
 
         // Set up response listener
         const handleResponse = (data: any) => {
+          console.log('OnlineUsersList: Received video_call_response:', data);
+          console.log('OnlineUsersList: Comparing call_id:', data.call_id, 'with callData.id:', callData.id);
           if (data.call_id === callData.id) {
+            console.log('OnlineUsersList: Call IDs match!');
             if (data.response === 'accepted') {
+              console.log('OnlineUsersList: Call accepted, calling onStartCall with:', callData.id);
               onStartCall(callData.id);
             } else {
               alert(`${data.responder_name} declined the call`);
             }
             socket.off('video_call_response', handleResponse);
             setLoading(false);
+          } else {
+            console.log('OnlineUsersList: Call IDs do not match, ignoring response');
           }
         };
 

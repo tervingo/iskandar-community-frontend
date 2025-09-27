@@ -50,11 +50,11 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
         agoraClient.on('user-unpublished', handleUserUnpublished);
         agoraClient.on('user-left', handleUserLeft);
 
-        // Generate token (in production, get from your backend)
-        const token = await generateToken(callId);
+        // Generate token and get channel name
+        const tokenData = await generateToken(callId);
 
-        // Join channel
-        await agoraClient.join(APP_ID, callId, token, user?.id);
+        // Join channel using the actual channel name
+        await agoraClient.join(APP_ID, tokenData.channel, tokenData.token, user?.id);
 
         // Create and publish local tracks
         const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
@@ -89,9 +89,9 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
     };
   }, [callId, user, socket]);
 
-  const generateToken = async (channelName: string): Promise<string> => {
+  const generateToken = async (callId: string): Promise<{token: string, channel: string}> => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/video-calls/generate-token?channel_name=${channelName}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/video-calls/generate-token?call_id=${callId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -99,10 +99,10 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
         }
       });
       const data = await response.json();
-      return data.token;
+      return data;
     } catch (error) {
       console.error('Error generating token:', error);
-      return '';
+      return { token: '', channel: '' };
     }
   };
 

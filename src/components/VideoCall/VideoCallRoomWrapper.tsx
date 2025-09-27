@@ -6,6 +6,8 @@ const VideoCallRoomWrapper: React.FC = () => {
   const { callId } = useParams<{ callId: string }>();
   const navigate = useNavigate();
 
+  console.log('VideoCallRoomWrapper: callId from route params:', callId);
+
   if (!callId) {
     navigate('/video-calls');
     return null;

@@ -63,6 +63,8 @@ export const useVideoCallInvitations = () => {
 
   const respondToCall = (callId: string, response: 'accepted' | 'declined', responderName: string) => {
     if (socket && incomingCall) {
+      console.log('useSocket: respondToCall called with:', { callId, response, responderName });
+      console.log('useSocket: incomingCall data:', incomingCall);
       socket.emit('video_call_response', {
         caller_id: incomingCall.caller_id,
         call_id: callId,
