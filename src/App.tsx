@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import Home from './components/Home/Home';
 import PostList from './components/Blog/PostList';
@@ -22,15 +22,11 @@ import { useAuthStore } from './stores/authStore';
 import './App.css';
 import './styles/videoCall.css';
 
-const App: React.FC = () => {
-  const { initAuth } = useAuthStore();
-
-  useEffect(() => {
-    initAuth();
-  }, [initAuth]);
+const AppContent: React.FC = () => {
+  const navigate = useNavigate();
 
   return (
-    <Router>
+    <>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/home" replace />} />
@@ -109,11 +105,7 @@ const App: React.FC = () => {
           />
           <Route
             path="/video-call/:callId"
-            element={
-              <RedirectRoute>
-                <VideoCallRoomWrapper />
-              </RedirectRoute>
-            }
+            element={<VideoCallRoomWrapper />}
           />
           <Route
             path="/admin/*"
@@ -142,8 +134,23 @@ const App: React.FC = () => {
         </Route>
       </Routes>
       <IncomingCallModal onCallAccepted={(callId) => {
-        window.location.href = `/video-call/${callId}`;
+        console.log('App: Navigating to /video-call/' + callId);
+        navigate(`/video-call/${callId}`);
       }} />
+    </>
+  );
+};
+
+const App: React.FC = () => {
+  const { initAuth } = useAuthStore();
+
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
+
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 };
