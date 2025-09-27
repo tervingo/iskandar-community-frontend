@@ -12,7 +12,7 @@ interface OnlineUsersListProps {
 const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
   const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, token } = useAuthStore();
   const socket = useSocket();
 
   const fetchOnlineUsers = useCallback(async () => {
@@ -44,7 +44,7 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
   }, [isAuthenticated, user, fetchOnlineUsers]);
 
   const startVideoCall = async (targetUserId: string) => {
-    if (!user || !socket) return;
+    if (!user || !socket || !token) return;
 
     setLoading(true);
 
@@ -53,7 +53,7 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/video-calls/create-call`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({

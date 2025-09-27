@@ -32,7 +32,7 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const localVideoRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const socket = useSocket();
 
   // App ID - In production, get this from environment variables
@@ -94,7 +94,7 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/video-calls/generate-token?channel_name=${channelName}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -257,7 +257,7 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
       await fetch(`${import.meta.env.VITE_API_URL}/video-calls/leave-call/${callId}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
     } catch (error) {
