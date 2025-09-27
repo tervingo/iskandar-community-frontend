@@ -51,6 +51,7 @@ export const useVideoCallInvitations = () => {
   useEffect(() => {
     if (socket) {
       socket.on('video_call_invitation', (invitation) => {
+        console.log('useSocket: Received video_call_invitation:', invitation);
         setIncomingCall(invitation);
       });
 

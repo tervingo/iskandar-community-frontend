@@ -134,7 +134,6 @@ const AppContent: React.FC = () => {
         </Route>
       </Routes>
       <IncomingCallModal onCallAccepted={(callId) => {
-        console.log('App: Navigating to /video-call/' + callId);
         navigate(`/video-call/${callId}`);
       }} />
     </>

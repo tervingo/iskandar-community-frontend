@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaVideo, FaUsers, FaHistory, FaPlus } from 'react-icons/fa';
 import VideoCallRoom from './VideoCallRoom';
 import MeetingRoomList from './MeetingRoomList';
@@ -14,6 +15,7 @@ interface TabType {
 }
 
 const VideoCallsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('direct-calls');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeCall, setActiveCall] = useState<string | null>(null);
@@ -35,9 +37,9 @@ const VideoCallsPage: React.FC = () => {
       icon: <FaVideo />,
       component: (
         <OnlineUsersList
-          onStartCall={(userId: string) => {
-            // This will create a call and set activeCall
-            console.log('Start call with user:', userId);
+          onStartCall={(callId: string) => {
+            console.log('VideoCallsPage: Starting call with callId:', callId);
+            navigate(`/video-call/${callId}`);
           }}
         />
       )
