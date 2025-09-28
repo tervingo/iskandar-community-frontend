@@ -60,7 +60,7 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
         console.log('VideoCallRoom: Joining Agora channel:', {
           appId: APP_ID,
           channel: tokenData.channel,
-          token: tokenData.token.substring(0, 20) + '...',
+          token: tokenData.token ? tokenData.token.substring(0, 20) + '...' : 'null (testing mode)',
           uid: user?.id
         });
         await agoraClient.join(APP_ID, tokenData.channel, tokenData.token, user?.id);
