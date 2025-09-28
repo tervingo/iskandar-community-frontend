@@ -24,6 +24,40 @@
   color: #ccc;
 }
 
+.debug-info {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.debug-info details {
+  background: #1a1a1a;
+  border: 1px solid #404040;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+.debug-info summary {
+  cursor: pointer;
+  color: #999;
+  margin-bottom: 5px;
+}
+
+.debug-messages {
+  max-height: 150px;
+  overflow-y: auto;
+  background: #0d1117;
+  padding: 5px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.debug-message {
+  color: #8b949e;
+  font-size: 11px;
+  margin: 2px 0;
+  word-break: break-all;
+}
+
 .webrtc-videos {
   flex: 1;
   display: flex;

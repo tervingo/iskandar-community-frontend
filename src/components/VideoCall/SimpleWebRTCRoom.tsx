@@ -12,10 +12,15 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
   const [isConnected, setIsConnected] = useState(false);
   const [remoteUser, setRemoteUser] = useState<string | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [connectionState, setConnectionState] = useState<string>('new');
+  const [iceState, setIceState] = useState<string>('new');
+  const [debug, setDebug] = useState<string[]>([]);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const isCallerRef = useRef<boolean>(false);
+  const connectionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ICE servers for WebRTC
   const iceServers = {
@@ -25,11 +30,26 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
     ]
   };
 
+  const addDebugMessage = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setDebug(prev => [...prev, `${timestamp}: ${message}`]);
+  };
+
   useEffect(() => {
-    initializeWebRTC();
-    setupSocketListeners();
+    // Ensure socket is connected before initializing WebRTC
+    if (!socketService.isConnected()) {
+      addDebugMessage('Socket not connected, connecting...');
+      socketService.connect();
+    }
+
+    // Small delay to ensure socket connection is established
+    const initTimer = setTimeout(() => {
+      setupSocketListeners();
+      initializeWebRTC();
+    }, 500);
 
     return () => {
+      clearTimeout(initTimer);
       cleanup();
     };
   }, []);
@@ -37,6 +57,7 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
   const initializeWebRTC = async () => {
     try {
       console.log('SimpleWebRTCRoom: Initializing WebRTC for call:', callId);
+      addDebugMessage(`Initializing WebRTC for call: ${callId}`);
 
       // Get user media
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -47,6 +68,7 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       setLocalStream(stream);
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
+        addDebugMessage('Local video stream attached');
       }
 
       // Create peer connection
@@ -60,17 +82,20 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
 
       // Handle remote stream
       peerConnection.ontrack = (event) => {
-        console.log('SimpleWebRTCRoom: Received remote stream');
+        console.log('SimpleWebRTCRoom: Received remote stream:', event.streams.length, 'streams');
+        addDebugMessage(`Received remote stream with ${event.streams.length} streams`);
         const [stream] = event.streams;
-        if (remoteVideoRef.current) {
+        if (remoteVideoRef.current && stream) {
           remoteVideoRef.current.srcObject = stream;
+          addDebugMessage('Remote video stream attached');
         }
       };
 
       // Handle ICE candidates
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
-          console.log('SimpleWebRTCRoom: Sending ICE candidate');
+          console.log('SimpleWebRTCRoom: Sending ICE candidate:', event.candidate.type);
+          addDebugMessage(`Sending ICE candidate: ${event.candidate.type}`);
           const socket = socketService.getSocket();
           if (socket) {
             socket.emit('webrtc_ice_candidate', {
@@ -79,13 +104,39 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
               userId: user?.id
             });
           }
+        } else {
+          console.log('SimpleWebRTCRoom: ICE gathering completed');
+          addDebugMessage('ICE gathering completed');
         }
       };
 
       // Handle connection state changes
       peerConnection.onconnectionstatechange = () => {
-        console.log('SimpleWebRTCRoom: Connection state:', peerConnection.connectionState);
-        setIsConnected(peerConnection.connectionState === 'connected');
+        const state = peerConnection.connectionState;
+        console.log('SimpleWebRTCRoom: Connection state:', state);
+        setConnectionState(state);
+        setIsConnected(state === 'connected');
+        addDebugMessage(`Connection state: ${state}`);
+
+        if (state === 'connected' && connectionTimeoutRef.current) {
+          clearTimeout(connectionTimeoutRef.current);
+          connectionTimeoutRef.current = null;
+          addDebugMessage('Connection established, timeout cleared');
+        }
+      };
+
+      // Handle ICE connection state changes
+      peerConnection.oniceconnectionstatechange = () => {
+        const state = peerConnection.iceConnectionState;
+        console.log('SimpleWebRTCRoom: ICE connection state:', state);
+        setIceState(state);
+        addDebugMessage(`ICE state: ${state}`);
+      };
+
+      // Handle ICE gathering state changes
+      peerConnection.onicegatheringstatechange = () => {
+        console.log('SimpleWebRTCRoom: ICE gathering state:', peerConnection.iceGatheringState);
+        addDebugMessage(`ICE gathering: ${peerConnection.iceGatheringState}`);
       };
 
       // Join the call room
@@ -98,8 +149,17 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
         });
       }
 
+      // Set connection timeout
+      connectionTimeoutRef.current = setTimeout(() => {
+        if (!isConnected) {
+          addDebugMessage('Connection timeout - no response from remote peer');
+          console.warn('SimpleWebRTCRoom: Connection timeout');
+        }
+      }, 30000); // 30 second timeout
+
     } catch (error) {
       console.error('SimpleWebRTCRoom: Failed to initialize WebRTC:', error);
+      addDebugMessage(`Failed to initialize WebRTC: ${error}`);
     }
   };
 
@@ -116,11 +176,16 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
 
   const handleUserJoined = async (data: { userId: string, username: string }) => {
     console.log('SimpleWebRTCRoom: User joined:', data);
+    addDebugMessage(`User joined: ${data.username} (${data.userId})`);
     setRemoteUser(data.username);
 
-    // If this is the caller, create and send offer
+    // If this is the caller (first user already in room), create and send offer
     if (data.userId !== user?.id && peerConnectionRef.current) {
+      isCallerRef.current = true;
+      addDebugMessage('I am the caller, creating offer...');
       await createOffer();
+    } else if (data.userId === user?.id) {
+      addDebugMessage('I joined the room');
     }
   };
 
@@ -131,6 +196,7 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       await peerConnection.setLocalDescription(offer);
 
       console.log('SimpleWebRTCRoom: Sending offer');
+      addDebugMessage('Sending offer to remote peer');
       const socket = socketService.getSocket();
       if (socket) {
         socket.emit('webrtc_offer', {
@@ -141,19 +207,24 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       }
     } catch (error) {
       console.error('SimpleWebRTCRoom: Failed to create offer:', error);
+      addDebugMessage(`Failed to create offer: ${error}`);
     }
   };
 
   const handleOffer = async (data: { offer: RTCSessionDescriptionInit, userId: string }) => {
     try {
       console.log('SimpleWebRTCRoom: Received offer from:', data.userId);
+      addDebugMessage(`Received offer from: ${data.userId}`);
       const peerConnection = peerConnectionRef.current!;
 
       await peerConnection.setRemoteDescription(data.offer);
+      addDebugMessage('Set remote description from offer');
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
+      addDebugMessage('Created and set local description (answer)');
 
       console.log('SimpleWebRTCRoom: Sending answer');
+      addDebugMessage('Sending answer to caller');
       const socket = socketService.getSocket();
       if (socket) {
         socket.emit('webrtc_answer', {
@@ -164,26 +235,39 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       }
     } catch (error) {
       console.error('SimpleWebRTCRoom: Failed to handle offer:', error);
+      addDebugMessage(`Failed to handle offer: ${error}`);
     }
   };
 
   const handleAnswer = async (data: { answer: RTCSessionDescriptionInit, userId: string }) => {
     try {
       console.log('SimpleWebRTCRoom: Received answer from:', data.userId);
+      addDebugMessage(`Received answer from: ${data.userId}`);
       const peerConnection = peerConnectionRef.current!;
       await peerConnection.setRemoteDescription(data.answer);
+      addDebugMessage('Set remote description from answer');
     } catch (error) {
       console.error('SimpleWebRTCRoom: Failed to handle answer:', error);
+      addDebugMessage(`Failed to handle answer: ${error}`);
     }
   };
 
   const handleIceCandidate = async (data: { candidate: RTCIceCandidateInit, userId: string }) => {
     try {
       console.log('SimpleWebRTCRoom: Received ICE candidate from:', data.userId);
+      addDebugMessage(`Received ICE candidate from: ${data.userId}`);
       const peerConnection = peerConnectionRef.current!;
-      await peerConnection.addIceCandidate(data.candidate);
+
+      if (peerConnection.remoteDescription) {
+        await peerConnection.addIceCandidate(data.candidate);
+        addDebugMessage('Added ICE candidate');
+      } else {
+        console.warn('SimpleWebRTCRoom: Remote description not set, queuing ICE candidate');
+        addDebugMessage('Remote description not set, cannot add ICE candidate yet');
+      }
     } catch (error) {
       console.error('SimpleWebRTCRoom: Failed to add ICE candidate:', error);
+      addDebugMessage(`Failed to add ICE candidate: ${error}`);
     }
   };
 
@@ -201,6 +285,12 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
     // Stop local stream
     if (localStream) {
       localStream.getTracks().forEach(track => track.stop());
+    }
+
+    // Clear timeout
+    if (connectionTimeoutRef.current) {
+      clearTimeout(connectionTimeoutRef.current);
+      connectionTimeoutRef.current = null;
     }
 
     // Close peer connection
@@ -248,8 +338,18 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       <div className="webrtc-header">
         <h2>Video Call - {callId}</h2>
         <div className="connection-status">
-          Status: {isConnected ? 'Connected' : 'Connecting...'}
+          Status: {isConnected ? 'Connected' : 'Connecting...'} | Connection: {connectionState} | ICE: {iceState}
           {remoteUser && <span> | With: {remoteUser}</span>}
+        </div>
+        <div className="debug-info">
+          <details>
+            <summary>Debug Info ({debug.length} messages)</summary>
+            <div className="debug-messages">
+              {debug.slice(-10).map((msg, idx) => (
+                <div key={idx} className="debug-message">{msg}</div>
+              ))}
+            </div>
+          </details>
         </div>
       </div>
 
