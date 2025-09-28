@@ -110,7 +110,7 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
     };
   }, [callId, user, socket]);
 
-  const generateToken = async (callId: string): Promise<{token: string, channel: string}> => {
+  const generateToken = async (callId: string): Promise<{token: string | null, channel: string}> => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/video-calls/generate-token?call_id=${callId}`, {
         method: 'POST',
