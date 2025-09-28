@@ -41,6 +41,8 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
   useEffect(() => {
     const initializeCall = async () => {
       try {
+        console.log('VideoCallRoom: Initializing call with:', { callId, APP_ID, user: user?.name });
+
         // Create Agora client
         const agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
         setClient(agoraClient);
@@ -52,22 +54,36 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
 
         // Generate token and get channel name
         const tokenData = await generateToken(callId);
+        console.log('VideoCallRoom: Generated token data:', tokenData);
 
         // Join channel using the actual channel name
+        console.log('VideoCallRoom: Joining Agora channel:', {
+          appId: APP_ID,
+          channel: tokenData.channel,
+          token: tokenData.token.substring(0, 20) + '...',
+          uid: user?.id
+        });
         await agoraClient.join(APP_ID, tokenData.channel, tokenData.token, user?.id);
 
         // Create and publish local tracks
+        console.log('VideoCallRoom: Creating microphone and camera tracks...');
         const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+        console.log('VideoCallRoom: Created tracks:', { audioTrack, videoTrack });
         setLocalAudioTrack(audioTrack);
         setLocalVideoTrack(videoTrack);
 
         // Play local video
         if (localVideoRef.current) {
+          console.log('VideoCallRoom: Playing local video track...');
           videoTrack.play(localVideoRef.current);
+        } else {
+          console.log('VideoCallRoom: localVideoRef.current is null');
         }
 
         // Publish tracks
+        console.log('VideoCallRoom: Publishing tracks...');
         await agoraClient.publish([audioTrack, videoTrack]);
+        console.log('VideoCallRoom: Tracks published successfully');
 
         // Join socket room for call coordination
         socket?.emit('join_video_call_room', {
@@ -77,6 +93,11 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
 
       } catch (error) {
         console.error('Error initializing call:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
       }
     };
 
