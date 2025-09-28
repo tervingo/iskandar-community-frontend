@@ -94,9 +94,9 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
       } catch (error) {
         console.error('Error initializing call:', error);
         console.error('Error details:', {
-          message: error.message,
-          stack: error.stack,
-          name: error.name
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          name: error instanceof Error ? error.name : 'Unknown'
         });
       }
     };
