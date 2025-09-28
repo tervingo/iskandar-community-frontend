@@ -104,13 +104,13 @@ const CallHistory: React.FC = () => {
             className={`filter-btn ${filter === 'private' ? 'active' : ''}`}
             onClick={() => setFilter('private')}
           >
-            <FaVideo /> 1:1 Calls
+            <FaVideo /> Videollamadas 1:1
           </button>
           <button
             className={`filter-btn ${filter === 'meeting' ? 'active' : ''}`}
             onClick={() => setFilter('meeting')}
           >
-            <FaUsers /> Meetings
+            <FaUsers /> Reuniones
           </button>
         </div>
       </div>
@@ -118,8 +118,8 @@ const CallHistory: React.FC = () => {
       {filteredHistory.length === 0 ? (
         <div className="empty-state">
           <FaClock size={48} />
-          <h3>No Call History</h3>
-          <p>Your completed video calls will appear here</p>
+          <h3>No historial de videollamadas</h3>
+          <p>Tus videollamadas completadas aparecerán aquí</p>
         </div>
       ) : (
         <div className="history-list">
@@ -134,7 +134,7 @@ const CallHistory: React.FC = () => {
                   {call.call_type === 'meeting' && call.room_name
                     ? call.room_name
                     : call.call_type === 'private'
-                    ? `1:1 Call with ${call.creator_name}`
+                    ? `Videollamada 1:1 con ${call.creator_name}`
                     : `Meeting by ${call.creator_name}`
                   }
                 </h4>
@@ -159,7 +159,7 @@ const CallHistory: React.FC = () => {
                 </div>
 
                 <div className="call-status">
-                  <span className="status-badge completed">Completed</span>
+                  <span className="status-badge completed">Completada</span>
                 </div>
               </div>
 
@@ -178,19 +178,19 @@ const CallHistory: React.FC = () => {
           <div className="stats-grid">
             <div className="stat-item">
               <span className="stat-number">{callHistory.length}</span>
-              <span className="stat-label">Total Calls</span>
+              <span className="stat-label">Total Videollamadas</span>
             </div>
             <div className="stat-item">
               <span className="stat-number">
                 {callHistory.filter(c => c.call_type === 'private').length}
               </span>
-              <span className="stat-label">1:1 Calls</span>
+              <span className="stat-label">Videollamadas 1:1</span>
             </div>
             <div className="stat-item">
               <span className="stat-number">
                 {callHistory.filter(c => c.call_type === 'meeting').length}
               </span>
-              <span className="stat-label">Meetings</span>
+              <span className="stat-label">Reuniones</span>
             </div>
             <div className="stat-item">
               <span className="stat-number">
@@ -200,7 +200,7 @@ const CallHistory: React.FC = () => {
                     .reduce((total, c) => total + (c.duration || 0), 0) / 60
                 )}m
               </span>
-              <span className="stat-label">Total Time</span>
+              <span className="stat-label">Tiempo total</span>
             </div>
           </div>
         </div>

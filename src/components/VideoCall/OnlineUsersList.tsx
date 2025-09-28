@@ -83,6 +83,8 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
           console.log('OnlineUsersList: Comparing call_id:', data.call_id, 'with callData._id:', callData._id);
           if (data.call_id === callData._id) {
             console.log('OnlineUsersList: Call IDs match!');
+            // Clear the timeout since we got a response
+            clearTimeout(timeoutId);
             if (data.response === 'accepted') {
               console.log('OnlineUsersList: Call accepted, calling onStartCall with:', callData._id);
               onStartCall(callData._id);
@@ -99,7 +101,7 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
         socket.on('video_call_response', handleResponse);
 
         // Timeout after 30 seconds
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           socket.off('video_call_response', handleResponse);
           setLoading(false);
           alert('Call timeout - no response from user');
@@ -120,19 +122,19 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
   return (
     <div className="online-users-list">
       <div className="section-header">
-        <h3>Online Users</h3>
+        <h3>Usuarios conectados</h3>
         <button
           className="btn btn-secondary"
           onClick={fetchOnlineUsers}
           disabled={loading}
         >
-          🔄 Refresh
+          🔄 Actualizar
         </button>
       </div>
 
       {onlineUsers.length === 0 ? (
         <div className="empty-state">
-          <p>No other users are currently online</p>
+          <p>No hay otros usuarios conectados</p>
         </div>
       ) : (
         <div className="users-grid">
@@ -146,7 +148,7 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
                   <h4>{onlineUser.name}</h4>
                   <div className="user-status">
                     <FaCircle className="online-indicator" />
-                    <span>Online</span>
+                    <span>Conectado</span>
                   </div>
                 </div>
               </div>
@@ -158,7 +160,7 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
                 title={`Start video call with ${onlineUser.name}`}
               >
                 <FaVideo />
-                {loading ? 'Calling...' : 'Call'}
+                {loading ? 'Llamando...' : 'Llamar'}
               </button>
             </div>
           ))}
@@ -166,12 +168,12 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
       )}
 
       <div className="call-tips">
-        <h4>💡 Tips for Video Calls</h4>
+        <h4>💡 Tips para videollamadas</h4>
         <ul>
-          <li>Ensure you have a stable internet connection</li>
-          <li>Use headphones to prevent audio feedback</li>
-          <li>Make sure your camera and microphone are working</li>
-          <li>Find a quiet, well-lit environment</li>
+          <li>Asegúrate de que tienes una conexión de internet estable</li>
+          <li>Usa auriculares para evitar el eco</li>
+          <li>Asegúrate de que tu cámara y micrófono estén funcionando</li>
+          <li>Encuentra un entorno tranquilo y bien iluminado</li>
         </ul>
       </div>
     </div>

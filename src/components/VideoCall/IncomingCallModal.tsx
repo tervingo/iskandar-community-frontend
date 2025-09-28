@@ -128,7 +128,7 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
       <div className="incoming-call-modal">
         <div className="call-header">
           <FaVideo className="call-icon" />
-          <h2>Incoming Video Call</h2>
+          <h2>Videollamada entrante</h2>
         </div>
 
         <div className="caller-info">
@@ -137,7 +137,7 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
           </div>
           <h3>{incomingCall.caller_name}</h3>
           <p>
-            {incomingCall.call_type === 'private' ? '1:1 Video Call' : 'Group Meeting'}
+            {incomingCall.call_type === 'private' ? 'Videollamada 1:1' : 'Reunión'}
           </p>
         </div>
 
@@ -149,7 +149,7 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
           <button
             className="decline-btn"
             onClick={handleDecline}
-            title="Decline call"
+            title="Declinar llamada"
           >
             <FaPhoneSlash />
             Decline
@@ -158,7 +158,7 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
           <button
             className="accept-btn"
             onClick={handleAccept}
-            title="Accept call"
+            title="Aceptar llamada"
           >
             <FaPhone />
             Accept
@@ -166,7 +166,7 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
         </div>
 
         <div className="call-preview">
-          <p>📹 Make sure your camera and microphone are ready</p>
+          <p>📹 Asegúrate de que tu cámara y micrófono estén listos</p>
         </div>
       </div>
     </div>

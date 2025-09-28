@@ -65,7 +65,7 @@ const CreateCallModal: React.FC<CreateCallModalProps> = ({ onClose, onCallCreate
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content create-call-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Create Meeting Room</h2>
+          <h2>Crear sala de reunión</h2>
           <button className="close-btn" onClick={onClose}>
             <FaTimes />
           </button>
@@ -73,7 +73,7 @@ const CreateCallModal: React.FC<CreateCallModalProps> = ({ onClose, onCallCreate
 
         <form onSubmit={handleSubmit} className="create-room-form">
           <div className="form-group">
-            <label htmlFor="roomName">Room Name *</label>
+            <label htmlFor="roomName">Nombre de la sala *</label>
             <input
               type="text"
               id="roomName"
@@ -86,7 +86,7 @@ const CreateCallModal: React.FC<CreateCallModalProps> = ({ onClose, onCallCreate
           </div>
 
           <div className="form-group">
-            <label htmlFor="description">Description</label>
+            <label htmlFor="description">Descripción</label>
             <textarea
               id="description"
               value={description}
@@ -99,18 +99,18 @@ const CreateCallModal: React.FC<CreateCallModalProps> = ({ onClose, onCallCreate
 
           <div className="form-group">
             <label htmlFor="maxParticipants">
-              <FaUsers /> Maximum Participants
+              <FaUsers /> Máximo de participantes
             </label>
             <select
               id="maxParticipants"
               value={maxParticipants}
               onChange={(e) => setMaxParticipants(Number(e.target.value))}
             >
-              <option value={2}>2 participants</option>
-              <option value={5}>5 participants</option>
-              <option value={10}>10 participants</option>
-              <option value={20}>20 participants</option>
-              <option value={50}>50 participants</option>
+              <option value={2}>2 participantes</option>
+              <option value={5}>5 participantes</option>
+              <option value={10}>10 participantes</option>
+              <option value={20}>20 participantes</option>
+              <option value={50}>50 participantes</option>
             </select>
           </div>
 
@@ -125,7 +125,7 @@ const CreateCallModal: React.FC<CreateCallModalProps> = ({ onClose, onCallCreate
                   onChange={() => setIsPublic(true)}
                 />
                 <FaGlobe />
-                <span>Public - Anyone can join</span>
+                <span>Público - Cualquiera puede unirse</span>
               </label>
               <label className="radio-option">
                 <input
@@ -135,14 +135,14 @@ const CreateCallModal: React.FC<CreateCallModalProps> = ({ onClose, onCallCreate
                   onChange={() => setIsPublic(false)}
                 />
                 <FaLock />
-                <span>Private - Password required</span>
+                <span>Privado - Contraseña requerida</span>
               </label>
             </div>
           </div>
 
           {!isPublic && (
             <div className="form-group">
-              <label htmlFor="password">Room Password *</label>
+              <label htmlFor="password">Contraseña de la sala *</label>
               <input
                 type="password"
                 id="password"
@@ -174,7 +174,7 @@ const CreateCallModal: React.FC<CreateCallModalProps> = ({ onClose, onCallCreate
         </form>
 
         <div className="room-preview">
-          <h4>Room Preview</h4>
+          <h4>Vista previa de la sala</h4>
           <div className="preview-card">
             <h5>{roomName || 'Room Name'}</h5>
             {description && <p>{description}</p>}
