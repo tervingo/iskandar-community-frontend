@@ -311,6 +311,20 @@ export const activityLogsApi = {
     const response = await api.delete(`/activity-logs/cleanup?days=${days}`);
     return response.data;
   },
+
+  bulkDeleteUserLogs: async (usernames: string[]): Promise<{
+    message: string;
+    usernames: string[];
+    deleted_count: number;
+    deletion_summary: Record<string, number>;
+    performed_by: string;
+    timestamp: string;
+  }> => {
+    const response = await api.delete('/activity-logs/users/bulk', {
+      data: { usernames }
+    });
+    return response.data;
+  },
 };
 
 // Alias for posts API (for compatibility with existing components)

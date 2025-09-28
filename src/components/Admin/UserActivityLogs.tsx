@@ -11,6 +11,9 @@ const UserActivityLogs: React.FC = () => {
     limit: 50,
     offset: 0
   });
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [showBulkDelete, setShowBulkDelete] = useState(false);
+  const [deletionLoading, setDeletionLoading] = useState(false);
 
   useEffect(() => {
     fetchLogs();
@@ -76,6 +79,8 @@ const UserActivityLogs: React.FC = () => {
         return '🔑';
       case ActivityEventType.POST_VIEW:
         return '👁️';
+      case ActivityEventType.ADMIN_ACTION:
+        return '⚙️';
       default:
         return '📝';
     }
@@ -93,8 +98,68 @@ const UserActivityLogs: React.FC = () => {
         return '#3498db';
       case ActivityEventType.POST_VIEW:
         return '#9b59b6';
+      case ActivityEventType.ADMIN_ACTION:
+        return '#e67e22';
       default:
         return '#95a5a6';
+    }
+  };
+
+  // Get unique usernames from current logs
+  const getUniqueUsernames = (): string[] => {
+    const usernames = logs.map(log => log.username);
+    return Array.from(new Set(usernames)).sort();
+  };
+
+  const handleUserSelection = (username: string, isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedUsers(prev => [...prev, username]);
+    } else {
+      setSelectedUsers(prev => prev.filter(user => user !== username));
+    }
+  };
+
+  const handleSelectAllUsers = () => {
+    const allUsernames = getUniqueUsernames();
+    setSelectedUsers(allUsernames);
+  };
+
+  const handleDeselectAllUsers = () => {
+    setSelectedUsers([]);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedUsers.length === 0) {
+      alert('Por favor selecciona al menos un usuario');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `¿Estás seguro de que quieres eliminar TODOS los registros de actividad para los siguientes usuarios?\n\n${selectedUsers.join(', ')}\n\nEsta acción NO se puede deshacer.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletionLoading(true);
+      setError(null);
+
+      const result = await activityLogsApi.bulkDeleteUserLogs(selectedUsers);
+
+      alert(`✅ Eliminación completada exitosamente:\n\n${result.message}\n\nRegistros eliminados: ${result.deleted_count}\n\nDetalles:\n${Object.entries(result.deletion_summary).map(([user, count]) => `• ${user}: ${count} registros`).join('\n')}`);
+
+      // Refresh the logs and clear selections
+      await fetchLogs();
+      await fetchStats();
+      setSelectedUsers([]);
+      setShowBulkDelete(false);
+
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.detail || 'Error al eliminar los registros de actividad';
+      setError(errorMessage);
+      alert(`❌ Error: ${errorMessage}`);
+    } finally {
+      setDeletionLoading(false);
     }
   };
 
@@ -193,6 +258,7 @@ const UserActivityLogs: React.FC = () => {
               <option value={ActivityEventType.LOGOUT}>Logout</option>
               <option value={ActivityEventType.PASSWORD_CHANGE}>Cambio de Contraseña</option>
               <option value={ActivityEventType.POST_VIEW}>Vista de Entrada</option>
+              <option value={ActivityEventType.ADMIN_ACTION}>Acción de Admin</option>
             </select>
           </div>
 
@@ -232,8 +298,74 @@ const UserActivityLogs: React.FC = () => {
           <button onClick={() => { fetchLogs(); fetchStats(); }} className="btn btn-outline" disabled={loading}>
             🔄 Refrescar
           </button>
+          <button
+            onClick={() => setShowBulkDelete(!showBulkDelete)}
+            className="btn btn-danger"
+          >
+            🗑️ Eliminar por Usuario
+          </button>
         </div>
       </div>
+
+      {/* Bulk Delete Section */}
+      {showBulkDelete && (
+        <div className="bulk-delete-section">
+          <h3>🗑️ Eliminación Masiva de Registros por Usuario</h3>
+          <p className="warning-text">
+            ⚠️ <strong>ATENCIÓN:</strong> Esta acción eliminará TODOS los registros de actividad de los usuarios seleccionados. Esta operación NO se puede deshacer.
+          </p>
+
+          <div className="user-selection">
+            <div className="selection-header">
+              <h4>Seleccionar Usuarios (de los registros actuales):</h4>
+              <div className="selection-actions">
+                <button onClick={handleSelectAllUsers} className="btn btn-sm btn-outline">
+                  Seleccionar Todos
+                </button>
+                <button onClick={handleDeselectAllUsers} className="btn btn-sm btn-outline">
+                  Deseleccionar Todos
+                </button>
+                <span className="selection-count">
+                  {selectedUsers.length} de {getUniqueUsernames().length} usuarios seleccionados
+                </span>
+              </div>
+            </div>
+
+            <div className="users-grid">
+              {getUniqueUsernames().map(username => (
+                <label key={username} className="user-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={selectedUsers.includes(username)}
+                    onChange={(e) => handleUserSelection(username, e.target.checked)}
+                  />
+                  <span className="username">{username}</span>
+                  <span className="user-log-count">
+                    ({logs.filter(log => log.username === username).length} registros visibles)
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            <div className="bulk-delete-actions">
+              <button
+                onClick={handleBulkDelete}
+                disabled={selectedUsers.length === 0 || deletionLoading}
+                className="btn btn-danger"
+              >
+                {deletionLoading ? 'Eliminando...' : `🗑️ Eliminar Registros de ${selectedUsers.length} Usuario(s)`}
+              </button>
+              <button
+                onClick={() => setShowBulkDelete(false)}
+                className="btn btn-secondary"
+                disabled={deletionLoading}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="error-message">

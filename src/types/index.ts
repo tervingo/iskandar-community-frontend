@@ -180,7 +180,8 @@ export enum ActivityEventType {
   LOGIN = "login",
   LOGOUT = "logout",
   PASSWORD_CHANGE = "password_change",
-  POST_VIEW = "post_view"
+  POST_VIEW = "post_view",
+  ADMIN_ACTION = "admin_action"
 }
 
 export interface UserActivityLog {
