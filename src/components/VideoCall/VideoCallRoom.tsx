@@ -36,7 +36,8 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
   const socket = useSocket();
 
   // App ID - In production, get this from environment variables
-  const APP_ID = import.meta.env.VITE_AGORA_APP_ID || 'your_agora_app_id';
+  // Using a demo App ID for testing - replace with your own for production
+  const APP_ID = import.meta.env.VITE_AGORA_APP_ID || 'aab8b8f5a8cd4469a63042fcfafe7063';
 
   useEffect(() => {
     const initializeCall = async () => {
