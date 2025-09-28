@@ -119,11 +119,17 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
           'Content-Type': 'application/json'
         }
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
       return data;
     } catch (error) {
       console.error('Error generating token:', error);
-      return { token: '', channel: '' };
+      // For testing mode, return null token and use callId as channel
+      return { token: null, channel: callId };
     }
   };
 
