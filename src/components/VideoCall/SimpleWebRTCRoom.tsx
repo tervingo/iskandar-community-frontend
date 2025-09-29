@@ -21,6 +21,7 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const isCallerRef = useRef<boolean>(false);
   const connectionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const queuedIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
 
   // ICE servers for WebRTC
   const iceServers = {
@@ -33,6 +34,32 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
   const addDebugMessage = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
     setDebug(prev => [...prev, `${timestamp}: ${message}`]);
+  };
+
+  const reinitializeConnection = async () => {
+    console.log('SimpleWebRTCRoom: Reinitializing connection');
+    addDebugMessage('Reinitializing WebRTC connection');
+
+    // Clean up existing connection without leaving the room
+    if (connectionTimeoutRef.current) {
+      clearTimeout(connectionTimeoutRef.current);
+      connectionTimeoutRef.current = null;
+    }
+
+    queuedIceCandidatesRef.current = [];
+
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+    }
+
+    // Reset state
+    setConnectionState('new');
+    setIceState('new');
+    setIsConnected(false);
+
+    // Reinitialize
+    await initializeWebRTC();
   };
 
   useEffect(() => {
@@ -122,6 +149,12 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
           clearTimeout(connectionTimeoutRef.current);
           connectionTimeoutRef.current = null;
           addDebugMessage('Connection established, timeout cleared');
+        } else if (state === 'failed' || state === 'closed') {
+          addDebugMessage(`Connection ${state}, attempting to restart ICE`);
+          // Try to restart ICE connection
+          if (state === 'failed' && peerConnection.iceConnectionState !== 'closed') {
+            peerConnection.restartIce();
+          }
         }
       };
 
@@ -166,11 +199,21 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
   const setupSocketListeners = () => {
     const socket = socketService.getSocket();
     if (socket) {
+      // Remove any existing listeners first to prevent duplicates
+      socket.off('webrtc_user_joined', handleUserJoined);
+      socket.off('webrtc_offer', handleOffer);
+      socket.off('webrtc_answer', handleAnswer);
+      socket.off('webrtc_ice_candidate', handleIceCandidate);
+      socket.off('webrtc_user_left', handleUserLeft);
+
+      // Add fresh listeners
       socket.on('webrtc_user_joined', handleUserJoined);
       socket.on('webrtc_offer', handleOffer);
       socket.on('webrtc_answer', handleAnswer);
       socket.on('webrtc_ice_candidate', handleIceCandidate);
       socket.on('webrtc_user_left', handleUserLeft);
+
+      addDebugMessage('Socket listeners set up');
     }
   };
 
@@ -219,6 +262,10 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
 
       await peerConnection.setRemoteDescription(data.offer);
       addDebugMessage('Set remote description from offer');
+
+      // Process any queued ICE candidates now that remote description is set
+      await processQueuedIceCandidates();
+
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
       addDebugMessage('Created and set local description (answer)');
@@ -246,9 +293,35 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       const peerConnection = peerConnectionRef.current!;
       await peerConnection.setRemoteDescription(data.answer);
       addDebugMessage('Set remote description from answer');
+
+      // Process any queued ICE candidates now that remote description is set
+      await processQueuedIceCandidates();
     } catch (error) {
       console.error('SimpleWebRTCRoom: Failed to handle answer:', error);
       addDebugMessage(`Failed to handle answer: ${error}`);
+    }
+  };
+
+  const processQueuedIceCandidates = async () => {
+    const peerConnection = peerConnectionRef.current;
+    if (!peerConnection || !peerConnection.remoteDescription || queuedIceCandidatesRef.current.length === 0) {
+      return;
+    }
+
+    console.log(`SimpleWebRTCRoom: Processing ${queuedIceCandidatesRef.current.length} queued ICE candidates`);
+    addDebugMessage(`Processing ${queuedIceCandidatesRef.current.length} queued ICE candidates`);
+
+    const candidates = [...queuedIceCandidatesRef.current];
+    queuedIceCandidatesRef.current = [];
+
+    for (const candidate of candidates) {
+      try {
+        await peerConnection.addIceCandidate(candidate);
+        addDebugMessage('Added queued ICE candidate');
+      } catch (error) {
+        console.error('SimpleWebRTCRoom: Failed to add queued ICE candidate:', error);
+        addDebugMessage(`Failed to add queued ICE candidate: ${error}`);
+      }
     }
   };
 
@@ -262,8 +335,9 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
         await peerConnection.addIceCandidate(data.candidate);
         addDebugMessage('Added ICE candidate');
       } else {
-        console.warn('SimpleWebRTCRoom: Remote description not set, queuing ICE candidate');
-        addDebugMessage('Remote description not set, cannot add ICE candidate yet');
+        console.log('SimpleWebRTCRoom: Remote description not set, queuing ICE candidate');
+        addDebugMessage('Remote description not set, queuing ICE candidate');
+        queuedIceCandidatesRef.current.push(data.candidate);
       }
     } catch (error) {
       console.error('SimpleWebRTCRoom: Failed to add ICE candidate:', error);
@@ -281,11 +355,7 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
 
   const cleanup = () => {
     console.log('SimpleWebRTCRoom: Cleaning up');
-
-    // Stop local stream
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-    }
+    addDebugMessage('Starting cleanup');
 
     // Clear timeout
     if (connectionTimeoutRef.current) {
@@ -293,10 +363,39 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       connectionTimeoutRef.current = null;
     }
 
+    // Clear queued ICE candidates
+    queuedIceCandidatesRef.current = [];
+
+    // Stop local stream
+    if (localStream) {
+      localStream.getTracks().forEach(track => {
+        track.stop();
+        console.log(`Stopped track: ${track.kind}`);
+      });
+      setLocalStream(null);
+    }
+
+    // Clear remote video
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
+    }
+
+    // Clear local video
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+
     // Close peer connection
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
     }
+
+    // Reset state
+    setIsConnected(false);
+    setRemoteUser(null);
+    setConnectionState('closed');
+    setIceState('closed');
 
     // Leave the call
     const socket = socketService.getSocket();
@@ -313,6 +412,8 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       socket.off('webrtc_ice_candidate', handleIceCandidate);
       socket.off('webrtc_user_left', handleUserLeft);
     }
+
+    addDebugMessage('Cleanup completed');
   };
 
   const toggleAudio = () => {
@@ -385,6 +486,11 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
         <button onClick={toggleVideo} className="control-btn video-btn">
           📹 Video
         </button>
+        {(connectionState === 'failed' || connectionState === 'disconnected') && (
+          <button onClick={reinitializeConnection} className="control-btn reconnect-btn">
+            🔄 Reconnect
+          </button>
+        )}
         <button onClick={onLeave} className="control-btn leave-btn">
           📞 Leave Call
         </button>

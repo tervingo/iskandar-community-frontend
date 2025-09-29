@@ -4716,3 +4716,13 @@ body {
     width: 100%;
   }
 }
+
+
+.reconnect-btn {
+  background: #ff9500;
+  color: white;
+}
+
+.reconnect-btn:hover {
+  background: #e6851a;
+}
