@@ -580,9 +580,9 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
   return (
     <div className="webrtc-room">
       <div className="webrtc-header">
-        <h2>Video Call - {callId}</h2>
+        <h2>Videollamada - {callId}</h2>
         <div className="connection-status">
-          Status: {isConnected ? 'Connected' : 'Connecting...'} | Connection: {connectionState} | ICE: {iceState}
+          Status: {isConnected ? 'Conectado' : 'Conectando...'} | Connection: {connectionState} | ICE: {iceState}
           {remoteUser && <span> | With: {remoteUser}</span>}
         </div>
         <div className="debug-info">
@@ -633,15 +633,15 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
           📹 Video
         </button>
         <button onClick={toggleScreenShare} className="control-btn screen-share-btn">
-          {isScreenSharing ? '📱 Stop Share' : '🖥️ Share Screen'}
+          {isScreenSharing ? '📱 Dejar de Compartir' : '🖥️ Compartir Pantalla'}
         </button>
         {(connectionState === 'failed' || connectionState === 'disconnected') && (
           <button onClick={reinitializeConnection} className="control-btn reconnect-btn">
-            🔄 Reconnect
+            🔄 Reconectar
           </button>
         )}
         <button onClick={onLeave} className="control-btn leave-btn">
-          📞 Leave Call
+          📞 Salir
         </button>
       </div>
     </div>
