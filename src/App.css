@@ -4726,3 +4726,28 @@ body {
 .reconnect-btn:hover {
   background: #e6851a;
 }
+
+
+.screen-share-btn {
+  background: #9c27b0;
+  color: white;
+}
+
+.screen-share-btn:hover {
+  background: #7b1fa2;
+}
+
+/* Screen sharing specific styles */
+.local-video-container.screen-sharing,
+.remote-video-container.screen-sharing {
+  border: 3px solid #9c27b0;
+}
+
+.local-video-container.screen-sharing .video-label,
+.remote-video-container.screen-sharing .video-label {
+  background: rgba(156, 39, 176, 0.9);
+}
+
+.local-video.screen-sharing {
+  transform: none; /* Don't mirror screen shares */
+}

@@ -15,6 +15,8 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
   const [connectionState, setConnectionState] = useState<string>('new');
   const [iceState, setIceState] = useState<string>('new');
   const [debug, setDebug] = useState<string[]>([]);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [remoteIsScreenSharing, setRemoteIsScreenSharing] = useState(false);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -205,6 +207,7 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       socket.off('webrtc_answer', handleAnswer);
       socket.off('webrtc_ice_candidate', handleIceCandidate);
       socket.off('webrtc_user_left', handleUserLeft);
+      socket.off('webrtc_screen_share_status', handleScreenShareStatus);
 
       // Add fresh listeners
       socket.on('webrtc_user_joined', handleUserJoined);
@@ -212,6 +215,7 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       socket.on('webrtc_answer', handleAnswer);
       socket.on('webrtc_ice_candidate', handleIceCandidate);
       socket.on('webrtc_user_left', handleUserLeft);
+      socket.on('webrtc_screen_share_status', handleScreenShareStatus);
 
       addDebugMessage('Socket listeners set up');
     }
@@ -348,8 +352,18 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
   const handleUserLeft = (data: { userId: string, username: string }) => {
     console.log('SimpleWebRTCRoom: User left:', data);
     setRemoteUser(null);
+    setRemoteIsScreenSharing(false);
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
+    }
+  };
+
+  const handleScreenShareStatus = (data: { userId: string, isScreenSharing: boolean }) => {
+    console.log('SimpleWebRTCRoom: Screen share status update:', data);
+    addDebugMessage(`Remote user ${data.isScreenSharing ? 'started' : 'stopped'} screen sharing`);
+
+    if (data.userId !== user?.id) {
+      setRemoteIsScreenSharing(data.isScreenSharing);
     }
   };
 
@@ -396,6 +410,8 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
     setRemoteUser(null);
     setConnectionState('closed');
     setIceState('closed');
+    setIsScreenSharing(false);
+    setRemoteIsScreenSharing(false);
 
     // Leave the call
     const socket = socketService.getSocket();
@@ -411,6 +427,7 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       socket.off('webrtc_answer', handleAnswer);
       socket.off('webrtc_ice_candidate', handleIceCandidate);
       socket.off('webrtc_user_left', handleUserLeft);
+      socket.off('webrtc_screen_share_status', handleScreenShareStatus);
     }
 
     addDebugMessage('Cleanup completed');
@@ -431,6 +448,132 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
       }
+    }
+  };
+
+  const startScreenShare = async () => {
+    try {
+      console.log('SimpleWebRTCRoom: Starting screen share');
+      addDebugMessage('Starting screen share');
+
+      // Get screen share stream
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true // Include system audio if possible
+      });
+
+      // Get the video track from screen share
+      const screenVideoTrack = screenStream.getVideoTracks()[0];
+
+      if (!screenVideoTrack) {
+        throw new Error('No video track in screen share');
+      }
+
+      // Replace the video track in the peer connection
+      const peerConnection = peerConnectionRef.current;
+      if (peerConnection && localStream) {
+        const sender = peerConnection.getSenders().find(s =>
+          s.track && s.track.kind === 'video'
+        );
+
+        if (sender) {
+          await sender.replaceTrack(screenVideoTrack);
+          addDebugMessage('Replaced video track with screen share');
+        }
+      }
+
+      // Update local video display
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = screenStream;
+      }
+
+      // Handle screen share ending
+      screenVideoTrack.onended = () => {
+        console.log('Screen share ended');
+        stopScreenShare();
+      };
+
+      setIsScreenSharing(true);
+
+      // Notify remote user about screen sharing
+      const socket = socketService.getSocket();
+      if (socket) {
+        socket.emit('webrtc_screen_share_status', {
+          callId,
+          userId: user?.id,
+          isScreenSharing: true
+        });
+      }
+
+      addDebugMessage('Screen sharing started successfully');
+
+    } catch (error) {
+      console.error('SimpleWebRTCRoom: Failed to start screen share:', error);
+      addDebugMessage(`Failed to start screen share: ${error}`);
+    }
+  };
+
+  const stopScreenShare = async () => {
+    try {
+      console.log('SimpleWebRTCRoom: Stopping screen share');
+      addDebugMessage('Stopping screen share');
+
+      // Get camera stream again
+      const cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      });
+
+      const cameraVideoTrack = cameraStream.getVideoTracks()[0];
+
+      // Replace the screen share track back with camera
+      const peerConnection = peerConnectionRef.current;
+      if (peerConnection && cameraVideoTrack) {
+        const sender = peerConnection.getSenders().find(s =>
+          s.track && s.track.kind === 'video'
+        );
+
+        if (sender) {
+          await sender.replaceTrack(cameraVideoTrack);
+          addDebugMessage('Replaced screen share with camera');
+        }
+      }
+
+      // Update local video display
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = cameraStream;
+      }
+
+      // Update local stream reference
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+      setLocalStream(cameraStream);
+      setIsScreenSharing(false);
+
+      // Notify remote user about stopping screen share
+      const socket = socketService.getSocket();
+      if (socket) {
+        socket.emit('webrtc_screen_share_status', {
+          callId,
+          userId: user?.id,
+          isScreenSharing: false
+        });
+      }
+
+      addDebugMessage('Screen sharing stopped successfully');
+
+    } catch (error) {
+      console.error('SimpleWebRTCRoom: Failed to stop screen share:', error);
+      addDebugMessage(`Failed to stop screen share: ${error}`);
+    }
+  };
+
+  const toggleScreenShare = () => {
+    if (isScreenSharing) {
+      stopScreenShare();
+    } else {
+      startScreenShare();
     }
   };
 
@@ -455,18 +598,20 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       </div>
 
       <div className="webrtc-videos">
-        <div className="local-video-container">
+        <div className={`local-video-container ${isScreenSharing ? 'screen-sharing' : ''}`}>
           <video
             ref={localVideoRef}
             autoPlay
             muted
             playsInline
-            className="local-video"
+            className={`local-video ${isScreenSharing ? 'screen-sharing' : ''}`}
           />
-          <div className="video-label">You ({user?.name})</div>
+          <div className="video-label">
+            You ({user?.name}) {isScreenSharing && '🖥️ Sharing Screen'}
+          </div>
         </div>
 
-        <div className="remote-video-container">
+        <div className={`remote-video-container ${remoteIsScreenSharing ? 'screen-sharing' : ''}`}>
           <video
             ref={remoteVideoRef}
             autoPlay
@@ -475,6 +620,7 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
           />
           <div className="video-label">
             {remoteUser || 'Waiting for participant...'}
+            {remoteUser && remoteIsScreenSharing && ' 🖥️ Sharing Screen'}
           </div>
         </div>
       </div>
@@ -485,6 +631,9 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
         </button>
         <button onClick={toggleVideo} className="control-btn video-btn">
           📹 Video
+        </button>
+        <button onClick={toggleScreenShare} className="control-btn screen-share-btn">
+          {isScreenSharing ? '📱 Stop Share' : '🖥️ Share Screen'}
         </button>
         {(connectionState === 'failed' || connectionState === 'disconnected') && (
           <button onClick={reinitializeConnection} className="control-btn reconnect-btn">
