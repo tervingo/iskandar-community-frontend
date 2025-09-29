@@ -4751,3 +4751,23 @@ body {
 .local-video.screen-sharing {
   transform: none; /* Don't mirror screen shares */
 }
+
+
+/* Post list comments link */
+.comments-link {
+  color: #6c757d;
+  text-decoration: none;
+  font-size: 0.9em;
+  transition: color 0.2s ease;
+}
+
+.comments-link:hover {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+/* Post excerpt improvements */
+.post-excerpt {
+  line-height: 1.6;
+  color: #555;
+}

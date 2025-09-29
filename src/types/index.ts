@@ -30,6 +30,7 @@ export interface Post {
   pin_priority: number;
   created_at: string;
   updated_at: string;
+  comments_count: number;
 }
 
 export interface PostCreate {

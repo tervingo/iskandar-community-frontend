@@ -208,7 +208,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
   };
 
   return (
-    <div className="comment-section">
+    <div id="comments" className="comment-section">
       <div className="comments-header">
         <h3>Comentarios ({comments.length})</h3>
         <button 

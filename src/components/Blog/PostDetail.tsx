@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useBlogStore } from '../../stores/blogStore';
 import { useAuthStore } from '../../stores/authStore';
 import { postsApi } from '../../services/api';
@@ -9,6 +9,7 @@ import MarkdownProcessor from './MarkdownProcessor';
 const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentPost, loading, error, fetchPost, deletePost } = useBlogStore();
   const { user, isAdmin } = useAuthStore();
   const [deleting, setDeleting] = useState(false);
@@ -19,6 +20,19 @@ const PostDetail: React.FC = () => {
       fetchPost(id);
     }
   }, [id]);
+
+  // Handle scrolling to hash anchor after post loads
+  useEffect(() => {
+    if (currentPost && location.hash) {
+      // Small delay to ensure the component has rendered
+      setTimeout(() => {
+        const element = document.querySelector(location.hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [currentPost, location.hash]);
 
   const handleDelete = async () => {
     if (!id || !currentPost) return;

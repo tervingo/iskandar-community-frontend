@@ -46,6 +46,23 @@ const PostList: React.FC = () => {
     }
   };
 
+  const getPreviewContent = (content: string, maxLength: number = 200): string => {
+    // Remove markdown headers and formatting for preview
+    let preview = content
+      .replace(/^#{1,6}\s+/gm, '') // Remove headers
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic
+      .replace(/`(.*?)`/g, '$1') // Remove inline code
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links, keep text
+      .replace(/^\s*[-*+]\s+/gm, '• ') // Convert markdown lists to bullet points
+      .replace(/\n+/g, ' ') // Replace newlines with spaces
+      .trim();
+
+    return preview.length > maxLength
+      ? `${preview.substring(0, maxLength)}...`
+      : preview;
+  };
+
   if (loading) return <div className="loading">Cargando posts...</div>;
   if (error) return <div className="error">Error: {error}</div>;
 
@@ -105,12 +122,17 @@ const PostList: React.FC = () => {
                 <span>Por {post.author_name}</span>
                 <span>•</span>
                 <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                <span>•</span>
+                <Link
+                  to={`/blog/${post.id}#comments`}
+                  className="comments-link"
+                  title="Ir a los comentarios"
+                >
+                  💬 {post.comments_count} comentario{post.comments_count !== 1 ? 's' : ''}
+                </Link>
               </div>
               <div className="post-excerpt">
-                {post.content.length > 200
-                  ? `${post.content.substring(0, 200)}...`
-                  : post.content
-                }
+                {getPreviewContent(post.content)}
               </div>
 
               <div className="post-actions">
