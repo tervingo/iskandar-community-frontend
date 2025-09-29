@@ -53,7 +53,7 @@ const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
     try {
       // If room has password and it's not provided, prompt for it
       if (!room.is_public && !joinPassword[room.id]) {
-        const password = prompt('This room is password protected. Enter password:');
+        const password = prompt('Esta sala de reunión está protegida por contraseña. Introduce la contraseña:');
         if (!password) return;
         setJoinPassword(prev => ({ ...prev, [room.id]: password }));
       }
@@ -74,11 +74,11 @@ const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
         onJoinRoom(room.id);
       } else {
         const error = await response.json();
-        alert(error.detail || 'Failed to join room');
+        alert(error.detail || 'Error al unirse a la sala de reunión');
       }
     } catch (error) {
       console.error('Error joining meeting room:', error);
-      alert('Failed to join meeting room');
+      alert('Error al unirse a la sala de reunión');
     }
   };
 
@@ -96,23 +96,23 @@ const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
   };
 
   if (loading) {
-    return <div className="loading">Loading meeting rooms...</div>;
+    return <div className="loading">Cargando salas de reunión...</div>;
   }
 
   return (
     <div className="meeting-room-list">
       <div className="section-header">
-        <h3>Active Meeting Rooms</h3>
+        <h3>Salas de Reunión Activas</h3>
         <button className="btn btn-secondary" onClick={fetchMeetingRooms}>
-          🔄 Refresh
+          🔄 Actualizar
         </button>
       </div>
 
       {meetingRooms.length === 0 ? (
         <div className="empty-state">
           <FaUsers size={48} />
-          <h3>No Active Meeting Rooms</h3>
-          <p>Create a new meeting room to get started!</p>
+          <h3>No hay salas de reunión activas</h3>
+          <p>Crea una nueva sala de reunión para empezar!</p>
         </div>
       ) : (
         <div className="rooms-grid">
@@ -120,7 +120,7 @@ const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
             <div key={room.id} className="room-card">
               <div className="room-header">
                 <h4 className="room-title">
-                  {room.room_name || `${room.creator_name}'s Room`}
+                  {room.room_name || `${room.creator_name}'s Sala de Reunión`}
                 </h4>
                 <div className="room-status">
                   <span
@@ -146,13 +146,13 @@ const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
                   <span>{formatDateTime(room.created_at)}</span>
                 </div>
                 <div className="meta-item">
-                  {room.is_public ? <FaGlobe title="Public room" /> : <FaLock title="Private room" />}
-                  <span>{room.is_public ? 'Public' : 'Private'}</span>
+                  {room.is_public ? <FaGlobe title="Sala de reunión pública" /> : <FaLock title="Sala de reunión privada" />}
+                  <span>{room.is_public ? 'Público' : 'Privado'}</span>
                 </div>
               </div>
 
               <div className="room-creator">
-                <span>Created by: <strong>{room.creator_name}</strong></span>
+                <span>Creada por: <strong>{room.creator_name}</strong></span>
               </div>
 
               <div className="room-actions">
@@ -162,13 +162,13 @@ const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
                   disabled={room.participants.length >= room.max_participants}
                 >
                   <FaPlay />
-                  {room.participants.length >= room.max_participants ? 'Room Full' : 'Join Room'}
+                  {room.participants.length >= room.max_participants ? 'Sala llena' : 'Unirse a la sala'}
                 </button>
               </div>
 
               {room.participants.length > 0 && (
                 <div className="participants-preview">
-                  <h5>Current Participants:</h5>
+                  <h5>Participantes actuales:</h5>
                   <div className="participants-list">
                     {room.participants.slice(0, 5).map((participant, index) => (
                       <span key={index} className="participant-badge">
@@ -188,15 +188,6 @@ const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
         </div>
       )}
 
-      <div className="meeting-tips">
-        <h4>📋 Meeting Room Guidelines</h4>
-        <ul>
-          <li>Be respectful to all participants</li>
-          <li>Mute your microphone when not speaking</li>
-          <li>Use the chat feature for questions</li>
-          <li>Test your audio and video before joining important meetings</li>
-        </ul>
-      </div>
     </div>
   );
 };

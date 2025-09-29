@@ -168,7 +168,7 @@ const CreateCallModal: React.FC<CreateCallModalProps> = ({ onClose, onCallCreate
               className="btn btn-primary"
               disabled={loading}
             >
-              {loading ? 'Creating...' : 'Create Room'}
+              {loading ? 'Creando...' : 'Crear Sala de Reunión'}
             </button>
           </div>
         </form>
@@ -176,11 +176,11 @@ const CreateCallModal: React.FC<CreateCallModalProps> = ({ onClose, onCallCreate
         <div className="room-preview">
           <h4>Vista previa de la sala</h4>
           <div className="preview-card">
-            <h5>{roomName || 'Room Name'}</h5>
+            <h5>{roomName || 'Nombre de la sala'}</h5>
             {description && <p>{description}</p>}
             <div className="preview-meta">
               <span><FaUsers /> Max: {maxParticipants}</span>
-              <span>{isPublic ? <FaGlobe /> : <FaLock />} {isPublic ? 'Public' : 'Private'}</span>
+              <span>{isPublic ? <FaGlobe /> : <FaLock />} {isPublic ? 'Público' : 'Privado'}</span>
             </div>
           </div>
         </div>

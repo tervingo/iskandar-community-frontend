@@ -86,13 +86,13 @@ const CallHistory: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="loading">Loading call history...</div>;
+    return <div className="loading">Cargando historial de videollamadas...</div>;
   }
 
   return (
     <div className="call-history">
       <div className="history-header">
-        <h3>Call History</h3>
+        <h3>Historial de videollamadas</h3>
         <div className="filter-buttons">
           <button
             className={`filter-btn ${filter === 'all' ? 'active' : ''}`}

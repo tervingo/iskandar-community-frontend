@@ -142,7 +142,7 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
         </div>
 
         <div className="call-timer">
-          <span>Auto-decline in {timer}s</span>
+          <span>Auto-rechazar en {timer}s</span>
         </div>
 
         <div className="call-actions">
@@ -152,7 +152,7 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
             title="Declinar llamada"
           >
             <FaPhoneSlash />
-            Decline
+            Rechazar
           </button>
 
           <button
@@ -161,7 +161,7 @@ const IncomingCallModal: React.FC<IncomingCallModalProps> = ({ onCallAccepted })
             title="Aceptar llamada"
           >
             <FaPhone />
-            Accept
+            Aceptar
           </button>
         </div>
 

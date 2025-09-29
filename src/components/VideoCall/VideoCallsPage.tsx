@@ -33,7 +33,7 @@ const VideoCallsPage: React.FC = () => {
   const tabs: TabType[] = [
     {
       id: 'direct-calls',
-      label: '1:1 Calls',
+      label: 'Videollamadas 1:1',
       icon: <FaVideo />,
       component: (
         <OnlineUsersList
@@ -46,7 +46,7 @@ const VideoCallsPage: React.FC = () => {
     },
     {
       id: 'meeting-rooms',
-      label: 'Meeting Rooms',
+      label: 'Salas deReuniones',
       icon: <FaUsers />,
       component: (
         <MeetingRoomList
@@ -56,7 +56,7 @@ const VideoCallsPage: React.FC = () => {
     },
     {
       id: 'call-history',
-      label: 'Call History',
+      label: 'Historial de videollamadas',
       icon: <FaHistory />,
       component: <CallHistory />
     }
@@ -65,12 +65,12 @@ const VideoCallsPage: React.FC = () => {
   return (
     <div className="video-calls-page">
       <div className="page-header">
-        <h1>📹 Video Calls</h1>
+        <h1>📹 Videollamadas</h1>
         <button
           className="btn btn-primary"
           onClick={() => setShowCreateModal(true)}
         >
-          <FaPlus /> Create Meeting Room
+          <FaPlus /> Crear Sala de Reunión
         </button>
       </div>
 
