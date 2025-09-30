@@ -12,7 +12,6 @@ const TestVideoCall: React.FC = () => {
   const [screenShareStream, setScreenShareStream] = useState<MediaStream | null>(null);
   const [isScreenShareVideoReady, setIsScreenShareVideoReady] = useState(false);
   const [speechRecognitionEnabled, setSpeechRecognitionEnabled] = useState(false);
-  const [lastRecognizedText, setLastRecognizedText] = useState<string>('');
   const [virtualUserSpeaking, setVirtualUserSpeaking] = useState(false);
   const [conversationLog, setConversationLog] = useState<Array<{speaker: string, text: string, timestamp: Date}>>([]);
 
@@ -72,7 +71,6 @@ const TestVideoCall: React.FC = () => {
       }
 
       if (finalTranscript) {
-        setLastRecognizedText(finalTranscript.trim());
         addDebugMessage(`🗣️ You said: "${finalTranscript.trim()}"`);
 
         // Add to conversation log
