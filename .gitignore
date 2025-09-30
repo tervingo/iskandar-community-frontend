@@ -89,3 +89,7 @@ dist
 .out
 .storybook-out
 .env
+
+# temps
+
+*.tmp.*

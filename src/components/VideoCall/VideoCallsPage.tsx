@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaVideo, FaUsers, FaHistory, FaPlus } from 'react-icons/fa';
+import { FaVideo, FaUsers, FaHistory, FaPlus, FaFlask } from 'react-icons/fa';
+import { useAuthStore } from '../../stores/authStore';
 import VideoCallRoom from './VideoCallRoom';
 import MeetingRoomList from './MeetingRoomList';
 import CallHistory from './CallHistory';
 import CreateCallModal from './CreateCallModal';
 import OnlineUsersList from './OnlineUsersList';
+import TestVideoCall from './TestVideoCall';
 
 interface TabType {
   id: string;
@@ -16,6 +18,7 @@ interface TabType {
 
 const VideoCallsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useAuthStore();
   const [activeTab, setActiveTab] = useState('direct-calls');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeCall, setActiveCall] = useState<string | null>(null);
@@ -30,7 +33,7 @@ const VideoCallsPage: React.FC = () => {
     );
   }
 
-  const tabs: TabType[] = [
+  const baseTabs: TabType[] = [
     {
       id: 'direct-calls',
       label: 'Videollamadas 1:1',
@@ -61,6 +64,17 @@ const VideoCallsPage: React.FC = () => {
       component: <CallHistory />
     }
   ];
+
+  // Add test tab for admins only
+  const tabs: TabType[] = isAdmin ? [
+    ...baseTabs,
+    {
+      id: 'test-call',
+      label: 'Test Videocall',
+      icon: <FaFlask />,
+      component: <TestVideoCall />
+    }
+  ] : baseTabs;
 
   return (
     <div className="video-calls-page">

@@ -525,17 +525,31 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       });
 
       const cameraVideoTrack = cameraStream.getVideoTracks()[0];
+      const cameraAudioTrack = cameraStream.getAudioTracks()[0];
 
-      // Replace the screen share track back with camera
+      // Replace both video AND audio tracks in the peer connection
       const peerConnection = peerConnectionRef.current;
-      if (peerConnection && cameraVideoTrack) {
-        const sender = peerConnection.getSenders().find(s =>
-          s.track && s.track.kind === 'video'
-        );
+      if (peerConnection) {
+        // Replace video track
+        if (cameraVideoTrack) {
+          const videoSender = peerConnection.getSenders().find(s =>
+            s.track && s.track.kind === 'video'
+          );
+          if (videoSender) {
+            await videoSender.replaceTrack(cameraVideoTrack);
+            addDebugMessage('Replaced screen share with camera video');
+          }
+        }
 
-        if (sender) {
-          await sender.replaceTrack(cameraVideoTrack);
-          addDebugMessage('Replaced screen share with camera');
+        // Replace audio track to ensure audio continuity
+        if (cameraAudioTrack) {
+          const audioSender = peerConnection.getSenders().find(s =>
+            s.track && s.track.kind === 'audio'
+          );
+          if (audioSender) {
+            await audioSender.replaceTrack(cameraAudioTrack);
+            addDebugMessage('Replaced audio track for continuity');
+          }
         }
       }
 
@@ -544,10 +558,19 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
         localVideoRef.current.srcObject = cameraStream;
       }
 
-      // Update local stream reference
+      // PROPERLY stop only the old stream tracks (screen share streams)
+      // But preserve the original camera stream's audio track
       if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
+        // Only stop video tracks from screen share, preserve audio
+        localStream.getVideoTracks().forEach(track => {
+          addDebugMessage('Stopping screen share video track');
+          track.stop();
+        });
+
+        // Don't stop audio tracks - they should continue seamlessly
+        // localStream.getAudioTracks().forEach(track => track.stop()); // REMOVED THIS
       }
+
       setLocalStream(cameraStream);
       setIsScreenSharing(false);
 
@@ -561,7 +584,7 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
         });
       }
 
-      addDebugMessage('Screen sharing stopped successfully');
+      addDebugMessage('Screen sharing stopped successfully - audio preserved');
 
     } catch (error) {
       console.error('SimpleWebRTCRoom: Failed to stop screen share:', error);

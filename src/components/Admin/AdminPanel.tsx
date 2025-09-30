@@ -47,13 +47,53 @@ const AdminPanel: React.FC = () => {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Basic client-side validation
+    if (!newUser.email.trim()) {
+      setError('Email is required');
+      return;
+    }
+    if (!newUser.name.trim()) {
+      setError('Name is required');
+      return;
+    }
+    if (!newUser.password.trim()) {
+      setError('Password is required');
+      return;
+    }
+    if (newUser.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
     try {
+      console.log('Creating user with data:', newUser);
       await authApi.createUser(newUser);
       setNewUser({ email: '', password: '', name: '', role: 'normal', avatar: '', phone: '' });
       setShowCreateUser(false);
       fetchUsers();
+      setError(null); // Clear any previous errors
     } catch (error: any) {
-      setError('Failed to create user');
+      console.error('Create user error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+
+      // Show specific error message from backend
+      let errorMessage = 'Failed to create user';
+
+      if (error.response?.status === 401) {
+        errorMessage = 'Unauthorized: You need admin privileges to create users';
+      } else if (error.response?.status === 400) {
+        errorMessage = error.response?.data?.detail ||
+                      error.response?.data?.message ||
+                      'Bad request: Please check the form data';
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setError(`Failed to create user: ${errorMessage}`);
     }
   };
 
