@@ -64,11 +64,16 @@ export interface Comment {
   author_name: string;
   content: string;
   created_at: string;
+  parent_id?: string;
+  author_email?: string;
+  replies?: Comment[];
 }
 
 export interface CommentCreate {
   author_name: string;
   content: string;
+  parent_id?: string;
+  author_email?: string;
 }
 
 export interface CommentUpdate {

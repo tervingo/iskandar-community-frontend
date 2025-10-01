@@ -5,7 +5,7 @@ import MarkdownHelp from './MarkdownHelp';
 import FileLinkSelector from './FileLinkSelector';
 import PostLinkSelector from './PostLinkSelector';
 import MarkdownProcessor from './MarkdownProcessor';
-import { FileItem, Post } from '../../types';
+import { FileItem, Post, Comment } from '../../types';
 
 interface CommentSectionProps {
   postId: string;
@@ -18,11 +18,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
   const [commentForm, setCommentForm] = useState({
     author_name: user?.name || '',
     content: '',
+    parent_id: undefined as string | undefined,
+    author_email: user?.email || '',
   });
-  
+
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
+  const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showEditPreview, setShowEditPreview] = useState(false);
   const [showMarkdownHelp, setShowMarkdownHelp] = useState(false);
@@ -41,10 +44,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
     if (user?.name && commentForm.author_name === '') {
       setCommentForm(prev => ({
         ...prev,
-        author_name: user.name
+        author_name: user.name,
+        author_email: user.email || ''
       }));
     }
-  }, [user?.name]);
+  }, [user?.name, user?.email]);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setCommentForm({
@@ -55,16 +59,28 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!commentForm.author_name.trim() || !commentForm.content.trim()) {
       return;
     }
 
-    await createComment(postId, commentForm);
-    
+    // Set parent_id if replying to a comment
+    const commentData = {
+      ...commentForm,
+      parent_id: replyingToId || undefined
+    };
+
+    await createComment(postId, commentData);
+
     if (!error) {
-      setCommentForm({ author_name: user?.name || '', content: '' });
+      setCommentForm({
+        author_name: user?.name || '',
+        content: '',
+        parent_id: undefined,
+        author_email: user?.email || ''
+      });
       setShowCommentForm(false);
+      setReplyingToId(null);
     }
   };
 
@@ -99,6 +115,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
     setEditingCommentId(null);
     setEditContent('');
     setShowEditPreview(false);
+  };
+
+  const handleReplyToComment = (commentId: string) => {
+    setReplyingToId(commentId);
+    setShowCommentForm(true);
+  };
+
+  const handleCancelReply = () => {
+    setReplyingToId(null);
+    setShowCommentForm(false);
+    setCommentForm({
+      author_name: user?.name || '',
+      content: '',
+      parent_id: undefined,
+      author_email: user?.email || ''
+    });
   };
 
   const handleInsertFileLink = (file: FileItem, linkText: string) => {
@@ -207,17 +239,196 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
     }
   };
 
+  const renderComment = (comment: Comment, depth = 0) => {
+    const canEditDelete = user && (isAdmin || comment.author_name === user.name);
+    const isEditing = editingCommentId === comment.id;
+    const maxDepth = 3; // Limit nesting depth to avoid UI issues
+
+    return (
+      <div key={comment.id} className={`comment ${depth > 0 ? 'comment-reply' : ''}`} style={{
+        marginLeft: depth > 0 ? `${Math.min(depth, maxDepth) * 20}px` : '0',
+        borderLeft: depth > 0 ? '2px solid #e0e0e0' : 'none',
+        paddingLeft: depth > 0 ? '15px' : '0'
+      }}>
+        <div className="comment-header">
+          <strong>{comment.author_name}</strong>
+          <span className="comment-date">
+            {new Date(comment.created_at).toLocaleDateString()}
+          </span>
+          {depth > 0 && <span className="reply-indicator">↳</span>}
+          {canEditDelete && (
+            <div className="comment-actions">
+              {!isEditing && (
+                <>
+                  <button
+                    onClick={() => handleEditComment(comment)}
+                    className="btn btn-sm btn-secondary"
+                    disabled={commentsLoading}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteComment(comment.id)}
+                    className="btn btn-sm btn-danger"
+                    disabled={commentsLoading}
+                    style={{ marginLeft: '0.5rem' }}
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+        <div className="comment-content">
+          {isEditing ? (
+            <div className="comment-edit-form">
+              <div className="markdown-editor">
+                <div className="editor-tabs">
+                  <button
+                    type="button"
+                    className={`tab-btn ${!showEditPreview ? 'active' : ''}`}
+                    onClick={() => setShowEditPreview(false)}
+                  >
+                    ✏️ Editar
+                  </button>
+                  <button
+                    type="button"
+                    className={`tab-btn ${showEditPreview ? 'active' : ''}`}
+                    onClick={() => setShowEditPreview(true)}
+                  >
+                    👁️ Vista previa
+                  </button>
+                  <button
+                    type="button"
+                    className="help-btn"
+                    onClick={() => setShowMarkdownHelp(true)}
+                    title="Ayuda de Markdown"
+                  >
+                    ❓ Ayuda
+                  </button>
+                  <button
+                    type="button"
+                    className="file-link-btn"
+                    onClick={() => setShowEditFileLinkSelector(true)}
+                    title="Enlazar archivo del repositorio"
+                  >
+                    📎 Enlazar archivo
+                  </button>
+                  <button
+                    type="button"
+                    className="post-link-btn"
+                    onClick={() => setShowEditPostLinkSelector(true)}
+                    title="Enlazar post del blog"
+                    style={{
+                      backgroundColor: '#9b59b6',
+                      color: 'white',
+                      border: '1px solid #9b59b6'
+                    }}
+                  >
+                    📄 Link Post
+                  </button>
+                </div>
+
+                {!showEditPreview ? (
+                  <textarea
+                    ref={editTextareaRef}
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    rows={3}
+                    className="markdown-textarea"
+                    disabled={commentsLoading}
+                    placeholder="Edita tu comentario usando Markdown...&#10;Usa botones 📎 y 📄 para enlaces"
+                  />
+                ) : (
+                  <div className="markdown-preview">
+                    {editContent.trim() ? (
+                      <MarkdownProcessor content={editContent} />
+                    ) : (
+                      <p className="preview-empty">Nada que mostrar en vista previa</p>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="comment-edit-actions">
+                <button
+                  onClick={() => handleUpdateComment(comment.id)}
+                  className="btn btn-sm btn-primary"
+                  disabled={commentsLoading || !editContent.trim()}
+                >
+                  {commentsLoading ? 'Actualizando...' : 'Actualizar'}
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  className="btn btn-sm btn-secondary"
+                  disabled={commentsLoading}
+                  style={{ marginLeft: '0.5rem' }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="comment-markdown">
+              <MarkdownProcessor content={comment.content} />
+            </div>
+          )}
+        </div>
+
+        {/* Reply button */}
+        {!isEditing && depth < maxDepth && (
+          <div className="comment-reply-actions">
+            <button
+              onClick={() => handleReplyToComment(comment.id)}
+              className="btn btn-sm btn-outline-primary reply-btn"
+              disabled={commentsLoading}
+            >
+              💬 Responder
+            </button>
+          </div>
+        )}
+
+        {/* Render nested replies */}
+        {comment.replies && comment.replies.length > 0 && (
+          <div className="comment-replies">
+            {comment.replies.map(reply => renderComment(reply, depth + 1))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div id="comments" className="comment-section">
       <div className="comments-header">
         <h3>Comentarios ({comments.length})</h3>
-        <button 
-          onClick={() => setShowCommentForm(!showCommentForm)}
+        <button
+          onClick={() => {
+            if (replyingToId) {
+              handleCancelReply();
+            } else {
+              setShowCommentForm(!showCommentForm);
+            }
+          }}
           className="btn btn-primary"
         >
           {showCommentForm ? 'Cancelar' : 'Agregar Comentario'}
         </button>
       </div>
+
+      {replyingToId && (
+        <div className="reply-indicator-header">
+          <p>
+            💬 Respondiendo a un comentario.{' '}
+            <button
+              onClick={handleCancelReply}
+              className="btn btn-sm btn-secondary"
+            >
+              Cancelar respuesta
+            </button>
+          </p>
+        </div>
+      )}
 
       {showCommentForm && (
         <form onSubmit={handleCommentSubmit} className="comment-form">
@@ -289,7 +500,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
                     name="content"
                     value={commentForm.content}
                     onChange={handleCommentChange}
-                    placeholder="Escribe tu comentario usando Markdown...&#10;&#10;Ejemplos:&#10;**negrita** *cursiva*&#10;[enlace](https://ejemplo.com)&#10;- Lista&#10;`código`&#10;&#10;Usa botones 📎 y 📄 para enlaces a archivos y posts"
+                    placeholder={replyingToId
+                      ? "Escribe tu respuesta usando Markdown...&#10;&#10;Ejemplos:&#10;**negrita** *cursiva*&#10;[enlace](https://ejemplo.com)&#10;- Lista&#10;`código`&#10;&#10;Usa botones 📎 y 📄 para enlaces a archivos y posts"
+                      : "Escribe tu comentario usando Markdown...&#10;&#10;Ejemplos:&#10;**negrita** *cursiva*&#10;[enlace](https://ejemplo.com)&#10;- Lista&#10;`código`&#10;&#10;Usa botones 📎 y 📄 para enlaces a archivos y posts"
+                    }
                     rows={4}
                     required
                     className="markdown-textarea"
@@ -321,12 +535,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn btn-primary"
               disabled={commentsLoading || !commentForm.author_name.trim() || !commentForm.content.trim()}
             >
-              {commentsLoading ? 'Publicando...' : 'Publicar Comentario'}
+              {commentsLoading
+                ? (replyingToId ? 'Publicando respuesta...' : 'Publicando...')
+                : (replyingToId ? 'Publicar Respuesta' : 'Publicar Comentario')
+              }
             </button>
           </div>
         </form>
@@ -340,138 +557,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
             <p>No hay comentarios todavía. Sé el primero en comentar!</p>
           </div>
         ) : (
-          comments.map((comment) => {
-            const canEditDelete = user && (isAdmin || comment.author_name === user.name);
-            const isEditing = editingCommentId === comment.id;
-            
-            return (
-              <div key={comment.id} className="comment">
-                <div className="comment-header">
-                  <strong>{comment.author_name}</strong>
-                  <span className="comment-date">
-                    {new Date(comment.created_at).toLocaleDateString()}
-                  </span>
-                  {canEditDelete && (
-                    <div className="comment-actions">
-                      {!isEditing && (
-                        <>
-                          <button 
-                            onClick={() => handleEditComment(comment)}
-                            className="btn btn-sm btn-secondary"
-                            disabled={commentsLoading}
-                          >
-                            Edit
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteComment(comment.id)}
-                            className="btn btn-sm btn-danger"
-                            disabled={commentsLoading}
-                            style={{ marginLeft: '0.5rem' }}
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="comment-content">
-                  {isEditing ? (
-                    <div className="comment-edit-form">
-                      <div className="markdown-editor">
-                        <div className="editor-tabs">
-                          <button
-                            type="button"
-                            className={`tab-btn ${!showEditPreview ? 'active' : ''}`}
-                            onClick={() => setShowEditPreview(false)}
-                          >
-                            ✏️ Editar
-                          </button>
-                          <button
-                            type="button"
-                            className={`tab-btn ${showEditPreview ? 'active' : ''}`}
-                            onClick={() => setShowEditPreview(true)}
-                          >
-                            👁️ Vista previa
-                          </button>
-                          <button
-                            type="button"
-                            className="help-btn"
-                            onClick={() => setShowMarkdownHelp(true)}
-                            title="Ayuda de Markdown"
-                          >
-                            ❓ Ayuda
-                          </button>
-                          <button
-                            type="button"
-                            className="file-link-btn"
-                            onClick={() => setShowEditFileLinkSelector(true)}
-                            title="Enlazar archivo del repositorio"
-                          >
-                            📎 Enlazar archivo
-                          </button>
-                          <button
-                            type="button"
-                            className="post-link-btn"
-                            onClick={() => setShowEditPostLinkSelector(true)}
-                            title="Enlazar post del blog"
-                            style={{
-                              backgroundColor: '#9b59b6',
-                              color: 'white',
-                              border: '1px solid #9b59b6'
-                            }}
-                          >
-                            📄 Link Post
-                          </button>
-                        </div>
-                        
-                        {!showEditPreview ? (
-                          <textarea
-                            ref={editTextareaRef}
-                            value={editContent}
-                            onChange={(e) => setEditContent(e.target.value)}
-                            rows={3}
-                            className="markdown-textarea"
-                            disabled={commentsLoading}
-                            placeholder="Edita tu comentario usando Markdown...&#10;Usa botones 📎 y 📄 para enlaces"
-                          />
-                        ) : (
-                          <div className="markdown-preview">
-                            {editContent.trim() ? (
-                              <MarkdownProcessor content={editContent} />
-                            ) : (
-                              <p className="preview-empty">Nada que mostrar en vista previa</p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <div className="comment-edit-actions">
-                        <button 
-                          onClick={() => handleUpdateComment(comment.id)}
-                          className="btn btn-sm btn-primary"
-                          disabled={commentsLoading || !editContent.trim()}
-                        >
-                          {commentsLoading ? 'Actualizando...' : 'Actualizar'}
-                        </button>
-                        <button 
-                          onClick={handleCancelEdit}
-                          className="btn btn-sm btn-secondary"
-                          disabled={commentsLoading}
-                          style={{ marginLeft: '0.5rem' }}
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="comment-markdown">
-                      <MarkdownProcessor content={comment.content} />
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })
+          comments.map((comment) => renderComment(comment))
         )}
       </div>
       

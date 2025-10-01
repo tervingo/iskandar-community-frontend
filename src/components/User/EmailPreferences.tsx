@@ -120,7 +120,6 @@ const EmailPreferences: React.FC = () => {
             <div className="preference-details">
               <h3>Respuestas a Comentarios</h3>
               <p>Recibe notificaciones cuando alguien responda a tus comentarios</p>
-              <small className="feature-status">Próximamente disponible</small>
             </div>
           </div>
           <div className="preference-toggle">
@@ -129,9 +128,9 @@ const EmailPreferences: React.FC = () => {
                 type="checkbox"
                 checked={preferences.comment_replies}
                 onChange={() => handleToggle('comment_replies')}
-                disabled={true} // Disabled until feature is implemented
+                disabled={saving}
               />
-              <span className="toggle-slider disabled"></span>
+              <span className="toggle-slider"></span>
             </label>
           </div>
         </div>
