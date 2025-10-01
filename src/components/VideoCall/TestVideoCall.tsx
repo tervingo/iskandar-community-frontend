@@ -981,15 +981,38 @@ const TestVideoCall: React.FC = () => {
         </div>
       ) : (
         <div className="test-call-interface">
-          <div className="video-container">
-            <div className="video-section">
-              <h4>Your Video</h4>
+          <div className={`video-container ${isScreenSharing ? 'screen-share-active' : ''}`} style={{
+            display: 'flex',
+            gap: '20px',
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+            position: 'relative',
+            ...(isScreenSharing && {
+              flexDirection: 'column',
+              gap: '10px'
+            })
+          }}>
+            <div className={`video-section ${isScreenSharing ? 'screen-sharing' : ''}`} style={{
+              ...(isScreenSharing && {
+                width: '100%',
+                maxWidth: 'none',
+                order: 1
+              })
+            }}>
+              <h4>Your Video {isScreenSharing && '🖥️ (Screen Share)'}</h4>
               <video
                 ref={localVideoRef}
                 autoPlay
                 muted
                 className="local-video"
-                style={{ width: '100%', maxWidth: '400px', border: '2px solid #007bff' }}
+                style={{
+                  width: '100%',
+                  maxWidth: isScreenSharing ? 'none' : '400px',
+                  height: isScreenSharing ? 'calc(70vh - 100px)' : 'auto',
+                  border: `2px solid ${isScreenSharing ? '#FF5722' : '#007bff'}`,
+                  objectFit: isScreenSharing ? 'contain' : 'cover'
+                }}
               />
               <div className="video-controls">
                 <button
@@ -1022,45 +1045,82 @@ const TestVideoCall: React.FC = () => {
               </div>
             </div>
 
-            <div className="video-section">
-              <h4>Virtual Test User</h4>
+            <div className={`video-section ${isScreenSharing ? 'pip' : ''}`} style={{
+              ...(isScreenSharing && {
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                width: '250px',
+                zIndex: 10,
+                border: '2px solid #fff',
+                borderRadius: '8px',
+                backgroundColor: '#000',
+                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
+                order: 2
+              })
+            }}>
+              <h4 style={{
+                fontSize: isScreenSharing ? '14px' : '1.25rem',
+                margin: isScreenSharing ? '5px' : '0 0 1rem 0'
+              }}>Virtual Test User</h4>
               <video
                 ref={virtualVideoRef}
                 autoPlay
                 className="remote-video"
-                style={{ width: '100%', maxWidth: '400px', border: '2px solid #28a745' }}
+                style={{
+                  width: '100%',
+                  maxWidth: isScreenSharing ? 'none' : '400px',
+                  height: isScreenSharing ? '150px' : 'auto',
+                  border: `2px solid ${isScreenSharing ? '#fff' : '#28a745'}`,
+                  objectFit: 'cover'
+                }}
               />
-              <div className="virtual-user-info">
-                <p>🤖 This is a simulated user for testing purposes</p>
-                <div className="communication-status">
-                  <div className="audio-status">
-                    <span style={{ color: isSpeaking ? '#4CAF50' : '#9E9E9E' }}>
-                      {isSpeaking ? '🔊' : '🔇'} Audio: {isSpeaking ? 'Hearing you' : 'Listening'}
-                    </span>
-                    {isSpeaking && (
-                      <div className="audio-meter" style={{
-                        width: '100px',
-                        height: '6px',
-                        backgroundColor: '#ddd',
-                        borderRadius: '3px',
-                        marginTop: '4px',
-                        overflow: 'hidden'
-                      }}>
-                        <div style={{
-                          width: `${audioLevel * 100}%`,
-                          height: '100%',
-                          backgroundColor: '#4CAF50',
-                          transition: 'width 0.1s'
-                        }}></div>
-                      </div>
-                    )}
+              <div className="virtual-user-info" style={{
+                ...(isScreenSharing && {
+                  fontSize: '12px',
+                  padding: '5px'
+                })
+              }}>
+                <p style={{
+                  fontSize: isScreenSharing ? '11px' : '14px',
+                  margin: isScreenSharing ? '2px 0' : '8px 0'
+                }}>🤖 {isScreenSharing ? 'Virtual User' : 'This is a simulated user for testing purposes'}</p>
+                {!isScreenSharing && (
+                  <div className="communication-status">
+                    <div className="audio-status">
+                      <span style={{ color: isSpeaking ? '#4CAF50' : '#9E9E9E' }}>
+                        {isSpeaking ? '🔊' : '🔇'} Audio: {isSpeaking ? 'Hearing you' : 'Listening'}
+                      </span>
+                      {isSpeaking && (
+                        <div className="audio-meter" style={{
+                          width: '100px',
+                          height: '6px',
+                          backgroundColor: '#ddd',
+                          borderRadius: '3px',
+                          marginTop: '4px',
+                          overflow: 'hidden'
+                        }}>
+                          <div style={{
+                            width: `${audioLevel * 100}%`,
+                            height: '100%',
+                            backgroundColor: '#4CAF50',
+                            transition: 'width 0.1s'
+                          }}></div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="video-status" style={{ marginTop: '8px' }}>
+                      <span style={{ color: localVideoRef.current?.videoWidth ? '#4CAF50' : '#9E9E9E' }}>
+                        👁️ Video: {localVideoRef.current?.videoWidth ? 'Seeing you' : 'Waiting for video'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="video-status" style={{ marginTop: '8px' }}>
-                    <span style={{ color: localVideoRef.current?.videoWidth ? '#4CAF50' : '#9E9E9E' }}>
-                      👁️ Video: {localVideoRef.current?.videoWidth ? 'Seeing you' : 'Waiting for video'}
-                    </span>
+                )}
+                {isScreenSharing && (
+                  <div style={{ fontSize: '10px', color: '#4CAF50', textAlign: 'center' }}>
+                    Audio: {isSpeaking ? '🔊 Hearing' : '🔇 Listening'}
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

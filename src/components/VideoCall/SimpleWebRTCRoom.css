@@ -65,6 +65,14 @@
   padding: 20px;
   justify-content: center;
   align-items: center;
+  position: relative; /* Add relative positioning for PIP placement */
+}
+
+/* When screen sharing is active, change to single-column layout */
+.webrtc-videos.screen-share-active {
+  flex-direction: column;
+  gap: 0;
+  padding: 10px;
 }
 
 .local-video-container,
@@ -74,6 +82,30 @@
   overflow: hidden;
   background: #333;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+/* Main screen share view - takes most of the screen */
+.local-video-container.screen-sharing,
+.remote-video-container.screen-sharing {
+  width: 100% !important;
+  height: calc(100vh - 200px) !important; /* Full height minus header and controls */
+  max-width: none !important;
+  border-radius: 8px;
+}
+
+/* Picture-in-picture view - small corner overlay */
+.local-video-container.pip,
+.remote-video-container.pip {
+  position: absolute !important;
+  top: 20px;
+  right: 20px;
+  width: 200px !important;
+  height: 150px !important;
+  z-index: 10;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 .local-video,
@@ -82,10 +114,32 @@
   height: 300px;
   object-fit: cover;
   display: block;
+  transition: all 0.3s ease;
+}
+
+/* Screen sharing video - fills the container */
+.local-video.screen-sharing,
+.remote-video.screen-sharing {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain; /* Use contain for screen shares to preserve aspect ratio */
+}
+
+/* PIP video - smaller size */
+.local-video.pip,
+.remote-video.pip {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
 }
 
 .local-video {
   transform: scaleX(-1); /* Mirror local video */
+}
+
+/* Don't mirror local video when screen sharing */
+.local-video.screen-sharing {
+  transform: none;
 }
 
 .video-label {

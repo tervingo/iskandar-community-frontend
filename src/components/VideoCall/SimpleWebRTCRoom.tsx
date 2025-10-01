@@ -620,26 +620,38 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
         </div>
       </div>
 
-      <div className="webrtc-videos">
-        <div className={`local-video-container ${isScreenSharing ? 'screen-sharing' : ''}`}>
+      <div className={`webrtc-videos ${(isScreenSharing || remoteIsScreenSharing) ? 'screen-share-active' : ''}`}>
+        <div className={`local-video-container ${
+          isScreenSharing ? 'screen-sharing' :
+          remoteIsScreenSharing ? 'pip' : ''
+        }`}>
           <video
             ref={localVideoRef}
             autoPlay
             muted
             playsInline
-            className={`local-video ${isScreenSharing ? 'screen-sharing' : ''}`}
+            className={`local-video ${
+              isScreenSharing ? 'screen-sharing' :
+              remoteIsScreenSharing ? 'pip' : ''
+            }`}
           />
           <div className="video-label">
             You ({user?.name}) {isScreenSharing && '🖥️ Sharing Screen'}
           </div>
         </div>
 
-        <div className={`remote-video-container ${remoteIsScreenSharing ? 'screen-sharing' : ''}`}>
+        <div className={`remote-video-container ${
+          remoteIsScreenSharing ? 'screen-sharing' :
+          isScreenSharing ? 'pip' : ''
+        }`}>
           <video
             ref={remoteVideoRef}
             autoPlay
             playsInline
-            className="remote-video"
+            className={`remote-video ${
+              remoteIsScreenSharing ? 'screen-sharing' :
+              isScreenSharing ? 'pip' : ''
+            }`}
           />
           <div className="video-label">
             {remoteUser || 'Waiting for participant...'}
