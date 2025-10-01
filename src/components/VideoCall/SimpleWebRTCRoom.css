@@ -163,13 +163,15 @@
 }
 
 .control-btn {
-  padding: 12px 20px;
+  padding: 10px 16px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 500;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .audio-btn {
@@ -201,6 +203,50 @@
 
 .control-btn:active {
   transform: scale(0.98);
+}
+
+/* Audio/Video muted states with red diagonal line */
+.control-btn.muted {
+  background: #f44336 !important;
+}
+
+.control-btn.video-disabled {
+  background: #ff9800 !important;
+}
+
+/* Red diagonal line for muted/disabled buttons */
+.control-btn.muted::after,
+.control-btn.video-disabled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 40%,
+    #ff0000 45%,
+    #ff0000 55%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+/* Alternative thicker diagonal line */
+.control-btn.muted::before,
+.control-btn.video-disabled::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70%;
+  height: 2px;
+  background: #ff0000;
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow: 0 0 2px rgba(255, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Responsive design */

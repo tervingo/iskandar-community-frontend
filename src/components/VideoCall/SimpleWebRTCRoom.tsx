@@ -17,6 +17,8 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
   const [debug, setDebug] = useState<string[]>([]);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [remoteIsScreenSharing, setRemoteIsScreenSharing] = useState(false);
+  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -412,6 +414,8 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
     setIceState('closed');
     setIsScreenSharing(false);
     setRemoteIsScreenSharing(false);
+    setIsAudioEnabled(true);
+    setIsVideoEnabled(true);
 
     // Leave the call
     const socket = socketService.getSocket();
@@ -438,6 +442,8 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       const audioTrack = localStream.getAudioTracks()[0];
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
+        setIsAudioEnabled(audioTrack.enabled);
+        addDebugMessage(`Audio ${audioTrack.enabled ? 'enabled' : 'muted'}`);
       }
     }
   };
@@ -447,6 +453,8 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       const videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
+        setIsVideoEnabled(videoTrack.enabled);
+        addDebugMessage(`Video ${videoTrack.enabled ? 'enabled' : 'disabled'}`);
       }
     }
   };
@@ -661,11 +669,17 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
       </div>
 
       <div className="webrtc-controls">
-        <button onClick={toggleAudio} className="control-btn audio-btn">
-          🎤 Audio
+        <button
+          onClick={toggleAudio}
+          className={`control-btn audio-btn ${!isAudioEnabled ? 'muted' : ''}`}
+        >
+          {isAudioEnabled ? '🎤' : '🔇'} Audio
         </button>
-        <button onClick={toggleVideo} className="control-btn video-btn">
-          📹 Video
+        <button
+          onClick={toggleVideo}
+          className={`control-btn video-btn ${!isVideoEnabled ? 'video-disabled' : ''}`}
+        >
+          {isVideoEnabled ? '📹' : '📵'} Video
         </button>
         <button onClick={toggleScreenShare} className="control-btn screen-share-btn">
           {isScreenSharing ? '📱 Dejar de Compartir' : '🖥️ Compartir Pantalla'}
