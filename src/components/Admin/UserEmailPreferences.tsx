@@ -156,8 +156,9 @@ const UserEmailPreferences: React.FC = () => {
   const getPreferenceIcon = (key: keyof EmailPreferences): string => {
     const icons = {
       new_posts: '📝',
-      admin_notifications: '📢', 
+      admin_notifications: '📢',
       comment_replies: '💬',
+      new_comments: '🗨️',
       weekly_digest: '📊'
     };
     return icons[key];
@@ -168,6 +169,7 @@ const UserEmailPreferences: React.FC = () => {
       new_posts: 'Nuevos Posts',
       admin_notifications: 'Admin',
       comment_replies: 'Comentarios',
+      new_comments: 'Nuevos Comentarios',
       weekly_digest: 'Resumen'
     };
     return labels[key];
