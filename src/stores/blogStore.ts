@@ -117,8 +117,9 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
     set({ commentsLoading: true, error: null });
     try {
       const newComment = await commentsApi.create(postId, commentData);
-      const { comments } = get();
-      set({ comments: [...comments, newComment], commentsLoading: false });
+      // Reload comments to get the proper hierarchical structure
+      const comments = await commentsApi.getByPostId(postId);
+      set({ comments, commentsLoading: false });
     } catch (error) {
       set({ error: 'Error al crear el comentario', commentsLoading: false });
     }
