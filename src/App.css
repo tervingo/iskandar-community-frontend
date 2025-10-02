@@ -1554,7 +1554,7 @@ body {
 
 .preferences-columns {
   display: grid;
-  grid-template-columns: repeat(4, 70px);
+  grid-template-columns: repeat(5, 70px);
   gap: 1rem;
   text-align: center;
 }
@@ -1619,7 +1619,7 @@ body {
 
 .preferences-toggles {
   display: grid;
-  grid-template-columns: repeat(4, 70px);
+  grid-template-columns: repeat(5, 70px);
   gap: 1rem;
   text-align: center;
 }
@@ -1672,12 +1672,12 @@ body {
   }
   
   .preferences-columns {
-    grid-template-columns: repeat(4, 50px);
+    grid-template-columns: repeat(5, 50px);
     gap: 0.5rem;
   }
-  
+
   .preferences-toggles {
-    grid-template-columns: repeat(4, 50px);
+    grid-template-columns: repeat(5, 50px);
     gap: 0.5rem;
   }
   

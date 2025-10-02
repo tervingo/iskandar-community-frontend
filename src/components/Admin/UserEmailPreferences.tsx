@@ -215,7 +215,7 @@ const UserEmailPreferences: React.FC = () => {
             <p>Cambiar estas preferencias para {selectedUsers.size} usuarios seleccionados:</p>
             
             <div className="bulk-preferences">
-              {(['new_posts', 'admin_notifications', 'comment_replies', 'weekly_digest'] as const).map(key => (
+              {(['new_posts', 'admin_notifications', 'comment_replies', 'new_comments', 'weekly_digest'] as const).map(key => (
                 <label key={key} className="bulk-preference-item">
                   <input
                     type="checkbox"
@@ -275,6 +275,7 @@ const UserEmailPreferences: React.FC = () => {
             <div className="preference-header">📝 Posts</div>
             <div className="preference-header">📢 Admin</div>
             <div className="preference-header">💬 Coment</div>
+            <div className="preference-header">🗨️ N.Coment</div>
             <div className="preference-header">📊 Resum</div>
           </div>
         </div>
@@ -300,7 +301,7 @@ const UserEmailPreferences: React.FC = () => {
               </div>
 
               <div className="preferences-toggles">
-                {(['new_posts', 'admin_notifications', 'comment_replies', 'weekly_digest'] as const).map(key => (
+                {(['new_posts', 'admin_notifications', 'comment_replies', 'new_comments', 'weekly_digest'] as const).map(key => (
                   <div key={key} className="preference-toggle-cell">
                     <label className="toggle-switch">
                       <input
