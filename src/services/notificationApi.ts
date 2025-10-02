@@ -4,6 +4,7 @@ export interface EmailPreferences {
   new_posts: boolean;
   admin_notifications: boolean;
   comment_replies: boolean;
+  new_comments: boolean;
   weekly_digest: boolean;
 }
 

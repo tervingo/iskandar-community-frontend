@@ -6,6 +6,7 @@ const EmailPreferences: React.FC = () => {
     new_posts: true,
     admin_notifications: true,
     comment_replies: true,
+    new_comments: true,
     weekly_digest: false
   });
   const [loading, setLoading] = useState(true);
@@ -128,6 +129,27 @@ const EmailPreferences: React.FC = () => {
                 type="checkbox"
                 checked={preferences.comment_replies}
                 onChange={() => handleToggle('comment_replies')}
+                disabled={saving}
+              />
+              <span className="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div className="preference-item">
+          <div className="preference-content">
+            <div className="preference-icon">🗨️</div>
+            <div className="preference-details">
+              <h3>Nuevos Comentarios</h3>
+              <p>Recibe notificaciones cuando se publique cualquier comentario nuevo en el blog</p>
+            </div>
+          </div>
+          <div className="preference-toggle">
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={preferences.new_comments}
+                onChange={() => handleToggle('new_comments')}
                 disabled={saving}
               />
               <span className="toggle-slider"></span>
