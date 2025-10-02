@@ -116,7 +116,7 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
   createComment: async (postId: string, commentData: CommentCreate) => {
     set({ commentsLoading: true, error: null });
     try {
-      const newComment = await commentsApi.create(postId, commentData);
+      await commentsApi.create(postId, commentData);
       // Reload comments to get the proper hierarchical structure
       const comments = await commentsApi.getByPostId(postId);
       set({ comments, commentsLoading: false });
