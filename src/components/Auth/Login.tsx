@@ -28,7 +28,13 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, shouldReset }) => {
     e.preventDefault();
     clearError();
     
-    const success = await login(credentials);
+    // Clean credentials to handle whitespace issues, especially on mobile
+    const cleanCredentials = {
+      name: credentials.name.trim(),
+      password: credentials.password.trim()
+    };
+
+    const success = await login(cleanCredentials);
     if (success) {
       // Clear form after successful login
       setCredentials({ name: '', password: '' });
