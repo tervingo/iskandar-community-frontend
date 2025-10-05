@@ -68,17 +68,44 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
 
         // Create and publish local tracks
         console.log('VideoCallRoom: Creating microphone and camera tracks...');
+
+        // Check for permissions first
+        console.log('VideoCallRoom: Checking browser permissions...');
+        try {
+          const permissionsCheck = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          console.log('VideoCallRoom: Browser permissions granted');
+          permissionsCheck.getTracks().forEach(track => track.stop()); // Stop the test stream
+        } catch (permError) {
+          console.error('VideoCallRoom: Browser permissions denied:', permError);
+          alert('Por favor, permite el acceso a tu cámara y micrófono para unirte a la videollamada.');
+          return;
+        }
+
         const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
-        console.log('VideoCallRoom: Created tracks:', { audioTrack, videoTrack });
+        console.log('VideoCallRoom: Created tracks:', {
+          audioTrack: audioTrack ? 'OK' : 'FAILED',
+          videoTrack: videoTrack ? 'OK' : 'FAILED',
+          videoTrackEnabled: videoTrack?.enabled,
+          audioTrackEnabled: audioTrack?.enabled
+        });
         setLocalAudioTrack(audioTrack);
         setLocalVideoTrack(videoTrack);
 
         // Play local video
-        if (localVideoRef.current) {
+        if (localVideoRef.current && videoTrack) {
           console.log('VideoCallRoom: Playing local video track...');
-          videoTrack.play(localVideoRef.current);
+          console.log('VideoCallRoom: Video container element:', localVideoRef.current);
+          try {
+            await videoTrack.play(localVideoRef.current);
+            console.log('VideoCallRoom: Local video playing successfully');
+          } catch (playError) {
+            console.error('VideoCallRoom: Error playing local video:', playError);
+          }
         } else {
-          console.log('VideoCallRoom: localVideoRef.current is null');
+          console.log('VideoCallRoom: Cannot play video:', {
+            hasContainer: !!localVideoRef.current,
+            hasVideoTrack: !!videoTrack
+          });
         }
 
         // Publish tracks
@@ -93,12 +120,15 @@ const VideoCallRoom: React.FC<VideoCallRoomProps> = ({ callId, onLeave }) => {
         });
 
       } catch (error) {
-        console.error('Error initializing call:', error);
-        console.error('Error details:', {
+        console.error('VideoCallRoom: Error initializing call:', error);
+        console.error('VideoCallRoom: Error details:', {
           message: error instanceof Error ? error.message : 'Unknown error',
           stack: error instanceof Error ? error.stack : undefined,
           name: error instanceof Error ? error.name : 'Unknown'
         });
+
+        // Show user-friendly error message
+        alert(`Error al inicializar la videollamada: ${error instanceof Error ? error.message : 'Error desconocido'}`);
       }
     };
 

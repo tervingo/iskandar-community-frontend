@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaClock, FaVideo, FaUsers, FaCalendarAlt } from 'react-icons/fa';
+import { useAuthStore } from '../../stores/authStore';
 
 interface CallHistoryItem {
   id: string;
@@ -13,6 +14,7 @@ interface CallHistoryItem {
 }
 
 const CallHistory: React.FC = () => {
+  const { token } = useAuthStore();
   const [callHistory, setCallHistory] = useState<CallHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'private' | 'meeting'>('all');
@@ -22,10 +24,16 @@ const CallHistory: React.FC = () => {
   }, []);
 
   const fetchCallHistory = async () => {
+    if (!token) {
+      console.warn('No token available for fetching call history');
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/video-calls/call-history?limit=50`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 

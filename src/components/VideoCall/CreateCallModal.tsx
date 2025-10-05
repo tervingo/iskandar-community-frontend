@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaTimes, FaUsers, FaLock, FaGlobe } from 'react-icons/fa';
+import { useAuthStore } from '../../stores/authStore';
 
 interface CreateCallModalProps {
   onClose: () => void;
@@ -7,6 +8,7 @@ interface CreateCallModalProps {
 }
 
 const CreateCallModal: React.FC<CreateCallModalProps> = ({ onClose, onCallCreated }) => {
+  const { token } = useAuthStore();
   const [roomName, setRoomName] = useState('');
   const [description, setDescription] = useState('');
   const [maxParticipants, setMaxParticipants] = useState(10);
@@ -27,13 +29,18 @@ const CreateCallModal: React.FC<CreateCallModalProps> = ({ onClose, onCallCreate
       return;
     }
 
+    if (!token) {
+      alert('No estás autenticado. Por favor, inicia sesión.');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/video-calls/create-meeting-room`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({

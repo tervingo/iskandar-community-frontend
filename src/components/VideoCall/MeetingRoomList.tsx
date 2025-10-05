@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaUsers, FaClock, FaLock, FaGlobe, FaPlay } from 'react-icons/fa';
+import { useAuthStore } from '../../stores/authStore';
 
 interface MeetingRoom {
   id: string;
@@ -19,6 +20,7 @@ interface MeetingRoomListProps {
 }
 
 const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
+  const { token } = useAuthStore();
   const [meetingRooms, setMeetingRooms] = useState<MeetingRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [joinPassword, setJoinPassword] = useState<{ [key: string]: string }>({});
@@ -31,16 +33,28 @@ const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
   }, []);
 
   const fetchMeetingRooms = async () => {
+    if (!token) {
+      console.warn('No token available for fetching meeting rooms');
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/video-calls/meeting-rooms`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 
       if (response.ok) {
         const rooms = await response.json();
+        console.log('Fetched meeting rooms:', rooms);
+        console.log('Number of rooms:', rooms.length);
         setMeetingRooms(rooms);
+      } else {
+        console.error('Failed to fetch meeting rooms:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
       }
     } catch (error) {
       console.error('Error fetching meeting rooms:', error);
@@ -62,7 +76,7 @@ const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/video-calls/join-call/${room.id}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
