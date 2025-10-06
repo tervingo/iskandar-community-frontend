@@ -226,15 +226,20 @@ const SimpleWebRTCRoom: React.FC<SimpleWebRTCRoomProps> = ({ callId, onLeave }) 
   const handleUserJoined = async (data: { userId: string, username: string }) => {
     console.log('SimpleWebRTCRoom: User joined:', data);
     addDebugMessage(`User joined: ${data.username} (${data.userId})`);
-    setRemoteUser(data.username);
 
-    // If this is the caller (first user already in room), create and send offer
-    if (data.userId !== user?.id && peerConnectionRef.current) {
-      isCallerRef.current = true;
-      addDebugMessage('I am the caller, creating offer...');
-      await createOffer();
-    } else if (data.userId === user?.id) {
-      addDebugMessage('I joined the room');
+    // Only set remote user if it's NOT the current user
+    if (data.userId !== user?.id) {
+      setRemoteUser(data.username);
+      addDebugMessage(`Set remote user: ${data.username}`);
+
+      // This is a remote user joining, we should be the caller
+      if (peerConnectionRef.current) {
+        isCallerRef.current = true;
+        addDebugMessage('I am the caller, creating offer...');
+        await createOffer();
+      }
+    } else {
+      addDebugMessage('I joined the room (my own join event)');
     }
   };
 
