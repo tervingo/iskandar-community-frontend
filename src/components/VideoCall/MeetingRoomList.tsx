@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaUsers, FaClock, FaLock, FaGlobe, FaPlay } from 'react-icons/fa';
+import { FaUsers, FaClock, FaLock, FaGlobe, FaPlay, FaTrash } from 'react-icons/fa';
 import { useAuthStore } from '../../stores/authStore';
 
 interface MeetingRoom {
   id: string;
   channel_name: string;
+  creator_id: string;
   creator_name: string;
   room_name?: string;
   description?: string;
@@ -20,7 +21,7 @@ interface MeetingRoomListProps {
 }
 
 const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const [meetingRooms, setMeetingRooms] = useState<MeetingRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [joinPassword, setJoinPassword] = useState<{ [key: string]: string }>({});
@@ -109,6 +110,43 @@ const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
     }
   };
 
+  const deleteMeetingRoom = async (room: MeetingRoom) => {
+    // Confirm deletion
+    const confirmDelete = window.confirm(
+      `¿Estás seguro de que quieres eliminar la sala "${room.room_name}"?\n\nEsta acción no se puede deshacer.`
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      console.log('Deleting meeting room:', room.id);
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/video-calls/delete-meeting-room/${room.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(`Sala "${result.room_name}" eliminada exitosamente.`);
+
+        // Refresh the meeting rooms list
+        fetchMeetingRooms();
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Error al eliminar la sala de reunión');
+      }
+    } catch (error) {
+      console.error('Error deleting meeting room:', error);
+      alert('Error al eliminar la sala de reunión');
+    }
+  };
+
   if (loading) {
     return <div className="loading">Cargando salas de reunión...</div>;
   }
@@ -178,6 +216,23 @@ const MeetingRoomList: React.FC<MeetingRoomListProps> = ({ onJoinRoom }) => {
                   <FaPlay />
                   {room.participants.length >= room.max_participants ? 'Sala llena' : 'Unirse a la sala'}
                 </button>
+
+                {/* Show delete button only for room creator */}
+                {user?.id === room.creator_id && (
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => deleteMeetingRoom(room)}
+                    title="Eliminar sala de reunión"
+                    style={{
+                      marginLeft: '10px',
+                      backgroundColor: '#dc3545',
+                      border: '1px solid #dc3545'
+                    }}
+                  >
+                    <FaTrash />
+                    Eliminar
+                  </button>
+                )}
               </div>
 
               {room.participants.length > 0 && (
