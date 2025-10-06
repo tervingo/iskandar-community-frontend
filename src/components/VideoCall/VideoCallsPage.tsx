@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaVideo, FaUsers, FaHistory, FaPlus, FaFlask } from 'react-icons/fa';
 import { useAuthStore } from '../../stores/authStore';
-import VideoCallRoom from './VideoCallRoom';
+// import VideoCallRoom from './VideoCallRoom'; // Removed - using navigation instead
 import MeetingRoomList from './MeetingRoomList';
 import CallHistory from './CallHistory';
 import CreateCallModal from './CreateCallModal';
@@ -21,17 +21,9 @@ const VideoCallsPage: React.FC = () => {
   const { isAdmin } = useAuthStore();
   const [activeTab, setActiveTab] = useState('direct-calls');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [activeCall, setActiveCall] = useState<string | null>(null);
+  // const [activeCall, setActiveCall] = useState<string | null>(null); // Removed - using navigation instead
 
-  // If user is in an active call, show the call room
-  if (activeCall) {
-    return (
-      <VideoCallRoom
-        callId={activeCall}
-        onLeave={() => setActiveCall(null)}
-      />
-    );
-  }
+  // Removed direct VideoCallRoom rendering - now using navigation for all calls
 
   const baseTabs: TabType[] = [
     {
@@ -53,7 +45,10 @@ const VideoCallsPage: React.FC = () => {
       icon: <FaUsers />,
       component: (
         <MeetingRoomList
-          onJoinRoom={(callId: string) => setActiveCall(callId)}
+          onJoinRoom={(callId: string) => {
+            console.log('VideoCallsPage: Joining room with callId:', callId);
+            navigate(`/video-call/${callId}`);
+          }}
         />
       )
     },
@@ -111,8 +106,9 @@ const VideoCallsPage: React.FC = () => {
         <CreateCallModal
           onClose={() => setShowCreateModal(false)}
           onCallCreated={(callId: string) => {
-            setActiveCall(callId);
+            console.log('VideoCallsPage: Room created with callId:', callId);
             setShowCreateModal(false);
+            navigate(`/video-call/${callId}`);
           }}
         />
       )}
