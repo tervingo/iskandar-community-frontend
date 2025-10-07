@@ -72,7 +72,7 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
           caller_id: user.id,
           caller_name: user.name,
           callee_id: targetUserId,
-          call_id: callData._id,  // Use _id instead of id
+          call_id: callData.id,  // Use id field from API response
           channel_name: callData.channel_name,
           call_type: 'private'
         });
@@ -80,14 +80,14 @@ const OnlineUsersList: React.FC<OnlineUsersListProps> = ({ onStartCall }) => {
         // Set up response listener
         const handleResponse = (data: any) => {
           console.log('OnlineUsersList: Received video_call_response:', data);
-          console.log('OnlineUsersList: Comparing call_id:', data.call_id, 'with callData._id:', callData._id);
-          if (data.call_id === callData._id) {
+          console.log('OnlineUsersList: Comparing call_id:', data.call_id, 'with callData.id:', callData.id);
+          if (data.call_id === callData.id) {
             console.log('OnlineUsersList: Call IDs match!');
             // Clear the timeout since we got a response
             clearTimeout(timeoutId);
             if (data.response === 'accepted') {
-              console.log('OnlineUsersList: Call accepted, calling onStartCall with:', callData._id);
-              onStartCall(callData._id);
+              console.log('OnlineUsersList: Call accepted, calling onStartCall with:', callData.id);
+              onStartCall(callData.id);
             } else {
               alert(`${data.responder_name} declined the call`);
             }
