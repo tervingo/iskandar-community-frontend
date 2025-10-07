@@ -244,32 +244,62 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
         return prev;
       });
 
-      // Create peer connection and initiate offer (we are the initiator)
-      const peerConnection = createPeerConnection(data.userId, true);
-      peerConnectionsRef.current.set(data.userId, {
-        userId: data.userId,
-        connection: peerConnection,
-        isInitiator: true
-      });
+      // Wait for local stream to be available before creating peer connection
+      if (!localStream) {
+        console.log('MultiParticipantWebRTCRoom: Waiting for local stream...');
+        addDebugMessage('Waiting for local stream before creating peer connection');
 
-      // Process any queued ICE candidates
-      const queuedCandidates = queuedIceCandidatesRef.current.get(data.userId) || [];
-      for (const candidate of queuedCandidates) {
-        try {
-          await peerConnection.addIceCandidate(candidate);
-          addDebugMessage(`Added queued ICE candidate for ${data.userId}`);
-        } catch (error) {
-          console.error('Error adding queued ICE candidate:', error);
-        }
+        // Wait up to 5 seconds for local stream
+        let attempts = 0;
+        const maxAttempts = 10;
+        const waitForStream = async () => {
+          if (localStream || attempts >= maxAttempts) {
+            if (localStream) {
+              console.log('MultiParticipantWebRTCRoom: Local stream now available, creating peer connection');
+              await createPeerConnectionAndOffer(data.userId);
+            } else {
+              console.error('MultiParticipantWebRTCRoom: Timeout waiting for local stream');
+              addDebugMessage('Timeout waiting for local stream');
+            }
+          } else {
+            attempts++;
+            setTimeout(waitForStream, 500);
+          }
+        };
+        waitForStream();
+      } else {
+        console.log('MultiParticipantWebRTCRoom: Local stream available, creating peer connection immediately');
+        await createPeerConnectionAndOffer(data.userId);
       }
-      queuedIceCandidatesRef.current.delete(data.userId);
-
-      // Create and send offer
-      await createOffer(data.userId);
     } else {
       addDebugMessage('I joined the room (my own join event)');
       setIsConnected(true);
     }
+  };
+
+  const createPeerConnectionAndOffer = async (userId: string) => {
+    // Create peer connection and initiate offer (we are the initiator)
+    const peerConnection = createPeerConnection(userId, true);
+    peerConnectionsRef.current.set(userId, {
+      userId: userId,
+      connection: peerConnection,
+      isInitiator: true
+    });
+
+    // Process any queued ICE candidates
+    const queuedCandidates = queuedIceCandidatesRef.current.get(userId) || [];
+    for (const candidate of queuedCandidates) {
+      try {
+        await peerConnection.addIceCandidate(candidate);
+        addDebugMessage(`Added queued ICE candidate for ${userId}`);
+      } catch (error) {
+        console.error('Error adding queued ICE candidate:', error);
+      }
+    }
+    queuedIceCandidatesRef.current.delete(userId);
+
+    // Create and send offer
+    await createOffer(userId);
   };
 
   const createOffer = async (targetUserId: string) => {
@@ -305,49 +335,78 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
   const handleOffer = async (data: { offer: RTCSessionDescriptionInit, fromUserId: string }) => {
     try {
       console.log(`Received offer from ${data.fromUserId}`);
+      console.log('MultiParticipantWebRTCRoom: Local stream available for offer handling:', !!localStream);
       addDebugMessage(`Received offer from ${data.fromUserId}`);
 
-      // Create peer connection for this user (we are not the initiator)
-      const peerConnection = createPeerConnection(data.fromUserId, false);
-      peerConnectionsRef.current.set(data.fromUserId, {
-        userId: data.fromUserId,
-        connection: peerConnection,
-        isInitiator: false
-      });
+      // Wait for local stream if not available
+      if (!localStream) {
+        console.log('MultiParticipantWebRTCRoom: Waiting for local stream before handling offer...');
+        addDebugMessage('Waiting for local stream before handling offer');
 
-      await peerConnection.setRemoteDescription(data.offer);
-
-      // Process any queued ICE candidates
-      const queuedCandidates = queuedIceCandidatesRef.current.get(data.fromUserId) || [];
-      for (const candidate of queuedCandidates) {
-        try {
-          await peerConnection.addIceCandidate(candidate);
-          addDebugMessage(`Added queued ICE candidate for ${data.fromUserId}`);
-        } catch (error) {
-          console.error('Error adding queued ICE candidate:', error);
-        }
-      }
-      queuedIceCandidatesRef.current.delete(data.fromUserId);
-
-      // Create and send answer
-      const answer = await peerConnection.createAnswer();
-      await peerConnection.setLocalDescription(answer);
-
-      console.log(`Sending answer to ${data.fromUserId}`);
-      addDebugMessage(`Sending answer to ${data.fromUserId}`);
-
-      const socket = socketService.getSocket();
-      if (socket) {
-        socket.emit('webrtc_answer', {
-          callId,
-          answer,
-          targetUserId: data.fromUserId,
-          fromUserId: user?.id
-        });
+        let attempts = 0;
+        const maxAttempts = 10;
+        const waitForStreamForOffer = async () => {
+          if (localStream || attempts >= maxAttempts) {
+            if (localStream) {
+              console.log('MultiParticipantWebRTCRoom: Local stream now available, handling offer');
+              await processOffer(data);
+            } else {
+              console.error('MultiParticipantWebRTCRoom: Timeout waiting for local stream for offer');
+              addDebugMessage('Timeout waiting for local stream for offer');
+            }
+          } else {
+            attempts++;
+            setTimeout(waitForStreamForOffer, 500);
+          }
+        };
+        waitForStreamForOffer();
+      } else {
+        await processOffer(data);
       }
     } catch (error) {
       console.error('Error handling offer:', error);
       addDebugMessage(`Error handling offer: ${error}`);
+    }
+  };
+
+  const processOffer = async (data: { offer: RTCSessionDescriptionInit, fromUserId: string }) => {
+    // Create peer connection for this user (we are not the initiator)
+    const peerConnection = createPeerConnection(data.fromUserId, false);
+    peerConnectionsRef.current.set(data.fromUserId, {
+      userId: data.fromUserId,
+      connection: peerConnection,
+      isInitiator: false
+    });
+
+    await peerConnection.setRemoteDescription(data.offer);
+
+    // Process any queued ICE candidates
+    const queuedCandidates = queuedIceCandidatesRef.current.get(data.fromUserId) || [];
+    for (const candidate of queuedCandidates) {
+      try {
+        await peerConnection.addIceCandidate(candidate);
+        addDebugMessage(`Added queued ICE candidate for ${data.fromUserId}`);
+      } catch (error) {
+        console.error('Error adding queued ICE candidate:', error);
+      }
+    }
+    queuedIceCandidatesRef.current.delete(data.fromUserId);
+
+    // Create and send answer
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+
+    console.log(`Sending answer to ${data.fromUserId}`);
+    addDebugMessage(`Sending answer to ${data.fromUserId}`);
+
+    const socket = socketService.getSocket();
+    if (socket) {
+      socket.emit('webrtc_answer', {
+        callId,
+        answer,
+        targetUserId: data.fromUserId,
+        fromUserId: user?.id
+      });
     }
   };
 
@@ -678,7 +737,7 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
           <div key={remoteUser.userId} className="video-container remote-video-container">
             <video
               ref={(el) => {
-                if (el) {
+                if (el && !remoteVideoRefs.current.has(remoteUser.userId)) {
                   console.log(`Setting video ref for ${remoteUser.userId}:`, el);
                   remoteVideoRefs.current.set(remoteUser.userId, el);
                   addDebugMessage(`Video element ref set for ${remoteUser.userId}`);
