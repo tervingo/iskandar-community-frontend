@@ -130,8 +130,15 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
   const joinRoom = () => {
     const socket = socketService.getSocket();
 
+    console.log('MultiParticipantWebRTCRoom: Attempting to join room. Socket:', !!socket, 'User:', !!user);
+
     if (socket && user) {
       console.log('MultiParticipantWebRTCRoom: Joining WebRTC room', callId);
+      console.log('MultiParticipantWebRTCRoom: Sending join_webrtc_room event with data:', {
+        callId,
+        userId: user.id,
+        username: user.name
+      });
       addDebugMessage(`Joining room: ${callId}`);
 
       socket.emit('join_webrtc_room', {
@@ -139,6 +146,11 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
         userId: user.id,
         username: user.name
       });
+
+      addDebugMessage(`Sent join_webrtc_room event for user ${user.name}`);
+    } else {
+      console.error('MultiParticipantWebRTCRoom: Cannot join room - socket or user missing');
+      addDebugMessage(`Cannot join room - socket: ${!!socket}, user: ${!!user}`);
     }
   };
 
@@ -169,7 +181,8 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
   };
 
   const handleUserJoined = async (data: { userId: string, username: string }) => {
-    console.log('MultiParticipantWebRTCRoom: User joined:', data);
+    console.log('MultiParticipantWebRTCRoom: Received webrtc_user_joined event:', data);
+    console.log('MultiParticipantWebRTCRoom: Current user ID:', user?.id);
     addDebugMessage(`User joined: ${data.username} (${data.userId})`);
 
     // Only handle if it's NOT the current user
