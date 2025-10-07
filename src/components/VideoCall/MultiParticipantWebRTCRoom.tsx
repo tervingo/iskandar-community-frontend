@@ -130,7 +130,10 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
   const joinRoom = () => {
     const socket = socketService.getSocket();
 
-    console.log('MultiParticipantWebRTCRoom: Attempting to join room. Socket:', !!socket, 'User:', !!user);
+    console.log('MultiParticipantWebRTCRoom: Attempting to join room');
+    console.log('MultiParticipantWebRTCRoom: Socket exists:', !!socket);
+    console.log('MultiParticipantWebRTCRoom: Socket connected:', socket?.connected);
+    console.log('MultiParticipantWebRTCRoom: User:', !!user);
 
     if (socket && user) {
       console.log('MultiParticipantWebRTCRoom: Joining WebRTC room', callId);
@@ -139,7 +142,7 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
         userId: user.id,
         username: user.name
       });
-      addDebugMessage(`Joining room: ${callId}`);
+      addDebugMessage(`Joining room: ${callId} (socket connected: ${socket.connected})`);
 
       socket.emit('join_webrtc_room', {
         callId,
@@ -150,7 +153,10 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
       addDebugMessage(`Sent join_webrtc_room event for user ${user.name}`);
     } else {
       console.error('MultiParticipantWebRTCRoom: Cannot join room - socket or user missing');
-      addDebugMessage(`Cannot join room - socket: ${!!socket}, user: ${!!user}`);
+      console.error('MultiParticipantWebRTCRoom: Socket:', socket);
+      console.error('MultiParticipantWebRTCRoom: Socket connected:', socket?.connected);
+      console.error('MultiParticipantWebRTCRoom: User:', user);
+      addDebugMessage(`Cannot join room - socket: ${!!socket} (connected: ${socket?.connected}), user: ${!!user}`);
     }
   };
 
@@ -548,14 +554,36 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
   useEffect(() => {
     let mounted = true;
 
+    console.log('MultiParticipantWebRTCRoom: useEffect triggered');
+    console.log('MultiParticipantWebRTCRoom: callId:', callId);
+    console.log('MultiParticipantWebRTCRoom: user:', user);
+
     const initialize = async () => {
       try {
-        if (!user) return;
+        console.log('MultiParticipantWebRTCRoom: Starting initialization');
+        addDebugMessage('Starting initialization');
 
+        if (!user) {
+          console.log('MultiParticipantWebRTCRoom: No user found, aborting initialization');
+          addDebugMessage('No user found, aborting initialization');
+          return;
+        }
+
+        console.log('MultiParticipantWebRTCRoom: Setting up media...');
         await setupMedia();
 
         if (mounted) {
+          // Ensure socket is connected
+          console.log('MultiParticipantWebRTCRoom: Connecting to socket...');
+          socketService.connect();
+
+          // Small delay to ensure socket connection is established
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          console.log('MultiParticipantWebRTCRoom: Setting up socket listeners...');
           setupSocketListeners();
+
+          console.log('MultiParticipantWebRTCRoom: Joining room...');
           joinRoom();
         }
       } catch (error) {
@@ -567,6 +595,7 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
     initialize();
 
     return () => {
+      console.log('MultiParticipantWebRTCRoom: Component cleanup');
       mounted = false;
       cleanup();
     };
