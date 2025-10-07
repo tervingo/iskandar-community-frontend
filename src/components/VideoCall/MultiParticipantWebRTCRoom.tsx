@@ -77,12 +77,14 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
       if (event.candidate) {
         console.log(`Sending ICE candidate to ${remoteUserId}`);
         const socket = socketService.getSocket();
-        socket.emit('webrtc_ice_candidate', {
-          callId,
-          candidate: event.candidate,
-          targetUserId: remoteUserId,
-          fromUserId: user?.id
-        });
+        if (socket) {
+          socket.emit('webrtc_ice_candidate', {
+            callId,
+            candidate: event.candidate,
+            targetUserId: remoteUserId,
+            fromUserId: user?.id
+          });
+        }
       }
     };
 
@@ -228,12 +230,14 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
       addDebugMessage(`Sending offer to ${targetUserId}`);
 
       const socket = socketService.getSocket();
-      socket.emit('webrtc_offer', {
-        callId,
-        offer,
-        targetUserId,
-        fromUserId: user?.id
-      });
+      if (socket) {
+        socket.emit('webrtc_offer', {
+          callId,
+          offer,
+          targetUserId,
+          fromUserId: user?.id
+        });
+      }
     } catch (error) {
       console.error('Error creating offer:', error);
       addDebugMessage(`Error creating offer: ${error}`);
@@ -275,12 +279,14 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
       addDebugMessage(`Sending answer to ${data.fromUserId}`);
 
       const socket = socketService.getSocket();
-      socket.emit('webrtc_answer', {
-        callId,
-        answer,
-        targetUserId: data.fromUserId,
-        fromUserId: user?.id
-      });
+      if (socket) {
+        socket.emit('webrtc_answer', {
+          callId,
+          answer,
+          targetUserId: data.fromUserId,
+          fromUserId: user?.id
+        });
+      }
     } catch (error) {
       console.error('Error handling offer:', error);
       addDebugMessage(`Error handling offer: ${error}`);
@@ -459,11 +465,13 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
 
       // Notify other users
       const socket = socketService.getSocket();
-      socket.emit('webrtc_screen_share_status', {
-        callId,
-        userId: user?.id,
-        isScreenSharing: true
-      });
+      if (socket) {
+        socket.emit('webrtc_screen_share_status', {
+          callId,
+          userId: user?.id,
+          isScreenSharing: true
+        });
+      }
 
       addDebugMessage('Screen share started');
     } catch (error) {
@@ -500,11 +508,13 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
 
       // Notify other users
       const socket = socketService.getSocket();
-      socket.emit('webrtc_screen_share_status', {
-        callId,
-        userId: user?.id,
-        isScreenSharing: false
-      });
+      if (socket) {
+        socket.emit('webrtc_screen_share_status', {
+          callId,
+          userId: user?.id,
+          isScreenSharing: false
+        });
+      }
 
       addDebugMessage('Screen share stopped');
     } catch (error) {
