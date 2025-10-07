@@ -30,6 +30,7 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
   const remoteVideoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
   const peerConnectionsRef = useRef<Map<string, PeerConnection>>(new Map());
   const queuedIceCandidatesRef = useRef<Map<string, RTCIceCandidateInit[]>>(new Map());
@@ -54,12 +55,13 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
     const peerConnection = new RTCPeerConnection(iceServers);
 
     // Add local stream to peer connection
-    if (localStream) {
+    const currentLocalStream = localStreamRef.current || localStream;
+    if (currentLocalStream) {
       console.log(`Adding local stream tracks to peer connection for ${remoteUserId}`);
-      console.log(`Local stream tracks:`, localStream.getTracks());
-      localStream.getTracks().forEach(track => {
+      console.log(`Local stream tracks:`, currentLocalStream.getTracks());
+      currentLocalStream.getTracks().forEach(track => {
         console.log(`Adding track:`, track);
-        peerConnection.addTrack(track, localStream);
+        peerConnection.addTrack(track, currentLocalStream);
       });
       addDebugMessage(`Local tracks added to peer connection for ${remoteUserId}`);
     } else {
@@ -151,12 +153,15 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
         audio: true
       });
 
+      localStreamRef.current = stream;
       setLocalStream(stream);
 
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
         addDebugMessage('Local video stream set');
       }
+
+      console.log('MultiParticipantWebRTCRoom: Stream stored in ref:', localStreamRef.current);
 
       return stream;
     } catch (error) {
@@ -245,7 +250,8 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
       });
 
       // Wait for local stream to be available before creating peer connection
-      if (!localStream) {
+      const currentLocalStream = localStreamRef.current || localStream;
+      if (!currentLocalStream) {
         console.log('MultiParticipantWebRTCRoom: Waiting for local stream...');
         addDebugMessage('Waiting for local stream before creating peer connection');
 
@@ -253,8 +259,9 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
         let attempts = 0;
         const maxAttempts = 10;
         const waitForStream = async () => {
-          if (localStream || attempts >= maxAttempts) {
-            if (localStream) {
+          const streamToCheck = localStreamRef.current || localStream;
+          if (streamToCheck || attempts >= maxAttempts) {
+            if (streamToCheck) {
               console.log('MultiParticipantWebRTCRoom: Local stream now available, creating peer connection');
               await createPeerConnectionAndOffer(data.userId);
             } else {
@@ -335,19 +342,21 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
   const handleOffer = async (data: { offer: RTCSessionDescriptionInit, fromUserId: string }) => {
     try {
       console.log(`Received offer from ${data.fromUserId}`);
-      console.log('MultiParticipantWebRTCRoom: Local stream available for offer handling:', !!localStream);
+      const currentLocalStream = localStreamRef.current || localStream;
+      console.log('MultiParticipantWebRTCRoom: Local stream available for offer handling:', !!currentLocalStream);
       addDebugMessage(`Received offer from ${data.fromUserId}`);
 
       // Wait for local stream if not available
-      if (!localStream) {
+      if (!currentLocalStream) {
         console.log('MultiParticipantWebRTCRoom: Waiting for local stream before handling offer...');
         addDebugMessage('Waiting for local stream before handling offer');
 
         let attempts = 0;
         const maxAttempts = 10;
         const waitForStreamForOffer = async () => {
-          if (localStream || attempts >= maxAttempts) {
-            if (localStream) {
+          const streamToCheck = localStreamRef.current || localStream;
+          if (streamToCheck || attempts >= maxAttempts) {
+            if (streamToCheck) {
               console.log('MultiParticipantWebRTCRoom: Local stream now available, handling offer');
               await processOffer(data);
             } else {
@@ -668,7 +677,9 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
         }
 
         console.log('MultiParticipantWebRTCRoom: Setting up media...');
-        await setupMedia();
+        const stream = await setupMedia();
+        console.log('MultiParticipantWebRTCRoom: Media setup completed, stream:', stream);
+        addDebugMessage(`Media setup completed with ${stream.getTracks().length} tracks`);
 
         if (mounted) {
           // Ensure socket is connected
