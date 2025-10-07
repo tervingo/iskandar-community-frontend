@@ -3701,27 +3701,38 @@ body {
   color: #2c3e50;
 }
 
-.filters-grid {
+/* Admin panel specific styles */
+.admin-page .filters-grid,
+.unified-admin-panel .filters-grid,
+.user-activity-logs .filters-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
-.filter-group {
+.admin-page .filter-group,
+.unified-admin-panel .filter-group,
+.user-activity-logs .filter-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.filter-group label {
+.admin-page .filter-group label,
+.unified-admin-panel .filter-group label,
+.user-activity-logs .filter-group label {
   font-weight: 600;
   color: #2c3e50;
   font-size: 0.9rem;
 }
 
-.filter-group input,
-.filter-group select {
+.admin-page .filter-group input,
+.admin-page .filter-group select,
+.unified-admin-panel .filter-group input,
+.unified-admin-panel .filter-group select,
+.user-activity-logs .filter-group input,
+.user-activity-logs .filter-group select {
   padding: 0.5rem;
   border: 2px solid #e9ecef;
   border-radius: 6px;
@@ -3729,13 +3740,19 @@ body {
   transition: border-color 0.3s;
 }
 
-.filter-group input:focus,
-.filter-group select:focus {
+.admin-page .filter-group input:focus,
+.admin-page .filter-group select:focus,
+.unified-admin-panel .filter-group input:focus,
+.unified-admin-panel .filter-group select:focus,
+.user-activity-logs .filter-group input:focus,
+.user-activity-logs .filter-group select:focus {
   outline: none;
   border-color: #3498db;
 }
 
-.filter-actions {
+.admin-page .filter-actions,
+.unified-admin-panel .filter-actions,
+.user-activity-logs .filter-actions {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
@@ -3864,15 +3881,21 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .filters-grid {
+  .admin-page .filters-grid,
+  .unified-admin-panel .filters-grid,
+  .user-activity-logs .filters-grid {
     grid-template-columns: 1fr;
   }
 
-  .filter-actions {
+  .admin-page .filter-actions,
+  .unified-admin-panel .filter-actions,
+  .user-activity-logs .filter-actions {
     flex-direction: column;
   }
 
-  .filter-actions .btn {
+  .admin-page .filter-actions .btn,
+  .unified-admin-panel .filter-actions .btn,
+  .user-activity-logs .filter-actions .btn {
     width: 100%;
   }
 

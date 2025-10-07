@@ -39,6 +39,12 @@ const Navigation: React.FC = () => {
         >
           📹 Video Calls
         </NavLink>
+        <NavLink
+          to="/calendario"
+          className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
+        >
+          📅 Calendario
+        </NavLink>
       </div>
     </nav>
   );

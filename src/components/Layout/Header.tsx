@@ -44,6 +44,7 @@ const Header: React.FC = () => {
                 <Link to="/news">Noticias</Link>
                 <Link to="/chat">Chat</Link>
                 <Link to="/video-calls">Videollamadas</Link>
+                <Link to="/calendario">Calendario</Link>
                 <Link to="/files">Archivo</Link>
                 {isAdmin && <Link to="/admin">Admin</Link>}
               </>
@@ -53,6 +54,7 @@ const Header: React.FC = () => {
                 <span className="nav-link-disabled" title="Inicio de sesión requerido">Noticias</span>
                 <span className="nav-link-disabled" title="Inicio de sesión requerido">Chat</span>
                 <span className="nav-link-disabled" title="Inicio de sesión requerido">Videollamadas</span>
+                <span className="nav-link-disabled" title="Inicio de sesión requerido">Calendario</span>
                 <span className="nav-link-disabled" title="Inicio de sesión requerido">Archivo</span>
               </>
             )}

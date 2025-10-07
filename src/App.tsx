@@ -12,6 +12,7 @@ import FileRepository from './components/Files/FileRepository';
 import News from './components/News/News';
 import VideoCallsPage from './components/VideoCall/VideoCallsPage';
 import VideoCallRoomWrapper from './components/VideoCall/VideoCallRoomWrapper';
+import CalendarPage from './components/Calendar/CalendarPage';
 import IncomingCallModal from './components/VideoCall/IncomingCallModal';
 import UnifiedAdminPanel from './components/Admin/UnifiedAdminPanel';
 import EmailPreferences from './components/User/EmailPreferences';
@@ -106,6 +107,14 @@ const AppContent: React.FC = () => {
           <Route
             path="/video-call/:callId"
             element={<VideoCallRoomWrapper />}
+          />
+          <Route
+            path="/calendario"
+            element={
+              <RedirectRoute>
+                <CalendarPage />
+              </RedirectRoute>
+            }
           />
           <Route
             path="/admin/*"
