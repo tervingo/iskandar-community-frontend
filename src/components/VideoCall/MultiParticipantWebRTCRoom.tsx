@@ -55,20 +55,59 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
 
     // Add local stream to peer connection
     if (localStream) {
+      console.log(`Adding local stream tracks to peer connection for ${remoteUserId}`);
+      console.log(`Local stream tracks:`, localStream.getTracks());
       localStream.getTracks().forEach(track => {
+        console.log(`Adding track:`, track);
         peerConnection.addTrack(track, localStream);
       });
+      addDebugMessage(`Local tracks added to peer connection for ${remoteUserId}`);
+    } else {
+      console.warn(`No local stream available when creating peer connection for ${remoteUserId}`);
+      addDebugMessage(`No local stream for peer connection to ${remoteUserId}`);
     }
 
     // Handle remote stream
     peerConnection.ontrack = (event) => {
       console.log(`Received remote track from ${remoteUserId}:`, event);
+      console.log(`Event streams:`, event.streams);
+      console.log(`Event track:`, event.track);
       addDebugMessage(`Received remote track from ${remoteUserId}`);
 
       const remoteStream = event.streams[0];
+      console.log(`Remote stream:`, remoteStream);
+      console.log(`Stream tracks:`, remoteStream?.getTracks());
+
       const videoElement = remoteVideoRefs.current.get(remoteUserId);
+      console.log(`Video element for ${remoteUserId}:`, videoElement);
+
       if (videoElement && remoteStream) {
+        console.log(`Setting srcObject for ${remoteUserId}`);
         videoElement.srcObject = remoteStream;
+        addDebugMessage(`Video stream assigned to ${remoteUserId}`);
+
+        // Verify stream is playing
+        videoElement.play().then(() => {
+          console.log(`Video playing for ${remoteUserId}`);
+          addDebugMessage(`Video playing for ${remoteUserId}`);
+        }).catch(err => {
+          console.error(`Error playing video for ${remoteUserId}:`, err);
+          addDebugMessage(`Video play error for ${remoteUserId}: ${err}`);
+        });
+      } else {
+        console.warn(`Cannot assign stream - videoElement: ${!!videoElement}, remoteStream: ${!!remoteStream}`);
+        addDebugMessage(`Stream assignment failed - videoElement: ${!!videoElement}, stream: ${!!remoteStream}`);
+
+        // Retry after a short delay in case video element isn't ready yet
+        setTimeout(() => {
+          const retryVideoElement = remoteVideoRefs.current.get(remoteUserId);
+          if (retryVideoElement && remoteStream) {
+            console.log(`Retry: Setting srcObject for ${remoteUserId}`);
+            retryVideoElement.srcObject = remoteStream;
+            addDebugMessage(`Retry: Video stream assigned to ${remoteUserId}`);
+            retryVideoElement.play().catch(err => console.error(`Retry play error:`, err));
+          }
+        }, 500);
       }
     };
 
@@ -640,7 +679,9 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
             <video
               ref={(el) => {
                 if (el) {
+                  console.log(`Setting video ref for ${remoteUser.userId}:`, el);
                   remoteVideoRefs.current.set(remoteUser.userId, el);
+                  addDebugMessage(`Video element ref set for ${remoteUser.userId}`);
                 }
               }}
               autoPlay
