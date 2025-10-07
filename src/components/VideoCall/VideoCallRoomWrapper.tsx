@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import SimpleWebRTCRoom from './SimpleWebRTCRoom';
-import './SimpleWebRTCRoom.css';
+import MultiParticipantWebRTCRoom from './MultiParticipantWebRTCRoom';
+import './MultiParticipantWebRTCRoom.css';
 
 const VideoCallRoomWrapper: React.FC = () => {
   const { callId } = useParams<{ callId: string }>();
@@ -19,7 +19,7 @@ const VideoCallRoomWrapper: React.FC = () => {
     navigate('/video-calls');
   };
 
-  return <SimpleWebRTCRoom callId={callId} onLeave={handleLeave} />;
+  return <MultiParticipantWebRTCRoom callId={callId} onLeave={handleLeave} />;
 };
 
 export default VideoCallRoomWrapper;
