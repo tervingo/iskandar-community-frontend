@@ -32,6 +32,7 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteVideoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
+  const remoteStreamsAssigned = useRef<Map<string, boolean>>(new Map());
   const peerConnectionsRef = useRef<Map<string, PeerConnection>>(new Map());
   const queuedIceCandidatesRef = useRef<Map<string, RTCIceCandidateInit[]>>(new Map());
 
@@ -84,18 +85,25 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
       console.log(`Video element for ${remoteUserId}:`, videoElement);
 
       if (videoElement && remoteStream) {
-        console.log(`Setting srcObject for ${remoteUserId}`);
-        videoElement.srcObject = remoteStream;
-        addDebugMessage(`Video stream assigned to ${remoteUserId}`);
+        // Check if we've already assigned a stream to this video element
+        if (!remoteStreamsAssigned.current.get(remoteUserId)) {
+          console.log(`Setting srcObject for ${remoteUserId}`);
+          videoElement.srcObject = remoteStream;
+          remoteStreamsAssigned.current.set(remoteUserId, true);
+          addDebugMessage(`Video stream assigned to ${remoteUserId}`);
 
-        // Verify stream is playing
-        videoElement.play().then(() => {
-          console.log(`Video playing for ${remoteUserId}`);
-          addDebugMessage(`Video playing for ${remoteUserId}`);
-        }).catch(err => {
-          console.error(`Error playing video for ${remoteUserId}:`, err);
-          addDebugMessage(`Video play error for ${remoteUserId}: ${err}`);
-        });
+          // Verify stream is playing
+          videoElement.play().then(() => {
+            console.log(`Video playing for ${remoteUserId}`);
+            addDebugMessage(`Video playing for ${remoteUserId}`);
+          }).catch(err => {
+            console.error(`Error playing video for ${remoteUserId}:`, err);
+            addDebugMessage(`Video play error for ${remoteUserId}: ${err}`);
+          });
+        } else {
+          console.log(`Stream already assigned to ${remoteUserId}, skipping`);
+          addDebugMessage(`Stream already assigned to ${remoteUserId}`);
+        }
       } else {
         console.warn(`Cannot assign stream - videoElement: ${!!videoElement}, remoteStream: ${!!remoteStream}`);
         addDebugMessage(`Stream assignment failed - videoElement: ${!!videoElement}, stream: ${!!remoteStream}`);
@@ -249,34 +257,43 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
         return prev;
       });
 
-      // Wait for local stream to be available before creating peer connection
-      const currentLocalStream = localStreamRef.current || localStream;
-      if (!currentLocalStream) {
-        console.log('MultiParticipantWebRTCRoom: Waiting for local stream...');
-        addDebugMessage('Waiting for local stream before creating peer connection');
+      // Only initiate connection if we have a lower user ID (prevents both sides from initiating)
+      const shouldInitiate = user?.id && user.id < data.userId;
+      console.log(`Should initiate connection to ${data.userId}: ${shouldInitiate} (my ID: ${user?.id})`);
 
-        // Wait up to 5 seconds for local stream
-        let attempts = 0;
-        const maxAttempts = 10;
-        const waitForStream = async () => {
-          const streamToCheck = localStreamRef.current || localStream;
-          if (streamToCheck || attempts >= maxAttempts) {
-            if (streamToCheck) {
-              console.log('MultiParticipantWebRTCRoom: Local stream now available, creating peer connection');
-              await createPeerConnectionAndOffer(data.userId);
+      if (shouldInitiate) {
+        // Wait for local stream to be available before creating peer connection
+        const currentLocalStream = localStreamRef.current || localStream;
+        if (!currentLocalStream) {
+          console.log('MultiParticipantWebRTCRoom: Waiting for local stream...');
+          addDebugMessage('Waiting for local stream before creating peer connection');
+
+          // Wait up to 5 seconds for local stream
+          let attempts = 0;
+          const maxAttempts = 10;
+          const waitForStream = async () => {
+            const streamToCheck = localStreamRef.current || localStream;
+            if (streamToCheck || attempts >= maxAttempts) {
+              if (streamToCheck) {
+                console.log('MultiParticipantWebRTCRoom: Local stream now available, creating peer connection');
+                await createPeerConnectionAndOffer(data.userId);
+              } else {
+                console.error('MultiParticipantWebRTCRoom: Timeout waiting for local stream');
+                addDebugMessage('Timeout waiting for local stream');
+              }
             } else {
-              console.error('MultiParticipantWebRTCRoom: Timeout waiting for local stream');
-              addDebugMessage('Timeout waiting for local stream');
+              attempts++;
+              setTimeout(waitForStream, 500);
             }
-          } else {
-            attempts++;
-            setTimeout(waitForStream, 500);
-          }
-        };
-        waitForStream();
+          };
+          waitForStream();
+        } else {
+          console.log('MultiParticipantWebRTCRoom: Local stream available, creating peer connection immediately');
+          await createPeerConnectionAndOffer(data.userId);
+        }
       } else {
-        console.log('MultiParticipantWebRTCRoom: Local stream available, creating peer connection immediately');
-        await createPeerConnectionAndOffer(data.userId);
+        console.log(`Not initiating connection to ${data.userId} (waiting for their offer)`);
+        addDebugMessage(`Waiting for offer from ${data.userId}`);
       }
     } else {
       addDebugMessage('I joined the room (my own join event)');
@@ -379,13 +396,25 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
   };
 
   const processOffer = async (data: { offer: RTCSessionDescriptionInit, fromUserId: string }) => {
-    // Create peer connection for this user (we are not the initiator)
-    const peerConnection = createPeerConnection(data.fromUserId, false);
-    peerConnectionsRef.current.set(data.fromUserId, {
-      userId: data.fromUserId,
-      connection: peerConnection,
-      isInitiator: false
-    });
+    // Check if we already have a peer connection for this user
+    let peerConnectionData = peerConnectionsRef.current.get(data.fromUserId);
+
+    if (peerConnectionData) {
+      console.log(`Using existing peer connection for ${data.fromUserId}`);
+      addDebugMessage(`Using existing peer connection for ${data.fromUserId}`);
+    } else {
+      // Create peer connection for this user (we are not the initiator)
+      console.log(`Creating new peer connection for offer from ${data.fromUserId}`);
+      const peerConnection = createPeerConnection(data.fromUserId, false);
+      peerConnectionData = {
+        userId: data.fromUserId,
+        connection: peerConnection,
+        isInitiator: false
+      };
+      peerConnectionsRef.current.set(data.fromUserId, peerConnectionData);
+    }
+
+    const peerConnection = peerConnectionData.connection;
 
     await peerConnection.setRemoteDescription(data.offer);
 
@@ -476,6 +505,9 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
       videoElement.srcObject = null;
       remoteVideoRefs.current.delete(data.userId);
     }
+
+    // Clean up stream assignment tracking
+    remoteStreamsAssigned.current.delete(data.userId);
 
     // Clean up queued candidates
     queuedIceCandidatesRef.current.delete(data.userId);
