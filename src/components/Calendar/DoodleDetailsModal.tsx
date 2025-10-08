@@ -195,6 +195,56 @@ const DoodleDetailsModal: React.FC<DoodleDetailsModalProps> = ({ doodleId, onClo
     }
   };
 
+  // Function to get dates where all participants can attend
+  const getCommonAvailableDates = () => {
+    if (!doodle || doodle.responses.length === 0) return [];
+
+    const commonDates: DoodleOption[] = [];
+
+    doodle.options.forEach(option => {
+      // Check if ALL participants said "yes" to this option
+      const allCanAttend = doodle.responses.every(response =>
+        response.responses[option.option_id] === 'yes'
+      );
+
+      if (allCanAttend && doodle.responses.length > 0) {
+        commonDates.push(option);
+      }
+    });
+
+    return commonDates;
+  };
+
+  // Function to get dates where most participants can attend (including maybe)
+  const getBestAvailableDates = () => {
+    if (!doodle || doodle.responses.length === 0) return [];
+
+    const datesWithScores = doodle.options.map(option => {
+      const stats = doodle.option_stats[option.option_id] || { yes: 0, maybe: 0, no: 0 };
+      const yesCount = stats.yes || 0;
+      const maybeCount = stats.maybe || 0;
+      const totalResponses = doodle.responses.length;
+
+      // Score: yes votes get full point, maybe votes get half point
+      const score = yesCount + (maybeCount * 0.5);
+      const percentage = totalResponses > 0 ? (score / totalResponses) * 100 : 0;
+
+      return {
+        option,
+        yesCount,
+        maybeCount,
+        score,
+        percentage
+      };
+    });
+
+    // Sort by score descending and return top options
+    return datesWithScores
+      .sort((a, b) => b.score - a.score)
+      .filter(item => item.yesCount > 0) // Only show dates with at least one "yes"
+      .slice(0, 3); // Show top 3
+  };
+
   if (loading) {
     return (
       <div className="modal-overlay">
@@ -348,6 +398,77 @@ const DoodleDetailsModal: React.FC<DoodleDetailsModalProps> = ({ doodleId, onClo
               </table>
             </div>
           </div>
+
+          {/* Common Availability Section */}
+          {doodle.responses.length > 0 && (
+            <div className="availability-section">
+              <h3>📅 Análisis de Disponibilidad</h3>
+
+              {/* Dates where ALL can attend */}
+              {(() => {
+                const commonDates = getCommonAvailableDates();
+                return (
+                  <div className="common-dates">
+                    <h4>🎯 Fechas donde TODOS pueden asistir</h4>
+                    {commonDates.length > 0 ? (
+                      <div className="dates-list perfect-match">
+                        {commonDates.map(option => (
+                          <div key={option.option_id} className="date-item perfect">
+                            <span className="date-label">{option.label}</span>
+                            <span className="availability-badge perfect">
+                              ✅ {doodle.responses.length}/{doodle.responses.length} personas
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="no-perfect-dates">
+                        ❌ No hay fechas donde todos los participantes puedan asistir
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Best available dates */}
+              {(() => {
+                const bestDates = getBestAvailableDates();
+                const commonDates = getCommonAvailableDates();
+
+                // Only show this section if there are no perfect matches or if there are other good options
+                if (bestDates.length > 0 && (commonDates.length === 0 || bestDates.length > commonDates.length)) {
+                  return (
+                    <div className="best-dates">
+                      <h4>⭐ Mejores opciones disponibles</h4>
+                      <div className="dates-list">
+                        {bestDates.map(({ option, yesCount, maybeCount, percentage }) => (
+                          <div key={option.option_id} className="date-item">
+                            <span className="date-label">{option.label}</span>
+                            <div className="availability-info">
+                              <span className="availability-badge">
+                                ✅ {yesCount} confirmado{yesCount !== 1 ? 's' : ''}
+                                {maybeCount > 0 && `, ❓ ${maybeCount} posible${maybeCount !== 1 ? 's' : ''}`}
+                              </span>
+                              <span className="percentage">
+                                {Math.round(percentage)}% disponibilidad
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+              {doodle.responses.length > 1 && (
+                <div className="availability-tip">
+                  💡 <strong>Consejo:</strong> Las fechas marcadas en verde son ideales para programar la reunión.
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Comments Section */}
           {doodle.settings.allow_comments && (
