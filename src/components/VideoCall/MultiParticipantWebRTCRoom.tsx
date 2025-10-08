@@ -245,6 +245,14 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
 
     // Only handle if it's NOT the current user
     if (data.userId !== user?.id) {
+      // Check if we already have a peer connection for this user
+      const existingConnection = peerConnectionsRef.current.get(data.userId);
+      if (existingConnection) {
+        console.log(`Already have peer connection for ${data.userId}, skipping`);
+        addDebugMessage(`Already connected to ${data.username}`);
+        return;
+      }
+
       // Add to remote users list
       setRemoteUsers(prev => {
         if (!prev.find(u => u.userId === data.userId)) {
