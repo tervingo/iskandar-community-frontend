@@ -40,7 +40,10 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
   const iceServers = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' }
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:stun3.l.google.com:19302' },
+      { urls: 'stun:stun4.l.google.com:19302' }
     ]
   };
 
@@ -146,6 +149,13 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
     peerConnection.oniceconnectionstatechange = () => {
       console.log(`ICE connection state with ${remoteUserId}:`, peerConnection.iceConnectionState);
       addDebugMessage(`ICE state with ${remoteUserId}: ${peerConnection.iceConnectionState}`);
+
+      // Handle failed connections by attempting to restart ICE
+      if (peerConnection.iceConnectionState === 'failed') {
+        console.log(`ICE failed for ${remoteUserId}, attempting restart`);
+        addDebugMessage(`ICE failed for ${remoteUserId}, restarting...`);
+        peerConnection.restartIce();
+      }
     };
 
     return peerConnection;
@@ -245,13 +255,6 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
 
     // Only handle if it's NOT the current user
     if (data.userId !== user?.id) {
-      // Check if we already have a peer connection for this user
-      const existingConnection = peerConnectionsRef.current.get(data.userId);
-      if (existingConnection) {
-        console.log(`Already have peer connection for ${data.userId}, skipping`);
-        addDebugMessage(`Already connected to ${data.username}`);
-        return;
-      }
 
       // Add to remote users list
       setRemoteUsers(prev => {
@@ -264,6 +267,14 @@ const MultiParticipantWebRTCRoom: React.FC<MultiParticipantWebRTCRoomProps> = ({
         }
         return prev;
       });
+
+      // Check if we already have any peer connection for this user (prevents duplicates)
+      const existingConnection = peerConnectionsRef.current.get(data.userId);
+      if (existingConnection) {
+        console.log(`Already have peer connection for ${data.userId} (state: ${existingConnection.connection.connectionState}), skipping duplicate join event`);
+        addDebugMessage(`Duplicate join event for ${data.username}, ignoring`);
+        return;
+      }
 
       // Only initiate connection if we have a lower user ID (prevents both sides from initiating)
       const shouldInitiate = user?.id && user.id < data.userId;
