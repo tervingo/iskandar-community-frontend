@@ -279,13 +279,13 @@ const FileRepository: React.FC = () => {
   };
 
   // Filter image files for the image viewer
-  const imageFiles = useMemo(() => 
+  const imageFiles = useMemo(() =>
     files.filter(file => file.file_type.startsWith('image/')),
     [files]
   );
 
   // Filter audio files for the audio player
-  const audioFiles = useMemo(() => 
+  const audioFiles = useMemo(() =>
     files.filter(file => file.file_type.startsWith('audio/')),
     [files]
   );
@@ -360,6 +360,10 @@ const FileRepository: React.FC = () => {
     return file.file_type.startsWith('audio/');
   };
 
+  const isVideoFile = (file: FileItem): boolean => {
+    return file.file_type.startsWith('video/');
+  };
+
   const handleViewImage = (file: FileItem) => {
     const imageIndex = imageFiles.findIndex(img => img.id === file.id);
     if (imageIndex !== -1) {
@@ -382,6 +386,11 @@ const FileRepository: React.FC = () => {
 
   const handleAudioNavigation = (index: number) => {
     setCurrentAudioIndex(index);
+  };
+
+  const handlePlayVideo = (file: FileItem) => {
+    // Open video in new tab
+    window.open(`/video-viewer/${file.id}`, '_blank');
   };
 
   return (
@@ -741,6 +750,17 @@ const FileRepository: React.FC = () => {
                                 title="Reproducir audio"
                               >
                                 Play
+                              </button>
+                            )}
+
+                            {isVideoFile(file) && file.source_type !== 'url' && (
+                              <button
+                                onClick={() => handlePlayVideo(file)}
+                                className="btn btn-secondary btn-xs"
+                                disabled={loading}
+                                title="Reproducir video"
+                              >
+                                Ver
                               </button>
                             )}
 

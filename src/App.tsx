@@ -13,6 +13,7 @@ import News from './components/News/News';
 import VideoCallsPage from './components/VideoCall/VideoCallsPage';
 import VideoCallRoomWrapper from './components/VideoCall/VideoCallRoomWrapper';
 import CalendarPage from './components/Calendar/CalendarPage';
+import VideoViewerPage from './pages/VideoViewerPage';
 import IncomingCallModal from './components/VideoCall/IncomingCallModal';
 import UnifiedAdminPanel from './components/Admin/UnifiedAdminPanel';
 import EmailPreferences from './components/User/EmailPreferences';
@@ -29,6 +30,9 @@ const AppContent: React.FC = () => {
   return (
     <>
       <Routes>
+        {/* Video Viewer - Outside Layout (fullscreen) */}
+        <Route path="/video-viewer/:fileId" element={<VideoViewerPage />} />
+
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />

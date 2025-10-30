@@ -43,12 +43,15 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!file) return;
 
     if (file.source_type === 'url') {
       // For URLs, open the original URL
       window.open(file.original_url || file.cloudinary_url, '_blank');
+    } else if (file.file_type.startsWith('video/')) {
+      // For videos, open in video viewer
+      window.open(`/video-viewer/${file.id}`, '_blank');
     } else if (file.file_type === 'application/pdf') {
       // For PDFs, use the same viewer logic as FileRepository
       const pdfUrl = encodeURIComponent(file.cloudinary_url);
@@ -252,6 +255,95 @@ const FileLink: React.FC<FileLinkProps> = ({ fileId, children }) => {
           textAlign: 'center'
         }}>
           📷 {children || file.original_name}
+        </div>
+      </div>
+    );
+  }
+
+  // Render uploaded videos inline with preview
+  if (file.file_type.startsWith('video/') && file.file_type !== 'video/youtube') {
+    return (
+      <div className="embedded-video" style={{ margin: '10px 0' }}>
+        <div style={{
+          position: 'relative',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          backgroundColor: '#000',
+          overflow: 'hidden'
+        }}>
+          <video
+            src={file.cloudinary_url}
+            controls
+            style={{
+              width: '100%',
+              maxHeight: '500px',
+              display: 'block',
+              objectFit: 'contain'
+            }}
+            title={file.original_name}
+            preload="metadata"
+          >
+            Tu navegador no soporta la reproducción de video.
+          </video>
+        </div>
+        <div style={{
+          fontSize: '13px',
+          color: '#555',
+          marginTop: '8px',
+          padding: '8px 12px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '6px',
+          border: '1px solid #e9ecef',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            flex: 1,
+            minWidth: 0
+          }}>
+            <span style={{ fontSize: '16px' }}>🎬</span>
+            <span style={{
+              fontWeight: '500',
+              color: '#333',
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap'
+            }}>
+              {children || file.original_name}
+            </span>
+          </div>
+          <button
+            onClick={handleClick}
+            style={{
+              color: '#3498db',
+              backgroundColor: 'transparent',
+              border: '1px solid #3498db',
+              textDecoration: 'none',
+              fontSize: '12px',
+              fontWeight: '500',
+              padding: '4px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              flexShrink: 0
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#3498db';
+              e.currentTarget.style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#3498db';
+            }}
+          >
+            Ver en reproductor completo
+          </button>
         </div>
       </div>
     );
