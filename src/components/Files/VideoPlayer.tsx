@@ -27,7 +27,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [duration, setDuration] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  const hideControlsTimeout = useRef<NodeJS.Timeout | null>(null);
+  const hideControlsTimeout = useRef<number | null>(null);
 
   const currentVideo = videos[currentIndex];
 
@@ -144,11 +144,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     if (hideControlsTimeout.current) {
       clearTimeout(hideControlsTimeout.current);
     }
-    hideControlsTimeout.current = setTimeout(() => {
+    hideControlsTimeout.current = window.setTimeout(() => {
       if (isPlaying) {
         setShowControls(false);
       }
-    }, 3000);
+    }, 3000) as unknown as number;
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
